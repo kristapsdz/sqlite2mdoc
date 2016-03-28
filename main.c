@@ -631,8 +631,11 @@ init(struct parse *p, char *cp)
 }
 
 #define	BPOINT(_cp) \
-	(';' == (_cp) || '[' == (_cp) || \
-	 '(' == (_cp) || '{' == (_cp))
+	(';' == (_cp)[0] || \
+	 '[' == (_cp)[0] || \
+	 ('(' == (_cp)[0] && '*' != (_cp)[1]) || \
+	 ')' == (_cp)[0] || \
+	 '{' == (_cp)[0])
 
 /*
  * Given a declaration (be it preprocessor or C), try to parse out a
@@ -656,20 +659,22 @@ grok_name(const struct decl *e,
 		do {
 			while (isspace((int)*cp))
 				cp++;
-			if (BPOINT(*cp))
+			if (BPOINT(cp))
 				break;
+			if ('(' == *cp)
+				cp++;
 			/* Pass over pointers. */
 			while ('*' == *cp)
 				cp++;
 			*start = cp;
 			*sz = 0;
 			while ( ! isspace((int)*cp)) {
-				if (BPOINT(*cp))
+				if (BPOINT(cp))
 					break;
 				cp++;
 				(*sz)++;
 			}
-		} while ( ! BPOINT(*cp));
+		} while ( ! BPOINT(cp));
 	} else {
 		*sz = e->textsz;
 		*start = e->text;
