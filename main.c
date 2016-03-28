@@ -60,6 +60,8 @@ enum	preproc {
  * HTML tags that we recognise.
  */
 enum	tag {
+	TAG_B_CLOSE,
+	TAG_B_OPEN,
 	TAG_BLOCK_CLOSE,
 	TAG_BLOCK_OPEN,
 	TAG_DD_CLOSE,
@@ -68,6 +70,8 @@ enum	tag {
 	TAG_DL_OPEN,
 	TAG_DT_CLOSE,
 	TAG_DT_OPEN,
+	TAG_H3_CLOSE,
+	TAG_H3_OPEN,
 	TAG_LI_CLOSE,
 	TAG_LI_OPEN,
 	TAG_OL_CLOSE,
@@ -141,20 +145,24 @@ struct	taginfo {
 };
 
 static	const struct taginfo tags[TAG__MAX] = {
+	{ "</b>", "\\fP", TAGINFO_INLINE }, /* TAG_B_CLOSE */
+	{ "<b>", "\\fB", TAGINFO_INLINE }, /* TAG_B_OPEN */
 	{ "</blockquote>", ".Ed\n.Pp", 0 }, /* TAG_BLOCK_CLOSE */
-	{ "<blockquote>", ".Bd -ragged -offset Ds", 0 }, /* TAG_BLOCK_OPEN */
+	{ "<blockquote>", ".Bd -ragged", 0 }, /* TAG_BLOCK_OPEN */
 	{ "</dd>", "", TAGINFO_NOOP }, /* TAG_DD_CLOSE */
 	{ "<dd>", "", TAGINFO_NOOP }, /* TAG_DD_OPEN */
 	{ "</dl>", ".El\n.Pp", 0 }, /* TAG_DL_CLOSE */
 	{ "<dl>", ".Bl -tag -width Ds", 0 }, /* TAG_DL_OPEN */
 	{ "</dt>", "", TAGINFO_NOBR | TAGINFO_NOSP}, /* TAG_DT_CLOSE */
 	{ "<dt>", ".It", TAGINFO_NOBR }, /* TAG_DT_OPEN */
+	{ "</h3>", "", TAGINFO_NOBR | TAGINFO_NOSP}, /* TAG_H3_CLOSE */
+	{ "<h3>", ".Ss", TAGINFO_NOBR }, /* TAG_H3_OPEN */
 	{ "</li>", "", TAGINFO_NOOP }, /* TAG_LI_CLOSE */
 	{ "<li>", ".It", 0 }, /* TAG_LI_OPEN */
 	{ "</ol>", ".El\n.Pp", 0 }, /* TAG_OL_CLOSE */
 	{ "<ol>", ".Bl -enum", 0 }, /* TAG_OL_OPEN */
 	{ "</pre>", ".Ed\n.Pp", 0 }, /* TAG_PRE_CLOSE */
-	{ "<pre>", ".Bd -literal -offset Ds", 0 }, /* TAG_PRE_OPEN */
+	{ "<pre>", ".Bd -literal", 0 }, /* TAG_PRE_OPEN */
 	{ "</ul>", ".El\n.Pp", 0 }, /* TAG_UL_CLOSE */
 	{ "<ul>", ".Bl -bullet", 0 }, /* TAG_UL_OPEN */
 };
@@ -526,7 +534,8 @@ desc(struct parse *p, char *cp, size_t len)
 	    '\n' != d->desc[d->descsz - 1]) {
 		d->desc = realloc(d->desc, d->descsz + 2);
 		if (NULL == d->desc)
-			err(EXIT_FAILURE, "%s:%zu: realloc", p->fn, p->ln);
+			err(EXIT_FAILURE, "%s:%zu: realloc", 
+				p->fn, p->ln);
 		d->descsz++;
 		strlcat(d->desc, " ", d->descsz + 1);
 	}
@@ -536,11 +545,13 @@ desc(struct parse *p, char *cp, size_t len)
 	if (NULL == d->desc) {
 		d->desc = calloc(1, nsz + 1);
 		if (NULL == d->desc)
-			err(EXIT_FAILURE, "%s:%zu: calloc", p->fn, p->ln);
+			err(EXIT_FAILURE, "%s:%zu: calloc", 
+				p->fn, p->ln);
 	} else {
 		d->desc = realloc(d->desc, d->descsz + nsz + 1);
 		if (NULL == d->desc)
-			err(EXIT_FAILURE, "%s:%zu: realloc", p->fn, p->ln);
+			err(EXIT_FAILURE, "%s:%zu: realloc", 
+				p->fn, p->ln);
 	}
 	d->descsz += nsz;
 	strlcat(d->desc, 0 == len ? "\n" : cp, d->descsz + 1);
@@ -887,10 +898,10 @@ static void
 emit(const struct defn *d)
 {
 	struct decl	*first;
-	size_t		 sz, i, col, last;
+	size_t		 sz, i, col, last, ns;
 	FILE		*f;
 	char		*cp;
-	const char	*res, *lastres;
+	const char	*res, *lastres, *args, *str, *end;
 	enum tag	 tag;
 	enum preproc	 pre;
 
@@ -929,7 +940,7 @@ emit(const struct defn *d)
 		}
 
 		/* First, strip out the sqlite CPPs. */
-		for (i = 0; i < first->textsz; i++) {
+		for (i = 0; i < first->textsz; ) {
 			for (pre = 0; pre < PREPROC__MAX; pre++) {
 				sz = strlen(preprocs[pre]);
 				if (strncmp(preprocs[pre], 
@@ -938,7 +949,6 @@ emit(const struct defn *d)
 				i += sz;
 				while (isspace((int)first->text[i]))
 					i++;
-				i--;
 				break;
 			}
 			if (pre == PREPROC__MAX)
@@ -969,9 +979,82 @@ emit(const struct defn *d)
 			continue;
 		}
 
-		fputs(".Bd -literal\n", f);
-		fputs(&first->text[i], f);
-		fputs("\n.Ed\n", f);
+		str = &first->text[i];
+		if (NULL == (args = strchr(str, '('))) {
+			/* What is this? */
+			fputs(".Bd -literal\n", f);
+			fputs(&first->text[i], f);
+			fputs("\n.Ed\n", f);
+			continue;
+		}
+
+		/* Scroll back to end of function name. */
+		end = args - 1;
+		while (end > str && isspace((int)*end))
+			end--;
+
+		/* Scroll back to what comes before. */
+		for ( ; end > str; end--)
+			if (isspace((int)*end) || '*' == *end)
+				break;
+
+		/* 
+		 * If we can't find what came before, then the function
+		 * has no type, which is odd... let's just call it void.
+		 */
+		if (end > str) {
+			fprintf(f, ".Ft %.*s\n", 
+				(int)(end - str + 1), str);
+			fprintf(f, ".Fo %.*s\n", 
+				(int)(args - end - 1), end + 1);
+		} else {
+			fputs(".Ft void\n", f);
+			fprintf(f, ".Fo %.*s\n", (int)(args - end), end);
+		}
+
+		/*
+		 * Convert function arguments into `Fa' clauses.
+		 * This also handles nested function pointers, which
+		 * would otherwise throw off the delimeters.
+		 */
+		for (;;) {
+			str = ++args;
+			while (isspace((int)*str))
+				str++;
+			fputs(".Fa \"", f);
+			ns = 0;
+			while ('\0' != *str && 
+			       (ns || ',' != *str) && 
+			       (ns || ')' != *str)) {
+				if ('/' == str[0] && '*' == str[1]) {
+					str += 2;
+					for ( ; '\0' != str[0]; str++)
+						if ('*' == str[0] && '/' == str[1])
+							break;
+					if ('\0' == *str)
+						break;
+					str += 2;
+					while (isspace((int)*str))
+						str++;
+					if ('\0' == *str ||
+					    (0 == ns && ',' == *str) ||
+					    (0 == ns && ')' == *str))
+						break;
+				}
+				if ('(' == *str)
+					ns++;
+				else if (')' == *str)
+					ns--;
+				fputc(*str, f);
+				str++;
+			}
+			fputs("\"\n", f);
+			if ('\0' == *str || ')' == *str)
+				break;
+			args = str;
+		}
+
+		fputs(".Fc\n", f);
 	}
 
 	fputs(".Sh DESCRIPTION\n", f);
@@ -1096,6 +1179,10 @@ emit(const struct defn *d)
 					while (isspace((int)d->desc[i]))
 						i++;
 					break;
+				} else if (TAGINFO_INLINE & tags[tag].flags) {
+					fputs(tags[tag].mdoc, f);
+					i += sz;
+					break;
 				}
 
 				/* 
@@ -1150,9 +1237,26 @@ emit(const struct defn *d)
 		}
 
 		assert('\n' != d->desc[i]);
-		fputc(d->desc[i], f);
+		if (0 == strncmp(&d->desc[i], "&nbsp;", 6)) {
+			i += 6;
+			fputc(' ', f);
+		} else if (0 == strncmp(&d->desc[i], "&lt;", 4)) {
+			i += 4;
+			fputc('<', f);
+		} else if (0 == strncmp(&d->desc[i], "&gt;", 4)) {
+			i += 4;
+			fputc('>', f);
+		} else if (0 == strncmp(&d->desc[i], "&#91;", 5)) {
+			i += 5;
+			fputc('[', f);
+		} else {
+			if (0 == col && '.' == d->desc[i])
+				fputs("\\&", f);
+			fputc(d->desc[i], f);
+			i++;
+		}
+
 		col++;
-		i++;
 	}
 
 	if (col > 0)
