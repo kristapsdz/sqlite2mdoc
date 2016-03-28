@@ -453,7 +453,7 @@ seealso(struct parse *p, char *cp, size_t len)
 
 	/* Blank line: back to description part. */
 	if (0 == len) {
-		p->phase = PHASE_DECL;
+		p->phase = PHASE_DESC;
 		return;
 	}
 
@@ -498,6 +498,7 @@ desc(struct parse *p, char *cp, size_t len)
 
 	cp += 2;
 	len -= 2;
+
 	while (isspace((int)*cp)) {
 		cp++;
 		len--;
