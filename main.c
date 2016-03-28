@@ -20,6 +20,7 @@
 #include <ctype.h>
 #include <err.h>
 #include <getopt.h>
+#include <search.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +32,7 @@ enum	phase {
 	PHASE_INIT = 0, /* waiting to encounter definition */
 	PHASE_KEYS, /* have definition, now keywords */
 	PHASE_DESC, /* have keywords, now description */
+	PHASE_SEEALSO,
 	PHASE_DECL /* have description, now declarations */
 };
 
@@ -43,6 +45,9 @@ enum	decltype {
 	DECLTYPE_NEITHER /* non-preprocessor, no semicolon */
 };
 
+/*
+ * In variables and function declarations, we toss these.
+ */
 enum	preproc {
 	PREPROC_SQLITE_API,
 	PREPROC_SQLITE_DEPRECATED,
@@ -51,6 +56,9 @@ enum	preproc {
 	PREPROC__MAX
 };
 
+/*
+ * HTML tags that we recognise.
+ */
 enum	tag {
 	TAG_BLOCK_CLOSE,
 	TAG_BLOCK_OPEN,
@@ -89,15 +97,24 @@ struct	decl {
  * A definition is basically the manpage contents.
  */
 struct	defn {
-	char		*name; /* really Nd */
+	char		 *name; /* really Nd */
 	TAILQ_ENTRY(defn) entries;
-	char		*desc; /* long description */
-	size_t		 descsz; /* strlen(desc) */
-	struct declq	 dcqhead; /* declarations */
-	int		 multiline; /* used when parsing */
-	int		 instruct; /* used when parsing */
-	const char	*fn; /* parsed from file */
-	size_t		 ln; /* parsed at line */
+	char		 *desc; /* long description */
+	size_t		  descsz; /* strlen(desc) */
+	struct declq	  dcqhead; /* declarations */
+	int		  multiline; /* used when parsing */
+	int		  instruct; /* used when parsing */
+	const char	 *fn; /* parsed from file */
+	size_t		  ln; /* parsed at line */
+	int		  postprocessed; /* good for emission? */
+	char		 *dt; /* manpage title */
+	char		**nms; /* manpage names */
+	size_t		  nmsz; /* number of names */
+	char		 *fname; /* manpage filename */
+	char		 *seealso; /* see also tags */
+	size_t		  seealsosz; /* length of seealso */
+	char		**xrs;
+	size_t		  xrsz;
 };
 
 /*
@@ -110,14 +127,17 @@ struct	parse {
 	struct defnq	 dqhead; /* definitions */
 };
 
+/*
+ * How to handle HTML tags we find in the text.
+ */
 struct	taginfo {
-	const char	*html;
-	const char	*mdoc;
+	const char	*html; /* HTML to key on */
+	const char	*mdoc; /* generate mdoc(7) */
 	unsigned int	 flags;
-#define	TAGINFO_NOBR	 0x01
-#define	TAGINFO_NOOP	 0x02
-#define	TAGINFO_NOSP	 0x04
-#define	TAGINFO_INLINE	 0x08
+#define	TAGINFO_NOBR	 0x01 /* follow w/space, not newline */
+#define	TAGINFO_NOOP	 0x02 /* just strip out */
+#define	TAGINFO_NOSP	 0x04 /* follow w/o space or newline */
+#define	TAGINFO_INLINE	 0x08 /* inline block (notused) */
 };
 
 static	const struct taginfo tags[TAG__MAX] = {
@@ -154,7 +174,8 @@ decl_function_add(struct parse *p, char **etext,
 	if (' ' != (*etext)[*etextsz - 1]) {
 		*etext = realloc(*etext, *etextsz + 2);
 		if (NULL == *etext)
-			err(EXIT_FAILURE, "%s:%zu: realloc", p->fn, p->ln);
+			err(EXIT_FAILURE, "%s:%zu: "
+				"realloc", p->fn, p->ln);
 		(*etextsz)++;
 		strlcat(*etext, " ", *etextsz + 1);
 	}
@@ -286,7 +307,8 @@ again:
  * A definition is just #define followed by space followed by the name,
  * then the value of that name.
  * We ignore the latter.
- * FIXME: this does not understand multi-line CPP.
+ * FIXME: this does not understand multi-line CPP, but I don't think
+ * there are any instances of that in sqlite.h.
  */
 static int
 decl_define(struct parse *p, char *cp, size_t len)
@@ -343,7 +365,7 @@ decl_define(struct parse *p, char *cp, size_t len)
  * A declaration is a function, variable, preprocessor definition, or
  * really anything else until we reach a blank line.
  */
-static int
+static void
 decl(struct parse *p, char *cp, size_t len)
 {
 	struct defn	*d;
@@ -368,19 +390,74 @@ decl(struct parse *p, char *cp, size_t len)
 			e->type = DECLTYPE_NEITHER;
 			d->multiline = d->instruct = 0;
 		}
-		return(1);
+		return;
 	} 
 	
 	/* 
 	 * Catch preprocessor defines, but discard all other types of
 	 * preprocessor statements.
 	 */
-	if (0 == strncmp(cp, "#define", 7))
-		return(decl_define(p, cp + 7, len - 7));
-	else if ('#' == *cp)
-		return(1);
+	if ('#' == *cp) {
+		len--;
+		cp++;
+		while (isspace((int)*cp)) {
+			len--;
+			cp++;
+		}
+		if (0 == strncmp(cp, "define", 6))
+			decl_define(p, cp + 6, len - 6);
+		return;
+	}
 
-	return(decl_function(p, cp, len));
+	decl_function(p, cp, len);
+}
+
+/*
+ * Parse "SEE ALSO" phrases, which can come at any point in the
+ * interface description (unlike what they claim).
+ */
+static void
+seealso(struct parse *p, char *cp, size_t len)
+{
+	struct defn	*d;
+
+	if ('\0' == *cp) {
+		warnx("%s:%zu: warn: unexpected end of "
+			"interface description", p->fn, p->ln);
+		p->phase = PHASE_INIT;
+		return;
+	} else if (0 == strcmp(cp, "*/")) {
+		p->phase = PHASE_DECL;
+		return;
+	} else if ('*' != cp[0] || '*' != cp[1]) {
+		warnx("%s:%zu: warn: unexpected end of "
+			"interface description", p->fn, p->ln);
+		p->phase = PHASE_INIT;
+		return;
+	}
+
+	cp += 2;
+	len -= 2;
+	while (isspace((int)*cp)) {
+		cp++;
+		len--;
+	}
+
+	/* Blank line: back to description part. */
+	if (0 == len) {
+		p->phase = PHASE_DECL;
+		return;
+	}
+
+	/* Fetch current interface definition. */
+	d = TAILQ_LAST(&p->dqhead, defnq);
+	assert(NULL != d);
+
+	d->seealso = realloc(d->seealso,
+		d->seealsosz + len + 1);
+	memcpy(d->seealso + d->seealsosz, cp, len);
+	d->seealsosz += len;
+	d->seealso[d->seealsosz] = '\0';
 }
 
 /*
@@ -389,7 +466,7 @@ decl(struct parse *p, char *cp, size_t len)
  * It extends from the name of the definition down to the declarations
  * themselves.
  */
-static int
+static void
 desc(struct parse *p, char *cp, size_t len)
 {
 	struct defn	*d;
@@ -399,17 +476,18 @@ desc(struct parse *p, char *cp, size_t len)
 		warnx("%s:%zu: warn: unexpected end of "
 			"interface description", p->fn, p->ln);
 		p->phase = PHASE_INIT;
-		return(1);
+		return;
 	} else if (0 == strcmp(cp, "*/")) {
 		/* End of comment area, start of declarations. */
 		p->phase = PHASE_DECL;
-		return(1);
+		return;
 	} else if ('*' != cp[0] || '*' != cp[1]) {
 		warnx("%s:%zu: warn: unexpected end of "
 			"interface description", p->fn, p->ln);
 		p->phase = PHASE_INIT;
-		return(1);
+		return;
 	}
+
 	cp += 2;
 	len -= 2;
 	while (isspace((int)*cp)) {
@@ -423,7 +501,24 @@ desc(struct parse *p, char *cp, size_t len)
 
 	/* Ignore leading blank lines. */
 	if (0 == len && NULL == d->desc)
-		return(1);
+		return;
+
+	/* Collect SEE ALSO clauses. */
+	if (0 == strncasecmp(cp, "see also:", 9)) {
+		cp += 9;
+		len -= 9;
+		while (isspace((int)*cp)) {
+			cp++;
+			len--;
+		}
+		p->phase = PHASE_SEEALSO;
+		d->seealso = realloc(d->seealso,
+			d->seealsosz + len + 1);
+		memcpy(d->seealso + d->seealsosz, cp, len);
+		d->seealsosz += len;
+		d->seealso[d->seealsosz] = '\0';
+		return;
+	}
 
 	/* White-space padding between lines. */
 	if (NULL != d->desc && 
@@ -449,10 +544,13 @@ desc(struct parse *p, char *cp, size_t len)
 	}
 	d->descsz += nsz;
 	strlcat(d->desc, 0 == len ? "\n" : cp, d->descsz + 1);
-	return(1);
 }
 
-static int
+/*
+ * We currently don't do anything with keywords.
+ * But we can later if we want.
+ */
+static void
 keys(struct parse *p, char *cp, size_t len)
 {
 
@@ -460,53 +558,51 @@ keys(struct parse *p, char *cp, size_t len)
 		warnx("%s:%zu: warn: unexpected end of "
 			"interface keywords", p->fn, p->ln);
 		p->phase = PHASE_INIT;
-		return(1);
+		return;
 	} else if ('*' != cp[0] || '*' != cp[1]) {
 		warnx("%s:%zu: warn: unexpected end of "
 			"interface keywords", p->fn, p->ln);
 		p->phase = PHASE_INIT;
-		return(1);
+		return;
 	}
+
 	cp += 2;
 	len -= 2;
 	while (isspace((int)*cp)) {
 		cp++;
 		len--;
 	}
-	if (0 == len) {
-		p->phase = PHASE_DESC;
-		return(1);
-	}
 
-	return(1);
+	if (0 == len)
+		p->phase = PHASE_DESC;
 }
 
 /*
  * Initial state is where we're scanning forward to find commented
  * instances of CAPI3REF.
  */
-static int
+static void
 init(struct parse *p, char *cp)
 {
 	struct defn	*d;
 
 	/* Look for comment hook. */
 	if ('*' != cp[0] || '*' != cp[1])
-		return(1);
+		return;
 	cp += 2;
 	while (isspace((int)*cp))
 		cp++;
 
 	/* Look for beginning of definition. */
 	if (strncmp(cp, "CAPI3REF:", 9))
-		return(1);
+		return;
 	cp += 9;
 	while (isspace((int)*cp))
 		cp++;
 	if ('\0' == *cp) {
 		warnx("%s:%zu: warn: unexpected end of "
 			"interface definition", p->fn, p->ln);
-		return(1);
+		return;
 	}
 
 	/* Add definition to list of existing ones. */
@@ -521,15 +617,21 @@ init(struct parse *p, char *cp)
 	p->phase = PHASE_KEYS;
 	TAILQ_INIT(&d->dcqhead);
 	TAILQ_INSERT_TAIL(&p->dqhead, d, entries);
-	return(1);
 }
 
 #define	BPOINT(_cp) \
 	(';' == (_cp) || '[' == (_cp) || \
 	 '(' == (_cp) || '{' == (_cp))
 
+/*
+ * Given a declaration (be it preprocessor or C), try to parse out a
+ * reasonable "name" for the affair.
+ * For a struct, for example, it'd be the struct name.
+ * For a typedef, it'd be the type name.
+ * For a function, it'd be the function name.
+ */
 static void
-emit_grok_name(const struct decl *e, 
+grok_name(const struct decl *e, 
 	const char **start, size_t *sz)
 {
 	const char	*cp;
@@ -545,6 +647,7 @@ emit_grok_name(const struct decl *e,
 				cp++;
 			if (BPOINT(*cp))
 				break;
+			/* Pass over pointers. */
 			while ('*' == *cp)
 				cp++;
 			*start = cp;
@@ -562,21 +665,26 @@ emit_grok_name(const struct decl *e,
 	}
 }
 
+static int
+xrcmp(const void *p1, const void *p2)
+{
+	const char	*s1 = *(const char **)p1, 
+	     	 	*s2 = *(const char **)p2;
+
+	return(strcmp(s1, s2));
+}
+
 /*
- * Emit a valid mdoc(7) document within the given prefix.
- * FIXME: escaping non-mdoc(7) characters.
+ * Extract information from the interface definition.
+ * Mark it as "postprocessed" on success.
  */
 static void
-emit(const char *prefix, const struct defn *d)
+postprocess(const char *prefix, struct defn *d)
 {
 	struct decl	*first;
 	const char	*start;
-	size_t		 offs, sz, i, col;
-	int		 last;
-	FILE		*f;
-	char		*path, *cp;
-	enum tag	 tag;
-	enum preproc	 pre;
+	size_t		 offs, sz, i;
+	ENTRY		 ent;
 
 	if (TAILQ_EMPTY(&d->dcqhead))
 		return;
@@ -592,74 +700,222 @@ emit(const char *prefix, const struct defn *d)
 		return;
 	}
 
-	emit_grok_name(first, &start, &sz);
+	/* 
+	 * Now compute the document name (`Dt').
+	 * We'll also use this for the filename.
+	 */
+	grok_name(first, &start, &sz);
 	if (NULL == start) {
 		warnx("%s:%zu: couldn't deduce "
 			"entry name", d->fn, d->ln);
 		return;
 	}
 
-	/*
-	 * Open the output file.
-	 * We put this in the given directory and force the filename to
-	 * be only alphanumerics or some select other characters.
-	 */
-	asprintf(&path, "%s/%.*s.3", 
+	/* Document name needs all-caps. */
+	d->dt = malloc(sz + 1);
+	if (NULL == d->dt)
+		err(EXIT_FAILURE, "malloc");
+	memcpy(d->dt, start, sz);
+	d->dt[sz] = '\0';
+	for (i = 0; i < sz; i++)
+		d->dt[i] = toupper((int)d->dt[i]);
+
+	/* Filename needs no special chars. */
+	asprintf(&d->fname, "%s/%.*s.3", 
 		prefix, (int)sz, start);
-	if (NULL == path)
+	if (NULL == d->fname)
 		err(EXIT_FAILURE, "asprintf");
+
 	offs = strlen(prefix) + 1;
 	for (i = 0; i < sz; i++) {
-		if (isalnum((int)path[offs + i]) ||
-		    '_' == path[offs + i] ||
-		    '-' == path[offs + i])
+		if (isalnum((int)d->fname[offs + i]) ||
+		    '_' == d->fname[offs + i] ||
+		    '-' == d->fname[offs + i])
 			continue;
-		path[offs + i] = '_';
+		d->fname[offs + i] = '_';
 	}
-	if (NULL == (f = fopen(path, "w"))) {
-		warn("%s: fopen", path);
-		free(path);
-		return;
-	}
-	free(path);
 
-	/* 
-	 * Begin by outputting the mdoc(7) header. 
-	 * We use the first real bits as the title of the page, which
-	 * are also used for the file-name.
+	/*
+	 * Now extract all `Nm' values for this document.
+	 * We only use CPP and C references, and hope for the best when
+	 * doing so.
+	 * Enter each one of these as a searchable keyword.
 	 */
-	fputs(".Dd $Mdocdate$\n", f);
-	fputs(".Dt ", f);
-	for (i = 0; i < sz; i++)
-		fputc(toupper((int)start[i]), f);
-	fputs(" 3\n", f);
-	fputs(".Os\n", f);
-	fputs(".Sh NAME\n", f);
-
-	/* 
-	 * Now print the name bits of each declaration. 
-	 * We need some extra logic to handle the comma that follows
-	 * multiple names.
-	 */
-	last = 0;
 	TAILQ_FOREACH(first, &d->dcqhead, entries) {
 		if (DECLTYPE_CPP != first->type &&
 		    DECLTYPE_C != first->type)
 			continue;
-		emit_grok_name(first, &start, &sz);
+		grok_name(first, &start, &sz);
 		if (NULL == start) 
 			continue;
-		if (last) 
-			fputs(" ,\n", f);
-		fprintf(f, ".Nm %.*s", (int)sz, start);
-		last = 1;
+		d->nms = realloc(d->nms, 
+			(d->nmsz + 1) * sizeof(char *));
+		if (NULL == d->nms)
+			err(EXIT_FAILURE, "realloc");
+		d->nms[d->nmsz] = malloc(sz + 1);
+		if (NULL == d->nms[d->nmsz])
+			err(EXIT_FAILURE, "malloc");
+		memcpy(d->nms[d->nmsz], start, sz);
+		d->nms[d->nmsz][sz] = '\0';
+		d->nmsz++;
+
+		/* Hash the name. */
+		ent.key = d->nms[d->nmsz - 1];
+		ent.data = d;
+		(void)hsearch(ent, ENTER);
 	}
 
-	if (last) 
-		fputs("\n", f);
-	fprintf(f, ".Nd %s\n", d->name);
+	if (0 == d->nmsz) {
+		warnx("%s:%zu: couldn't deduce "
+			"any names", d->fn, d->ln);
+		return;
+	}
 
+	/*
+	 * Next, scan for all `Xr' values.
+	 * We'll add more to this list later.
+	 */
+	for (i = 0; i < d->seealsosz; i++) {
+		/* 
+		 * Find next value starting with `['.
+		 * There's other stuff in there (whitespace or
+		 * free text leading up to these) that we're ok
+		 * to ignore.
+		 */
+		while (i < d->seealsosz && '[' != d->seealso[i])
+			i++;
+		if (i == d->seealsosz)
+			break;
+
+		/* 
+		 * Now scan for the matching `]'.
+		 * Sometimes we can have an OR bar in there, but
+		 * for the time being, let's ignore that.
+		 */
+		start = &d->seealso[++i];
+		sz = 0;
+		while (i < d->seealsosz &&
+		      ']' != d->seealso[i]) {
+			i++;
+			sz++;
+		}
+		if (i == d->seealsosz)
+			break;
+		if (0 == sz)
+			continue;
+
+		/* Strip trailing parenthesis. */
+		if (sz > 2 && 
+		    '(' == start[sz - 2] && 
+	 	    ')' == start[sz - 1])
+			sz -= 2;
+
+		d->xrs = realloc(d->xrs,
+			(d->xrsz + 1) * sizeof(char *));
+		if (NULL == d->xrs)
+			err(EXIT_FAILURE, "realloc");
+		d->xrs[d->xrsz] = malloc(sz + 1);
+		if (NULL == d->xrs[d->xrsz])
+			err(EXIT_FAILURE, "malloc");
+		memcpy(d->xrs[d->xrsz], start, sz);
+		d->xrs[d->xrsz][sz] = '\0';
+		d->xrsz++;
+	}
+
+	/*
+	 * Next, extract all references.
+	 * We'll accumulate these into a list of SEE ALSO tags, after.
+	 */
+	for (i = 0; i < d->descsz; i++) {
+		if ('[' != d->desc[i])
+			continue;
+		i++;
+		if ('[' == d->desc[i])
+			continue;
+		start = &d->desc[i];
+		for (sz = 0; i < d->descsz; i++, sz++)
+			if (']' == d->desc[i])
+				break;
+		if (i == d->descsz)
+			break;
+		else if (sz == 0)
+			continue;
+
+		if (sz > 2 && 
+		    '(' == start[sz - 2] &&
+		    ')' == start[sz - 1])
+			sz -= 2;
+
+		d->xrs = realloc(d->xrs,
+			(d->xrsz + 1) * sizeof(char *));
+		if (NULL == d->xrs)
+			err(EXIT_FAILURE, "realloc");
+		d->xrs[d->xrsz] = malloc(sz + 1);
+		if (NULL == d->xrs[d->xrsz])
+			err(EXIT_FAILURE, "malloc");
+		memcpy(d->xrs[d->xrsz], start, sz);
+		d->xrs[d->xrsz][sz] = '\0';
+		d->xrsz++;
+	}
+
+	qsort(d->xrs, d->xrsz, sizeof(char *), xrcmp);
+	d->postprocessed = 1;
+}
+
+static const char *
+lookup(char *key)
+{
+	ENTRY		 ent;
+	ENTRY		*res;
+	struct defn	*d;
+
+	/* Actually perform search. */
+	ent.key = key;
+	res = hsearch(ent, FIND);
+	if (NULL == res) 
+		return(NULL);
+	d = (struct defn *)res->data;
+	if (0 == d->nmsz)
+		return(NULL);
+	return(d->nms[0]);
+}
+
+/*
+ * Emit a valid mdoc(7) document within the given prefix.
+ */
+static void
+emit(const struct defn *d)
+{
+	struct decl	*first;
+	size_t		 sz, i, col, last;
+	FILE		*f;
+	char		*cp;
+	const char	*res, *lastres;
+	enum tag	 tag;
+	enum preproc	 pre;
+
+	if ( ! d->postprocessed)
+		return;
+
+	if (NULL == (f = fopen(d->fname, "w"))) {
+		warn("%s: fopen", d->fname);
+		return;
+	}
+
+	/* Begin by outputting the mdoc(7) header. */
+	fputs(".Dd $" "Mdocdate$\n", f);
+	fprintf(f, ".Dt %s 3\n", d->dt);
+	fputs(".Os\n", f);
+	fputs(".Sh NAME\n", f);
+
+	/* Now print the name bits of each declaration. */
+	for (i = 0; i < d->nmsz; i++)
+		fprintf(f, ".Nm %s%s\n", d->nms[i], 
+			i < d->nmsz - 1 ? " ," : "");
+
+	fprintf(f, ".Nd %s\n", d->name);
 	fputs(".Sh SYNOPSIS\n", f);
+
 	TAILQ_FOREACH(first, &d->dcqhead, entries) {
 		if (DECLTYPE_CPP != first->type &&
 		    DECLTYPE_C != first->type)
@@ -756,11 +1012,6 @@ emit(const char *prefix, const struct defn *d)
 		d->desc[i] = d->desc[i + 1] = ' ';
 		i++;
 	}
-
-#if 0
-	fputs(d->desc, f);
-	fputs("\n", f);
-#endif
 
 	/*
 	 * Here we go!
@@ -873,6 +1124,23 @@ emit(const char *prefix, const struct defn *d)
 			}
 			if (tag < TAG__MAX)
 				continue;
+		} else if ('[' == d->desc[i] && 
+			   ']' != d->desc[i + 1]) {
+			/*
+			 * Now handle in-page references.
+			 * Print them out as-is: we've already
+			 * accumulated them into our "SEE ALSO" values,
+			 * which we'll use below.
+			 */
+			for (i++; i < d->descsz; i++, col++) {
+				if (']' == d->desc[i]) {
+					i++;
+					break;
+				}
+				fputc(d->desc[i], f);
+				col++;
+			}
+			continue;
 		}
 
 		if (' ' == d->desc[i] && 0 == col) {
@@ -881,21 +1149,51 @@ emit(const char *prefix, const struct defn *d)
 			continue;
 		}
 
-
 		assert('\n' != d->desc[i]);
 		fputc(d->desc[i], f);
 		col++;
 		i++;
 	}
 
-	fputs("\n", f);
+	if (col > 0)
+		fputs("\n", f);
+
+	if (d->xrsz > 0) {
+		/*
+		 * Look up all of our keywords (which are in the xrs
+		 * field) in the table of all known keywords.
+		 * Don't print duplicates.
+		 */
+		fputs(".Sh SEE ALSO\n", f);
+		lastres = NULL;
+		for (last = 0, i = 0; i < d->xrsz; i++) {
+			res = lookup(d->xrs[i]);
+			if (NULL == res) {
+				warnx("%s:%zu: ref not found: %s", 
+					d->fn, d->ln, d->xrs[i]);
+				continue;
+			}
+
+			/* Ignore duplicates. */
+			if (NULL != lastres && lastres == res)
+				continue;
+			if (last)
+				fputs(" ,\n", f);
+			fprintf(f, ".Xr %s 3", res);
+			last = 1;
+			lastres = res;
+		}
+		if (last)
+			fputs("\n", f);
+	}
+
 	fclose(f);
 }
 
 int
 main(int argc, char *argv[])
 {
-	size_t		 len;
+	size_t		 i, len;
 	FILE		*f;
 	char		*cp;
 	const char	*prefix;
@@ -937,29 +1235,35 @@ main(int argc, char *argv[])
 		/* Lines are always nil-terminated. */
 		switch (p.phase) {
 		case (PHASE_INIT):
-			if (init(&p, cp))
-				continue;
+			init(&p, cp);
 			break;
 		case (PHASE_KEYS):
-			if (keys(&p, cp, len))
-				continue;
+			keys(&p, cp, len);
 			break;
 		case (PHASE_DESC):
-			if (desc(&p, cp, len))
-				continue;
+			desc(&p, cp, len);
+			break;
+		case (PHASE_SEEALSO):
+			seealso(&p, cp, len);
 			break;
 		case (PHASE_DECL):
-			if (decl(&p, cp, len))
-				continue;
+			decl(&p, cp, len);
 			break;
 		}
-		break;
 	}
 
+	/*
+	 * If we hit the last line, then try to process.
+	 * Otherwise, we failed along the way.
+	 */
 	if (NULL == cp) {
 		if (PHASE_INIT == p.phase) {
+			if (0 == hcreate(5000))
+				err(EXIT_FAILURE, "hcreate");
 			TAILQ_FOREACH(d, &p.dqhead, entries)
-				emit(prefix, d);
+				postprocess(prefix, d);
+			TAILQ_FOREACH(d, &p.dqhead, entries)
+				emit(d);
 			rc = 1;
 		} else
 			warnx("%s:%zu: exit when not in "
@@ -977,6 +1281,15 @@ main(int argc, char *argv[])
 		}
 		free(d->name);
 		free(d->desc);
+		free(d->dt);
+		for (i = 0; i < d->nmsz; i++)
+			free(d->nms[i]);
+		for (i = 0; i < d->xrsz; i++)
+			free(d->xrs[i]);
+		free(d->nms);
+		free(d->xrs);
+		free(d->fname);
+		free(d->seealso);
 		free(d);
 	}
 
