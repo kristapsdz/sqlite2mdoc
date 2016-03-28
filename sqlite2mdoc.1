@@ -3,21 +3,28 @@
 .Os
 .Sh NAME
 .Nm sqlite2mdoc
-.Nd extract manpage documentation from SQLite header file
+.Nd extract C reference manpages from SQLite header file
 .Sh SYNOPSIS
 .Nm sqlite2mdoc
 .Op Fl p Ar prefix
 .Sh DESCRIPTION
 The
 .Nm
-utility extracts documentation from an SQLite header file
+utility extracts the C reference from an SQLite header file
 .Pa sqlite3.h ,
-given as standard input, and produces the corresponding set of manpages
-into
+given as standard input, and emits the corresponding set of
+.Xr mdoc 7
+manpages into
 .Ar prefix ,
 which defaults to the current directory.
-These correspond to the C-Language Interface Specification for SQLite,
-to date exclusively viewed as HTML.
+.Pp
+These manpages correspond to the C-Language Interface Specification for
+SQLite, to date exclusively viewed as HTML.
+.Pp
+The
+.Xr mdoc 7
+pages are different from the on-line content in that inter-document
+references link to other manpages, not to HTML points.
 .\" .Sh CONTEXT
 .\" For section 9 functions only.
 .\" .Sh IMPLEMENTATION NOTES
@@ -36,14 +43,15 @@ to date exclusively viewed as HTML.
 .\" .Sh ERRORS
 .\" For sections 2, 3, 4, and 9 errno settings only.
 .Sh SEE ALSO
-.Xr sqlite3 1
+.Xr mdoc 7
 .\" .Sh STANDARDS
 .\" .Sh HISTORY
 .Sh AUTHORS
 .Nm
 was written by
 .An Kristaps Dzonsons Aq Mt kristaps@bsd.lv .
-.\" .Sh CAVEATS
+.Sh CAVEATS
+Inline HTML tables are not yet parsed.
 .\" .Sh BUGS
 .\" .Sh SECURITY CONSIDERATIONS
 .\" Not used in OpenBSD.
