@@ -928,6 +928,7 @@ lookup(char *key)
 	d = (struct defn *)res->data;
 	if (0 == d->nmsz)
 		return(NULL);
+	assert(NULL != d->nms[0]);
 	return(d->nms[0]);
 }
 
@@ -1334,11 +1335,11 @@ emit(const struct defn *d)
 		lastres = NULL;
 		for (last = 0, i = 0; i < d->xrsz; i++) {
 			res = lookup(d->xrs[i]);
-			/*if (NULL == res) {
-				warnx("%s:%zu: ref not found: %s", 
-					d->fn, d->ln, d->xrs[i]);
+			if (NULL == res) {
+				/*warnx("%s:%zu: ref not found: %s",  
+					d->fn, d->ln, d->xrs[i]);*/
 				continue;
-			}*/
+			}
 
 			/* Ignore duplicates. */
 			if (NULL != lastres && lastres == res)
