@@ -14,10 +14,12 @@ of the project's CVS repository.
 
 ## Installation
 
-Simply run `make` and `make install`.
+Simply run `make`: this utility isn't meant for installation, but for
+integration into your SQLite deployment phase.
 There are no dependencies
 
-This software has only been tested on OpenBSD and Mac OS X machines.
+This software has only been tested on OpenBSD and Mac OS X machines,
+with the current version of SQLite on both.
 Porting it won't take much effort.
 
 ## License
