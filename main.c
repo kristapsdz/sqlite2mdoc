@@ -345,7 +345,7 @@ decl_define(struct parse *p, char *cp, size_t len)
 	 */
 	if (d->multiline) {
 		warnx("%s:%zu: multiline declaration "
-			"still open", p->fn, p->ln);
+			"still open (harmless?)", p->fn, p->ln);
 		e = TAILQ_LAST(&d->dcqhead, declq);
 		assert(NULL != e);
 		e->type = DECLTYPE_NEITHER;
@@ -392,7 +392,7 @@ decl(struct parse *p, char *cp, size_t len)
 		assert(NULL != d);
 		if (d->multiline) {
 			warnx("%s:%zu: multiline declaration "
-				"still open", p->fn, p->ln);
+				"still open (harmless?)", p->fn, p->ln);
 			e = TAILQ_LAST(&d->dcqhead, declq);
 			assert(NULL != e);
 			e->type = DECLTYPE_NEITHER;
@@ -570,6 +570,10 @@ keys(struct parse *p, char *cp, size_t len)
 		warnx("%s:%zu: warn: unexpected end of "
 			"interface keywords", p->fn, p->ln);
 		p->phase = PHASE_INIT;
+		return;
+	} else if (0 == strcmp(cp, "*/")) {
+		/* End of comment area, start of declarations. */
+		p->phase = PHASE_DECL;
 		return;
 	} else if ('*' != cp[0] || '*' != cp[1]) {
 		warnx("%s:%zu: warn: unexpected end of "
@@ -1330,11 +1334,11 @@ emit(const struct defn *d)
 		lastres = NULL;
 		for (last = 0, i = 0; i < d->xrsz; i++) {
 			res = lookup(d->xrs[i]);
-			if (NULL == res) {
+			/*if (NULL == res) {
 				warnx("%s:%zu: ref not found: %s", 
 					d->fn, d->ln, d->xrs[i]);
 				continue;
-			}
+			}*/
 
 			/* Ignore duplicates. */
 			if (NULL != lastres && lastres == res)
