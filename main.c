@@ -800,13 +800,14 @@ postprocess(const char *prefix, struct defn *d)
 
 		/* 
 		 * Now scan for the matching `]'.
-		 * Sometimes we can have an OR bar in there, but
-		 * for the time being, let's ignore that.
+		 * We can also have a vertical bar if we're separating a
+		 * keyword and its shown name.
 		 */
 		start = &d->seealso[++i];
 		sz = 0;
 		while (i < d->seealsosz &&
-		      ']' != d->seealso[i]) {
+		      ']' != d->seealso[i] &&
+		      '|' != d->seealso[i]) {
 			i++;
 			sz++;
 		}
@@ -814,6 +815,19 @@ postprocess(const char *prefix, struct defn *d)
 			break;
 		if (0 == sz)
 			continue;
+
+		/* 
+		 * Continue on to the end-of-reference, if we weren't
+		 * there to begin with.
+		 */
+		if (']' != d->seealso[i]) 
+			while (i < d->seealsosz &&
+			      ']' != d->seealso[i])
+				i++;
+
+		/* Strip trailing whitespace. */
+		while (sz > 1 && ' ' == start[sz - 1])
+			sz--;
 
 		/* Strip trailing parenthesis. */
 		if (sz > 2 && 
@@ -836,6 +850,8 @@ postprocess(const char *prefix, struct defn *d)
 	/*
 	 * Next, extract all references.
 	 * We'll accumulate these into a list of SEE ALSO tags, after.
+	 * See how these are parsed above for a description: this is
+	 * basically the same thing.
 	 */
 	for (i = 0; i < d->descsz; i++) {
 		if ('[' != d->desc[i])
@@ -843,14 +859,25 @@ postprocess(const char *prefix, struct defn *d)
 		i++;
 		if ('[' == d->desc[i])
 			continue;
+
 		start = &d->desc[i];
 		for (sz = 0; i < d->descsz; i++, sz++)
-			if (']' == d->desc[i])
+			if (']' == d->desc[i] ||
+			    '|' == d->desc[i])
 				break;
+
 		if (i == d->descsz)
 			break;
 		else if (sz == 0)
 			continue;
+
+		if (']' != d->desc[i]) 
+			while (i < d->descsz &&
+			      ']' != d->desc[i])
+				i++;
+
+		while (sz > 1 && ' ' == start[sz - 1])
+			sz--;
 
 		if (sz > 2 && 
 		    '(' == start[sz - 2] &&
@@ -873,6 +900,10 @@ postprocess(const char *prefix, struct defn *d)
 	d->postprocessed = 1;
 }
 
+/*
+ * Convenience function to look up a keyword.
+ * Returns the keyword's file if found or NULL.
+ */
 static const char *
 lookup(char *key)
 {
@@ -880,7 +911,6 @@ lookup(char *key)
 	ENTRY		*res;
 	struct defn	*d;
 
-	/* Actually perform search. */
 	ent.key = key;
 	res = hsearch(ent, FIND);
 	if (NULL == res) 
@@ -1164,7 +1194,8 @@ emit(const struct defn *d)
 		if ('<' == d->desc[i]) {
 			for (tag = 0; tag < TAG__MAX; tag++) {
 				sz = strlen(tags[tag].html);
-				if (strncmp(&d->desc[i], tags[tag].html, sz))
+				if (strncmp(&d->desc[i], 
+				    tags[tag].html, sz))
 					continue;
 				/*
 				 * NOOP tags don't do anything, such as
@@ -1213,13 +1244,26 @@ emit(const struct defn *d)
 				continue;
 		} else if ('[' == d->desc[i] && 
 			   ']' != d->desc[i + 1]) {
+			/* Do we start at the bracket or bar? */
+			for (sz = i + 1; sz < d->descsz; sz++) 
+				if ('|' == d->desc[sz] ||
+				    ']' == d->desc[sz])
+					break;
+
+			if (sz == d->descsz)
+				continue;
+			else if ('|' == d->desc[sz])
+				i = sz + 1;
+			else
+				i = i + 1;
+
 			/*
 			 * Now handle in-page references.
 			 * Print them out as-is: we've already
 			 * accumulated them into our "SEE ALSO" values,
 			 * which we'll use below.
 			 */
-			for (i++; i < d->descsz; i++, col++) {
+			for ( ; i < d->descsz; i++, col++) {
 				if (']' == d->desc[i]) {
 					i++;
 					break;
@@ -1237,6 +1281,13 @@ emit(const struct defn *d)
 		}
 
 		assert('\n' != d->desc[i]);
+
+		/*
+		 * Handle some oddities.
+		 * The following HTML escapes exist in the output that I
+		 * could find.
+		 * There might be others...
+		 */
 		if (0 == strncmp(&d->desc[i], "&nbsp;", 6)) {
 			i += 6;
 			fputc(' ', f);
@@ -1250,6 +1301,7 @@ emit(const struct defn *d)
 			i += 5;
 			fputc('[', f);
 		} else {
+			/* Make sure we don't trigger a macro. */
 			if (0 == col && '.' == d->desc[i])
 				fputs("\\&", f);
 			fputc(d->desc[i], f);
