@@ -7,7 +7,9 @@ documenting the C API.
 These will be roughly equivalent to the [C-language Interface
 Specification for SQLite](https://www.sqlite.org/c3ref/intro.html).
 
-See the [sqlite2mdoc.1](sqlite2mdoc.1) manpage for details.
+You can also use it for any file(s) using the documentation standards of
+SQLite.
+See the [sqlite2mdoc.1](sqlite2mdoc.1) manpage for syntax details.
 
 This [GitHub](https://www.github.com) repository is a read-only mirror
 of the project's CVS repository.
@@ -16,10 +18,11 @@ of the project's CVS repository.
 
 Simply run `make`: this utility isn't meant for installation, but for
 integration into your SQLite deployment phase.
-There are no dependencies
+You can run `make install`, however, if you plan on using it for other
+documentation.
+There are no compile-time or run-time dependencies
 
-This software has only been tested on OpenBSD and Mac OS X machines,
-with the current version of SQLite on both.
+This software has only been tested on OpenBSD and Mac OS X machines.
 Porting it won't take much effort.
 
 ## License
