@@ -20,10 +20,14 @@ Simply run `make`: this utility isn't meant for installation, but for
 integration into your SQLite deployment phase.
 You can run `make install`, however, if you plan on using it for other
 documentation.
-There are no compile-time or run-time dependencies
+There are no compile-time or run-time dependencies unless you're on
+Linux, in which case you'll need
+[libbsd](https://libbsd.freedesktop.org).
+You'll also need to uncomment the `LDADD` line in the
+[Makefile](Makefile), in this case.
 
-This software has only been tested on OpenBSD and Mac OS X machines.
-Porting it won't take much effort.
+
+This software has been used on OpenBSD, Mac OS X, and Linux machines.
 
 ## License
 
