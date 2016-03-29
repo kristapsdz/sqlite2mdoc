@@ -1016,8 +1016,11 @@ emit(const struct defn *d)
 	enum tag	 tag;
 	enum preproc	 pre;
 
-	if ( ! d->postprocessed)
+	if ( ! d->postprocessed) {
+		warnx("%s:%zu: interface has errors, not "
+			"producing manpage", d->fn, d->ln);
 		return;
+	}
 
 	if (0 == nofile) {
 		if (NULL == (f = fopen(d->fname, "w"))) {
