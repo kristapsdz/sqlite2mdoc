@@ -115,10 +115,14 @@ struct	defn {
 	char		**nms; /* manpage names */
 	size_t		  nmsz; /* number of names */
 	char		 *fname; /* manpage filename */
+	char		 *keybuf; /* raw keywords */
+	size_t		  keybufsz; /* length of "keysbuf" */
 	char		 *seealso; /* see also tags */
 	size_t		  seealsosz; /* length of seealso */
-	char		**xrs;
-	size_t		  xrsz;
+	char		**xrs; /* parsed "see also" references */
+	size_t		  xrsz; /* number of references */
+	char		**keys; /* parsed keywords */
+	size_t		  keysz; /* number of keywords */
 };
 
 /*
@@ -564,12 +568,12 @@ desc(struct parse *p, char *cp, size_t len)
 }
 
 /*
- * We currently don't do anything with keywords.
- * But we can later if we want.
+ * Copy all KEYWORDS into a buffer.
  */
 static void
 keys(struct parse *p, char *cp, size_t len)
 {
+	struct defn	*d;
 
 	if ('\0' == *cp) {
 		warnx("%s:%zu: warn: unexpected end of "
@@ -594,8 +598,23 @@ keys(struct parse *p, char *cp, size_t len)
 		len--;
 	}
 
-	if (0 == len)
+	if (0 == len) {
 		p->phase = PHASE_DESC;
+		return;
+	} else if (strncmp(cp, "KEYWORDS:", 9)) 
+		return;
+
+	cp += 9;
+	len -= 9;
+
+	d = TAILQ_LAST(&p->dqhead, defnq);
+	assert(NULL != d);
+	d->keybuf = realloc(d->keybuf, d->keybufsz + len + 1);
+	if (NULL == d->keybuf)
+		err(EXIT_FAILURE, "%s:%zu: realloc", p->fn, p->ln);
+	memcpy(d->keybuf + d->keybufsz, cp, len);
+	d->keybufsz += len;
+	d->keybuf[d->keybufsz] = '\0';
 }
 
 /*
@@ -760,6 +779,46 @@ postprocess(const char *prefix, struct defn *d)
 		    '-' == d->fname[offs + i])
 			continue;
 		d->fname[offs + i] = '_';
+	}
+
+	/* 
+	 * First, extract all keywords.
+	 */
+	for (i = 0; i < d->keybufsz; ) {
+		while (isspace((int)d->keybuf[i]))
+			i++;
+		if (i == d->keybufsz)
+			break;
+		sz = 0;
+		start = &d->keybuf[i];
+		if ('{' == d->keybuf[i]) {
+			start = &d->keybuf[++i];
+			for ( ; i < d->keybufsz; i++, sz++) 
+				if ('}' == d->keybuf[i])
+					break;
+			if ('}' == d->keybuf[i])
+				i++;
+		} else
+			for ( ; i < d->keybufsz; i++, sz++)
+				if (isspace((int)d->keybuf[i]))
+					break;
+		if (0 == sz)
+			continue;
+		d->keys = realloc(d->keys,
+			(d->keysz + 1) * sizeof(char *));
+		if (NULL == d->keys) 
+			err(EXIT_FAILURE, "realloc");
+		d->keys[d->keysz] = malloc(sz + 1);
+		if (NULL == d->keys[d->keysz]) 
+			err(EXIT_FAILURE, "malloc");
+		memcpy(d->keys[d->keysz], start, sz);
+		d->keys[d->keysz][sz] = '\0';
+		d->keysz++;
+		
+		/* Hash the keyword. */
+		ent.key = d->keys[d->keysz - 1];
+		ent.data = d;
+		(void)hsearch(ent, ENTER);
 	}
 
 	/*
@@ -1481,15 +1540,19 @@ main(int argc, char *argv[])
 			free(d->nms[i]);
 		for (i = 0; i < d->xrsz; i++)
 			free(d->xrs[i]);
+		for (i = 0; i < d->keysz; i++)
+			free(d->keys[i]);
+		free(d->keys);
 		free(d->nms);
 		free(d->xrs);
 		free(d->fname);
 		free(d->seealso);
+		free(d->keybuf);
 		free(d);
 	}
 
 	return(rc ? EXIT_SUCCESS : EXIT_FAILURE);
 usage:
-	fprintf(stderr, "usage: %s [-p prefix]\n", getprogname());
+	fprintf(stderr, "usage: %s [-nv] [-p prefix]\n", getprogname());
 	return(EXIT_FAILURE);
 }
