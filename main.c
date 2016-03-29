@@ -585,10 +585,15 @@ keys(struct parse *p, char *cp, size_t len)
 		p->phase = PHASE_DECL;
 		return;
 	} else if ('*' != cp[0] || '*' != cp[1]) {
-		warnx("%s:%zu: warn: unexpected end of "
-			"interface keywords", p->fn, p->ln);
-		p->phase = PHASE_INIT;
-		return;
+		if ('\0' != cp[1]) {
+			warnx("%s:%zu: warn: unexpected end of "
+				"interface keywords", p->fn, p->ln);
+			p->phase = PHASE_INIT;
+			return;
+		} else 
+			warnx("%s:%zu: warn: workaround in effect "
+				"for unexpected end of "
+				"interface keywords", p->fn, p->ln);
 	}
 
 	cp += 2;
