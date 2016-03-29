@@ -174,6 +174,11 @@ static	const char *const preprocs[TAG__MAX] = {
 	"SQLITE_EXTERN", /* PREPROC_SQLITE_EXTERN */
 };
 
+/* Verbose reporting. */
+static	int verbose;
+/* Don't output any files: use stdout. */
+static	int nofile;
+
 static void
 decl_function_add(struct parse *p, char **etext, 
 	size_t *etextsz, const char *cp, size_t len)
@@ -950,10 +955,13 @@ emit(const struct defn *d)
 	if ( ! d->postprocessed)
 		return;
 
-	if (NULL == (f = fopen(d->fname, "w"))) {
-		warn("%s: fopen", d->fname);
-		return;
-	}
+	if (0 == nofile) {
+		if (NULL == (f = fopen(d->fname, "w"))) {
+			warn("%s: fopen", d->fname);
+			return;
+		}
+	} else
+		f = stdout;
 
 	/* Begin by outputting the mdoc(7) header. */
 	fputs(".Dd $" "Mdocdate$\n", f);
@@ -1332,21 +1340,28 @@ emit(const struct defn *d)
 		 * field) in the table of all known keywords.
 		 * Don't print duplicates.
 		 */
-		fputs(".Sh SEE ALSO\n", f);
 		lastres = NULL;
 		for (last = 0, i = 0; i < d->xrsz; i++) {
 			res = lookup(d->xrs[i]);
-			if (NULL == res) {
-				/*warnx("%s:%zu: ref not found: %s",  
-					d->fn, d->ln, d->xrs[i]);*/
+			/* Ignore self-reference. */
+			if (res == d->nms[0] && verbose) 
+				warnx("%s:%zu: self-reference: %s",
+					d->fn, d->ln, d->xrs[i]);
+			if (res == d->nms[0] && verbose) 
 				continue;
-			}
+			if (NULL == res && verbose) 
+				warnx("%s:%zu: ref not found: %s",  
+					d->fn, d->ln, d->xrs[i]);
+			if (NULL == res)
+				continue;
 
 			/* Ignore duplicates. */
 			if (NULL != lastres && lastres == res)
 				continue;
 			if (last)
 				fputs(" ,\n", f);
+			else
+				fputs(".Sh SEE ALSO\n", f);
 			fprintf(f, ".Xr %s 3", res);
 			last = 1;
 			lastres = res;
@@ -1355,7 +1370,8 @@ emit(const struct defn *d)
 			fputs("\n", f);
 	}
 
-	fclose(f);
+	if (0 == nofile)
+		fclose(f);
 }
 
 int
@@ -1379,10 +1395,16 @@ main(int argc, char *argv[])
 	p.phase = PHASE_INIT;
 	TAILQ_INIT(&p.dqhead);
 
-	while (-1 != (ch = getopt(argc, argv, "p:")))
+	while (-1 != (ch = getopt(argc, argv, "np:v")))
 		switch (ch) {
+		case ('n'):
+			nofile = 1;
+			break;
 		case ('p'):
 			prefix = optarg;
+			break;
+		case ('v'):
+			verbose = 1;
 			break;
 		default:
 			goto usage;
