@@ -666,6 +666,7 @@ grok_name(const struct decl *e,
 				cp++;
 			if (BPOINT(cp))
 				break;
+			/* Function pointers... */
 			if ('(' == *cp)
 				cp++;
 			/* Pass over pointers. */
@@ -1424,7 +1425,12 @@ main(int argc, char *argv[])
 	 * Otherwise, we failed along the way.
 	 */
 	if (NULL == cp) {
-		if (PHASE_INIT == p.phase) {
+		/* 
+		 * Allow us to be at the declarations or scanning for
+		 * the next clause.
+		 */
+		if (PHASE_INIT == p.phase ||
+		    PHASE_DECL == p.phase) {
 			if (0 == hcreate(5000))
 				err(EXIT_FAILURE, "hcreate");
 			TAILQ_FOREACH(d, &p.dqhead, entries)
@@ -1432,7 +1438,7 @@ main(int argc, char *argv[])
 			TAILQ_FOREACH(d, &p.dqhead, entries)
 				emit(d);
 			rc = 1;
-		} else
+		} else if (PHASE_DECL != p.phase)
 			warnx("%s:%zu: exit when not in "
 				"initial state", p.fn, p.ln);
 	}
