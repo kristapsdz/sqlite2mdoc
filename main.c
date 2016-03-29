@@ -14,6 +14,9 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#ifdef __linux__
+#define _GNU_SOURCE
+#endif
 #include <sys/queue.h>
 
 #include <assert.h>
@@ -24,6 +27,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef __linux__
+#include <bsd/stdio.h>
+#include <bsd/stdlib.h>
+#include <bsd/string.h>
+#endif
 
 /*
  * Phase of parsing input file.
