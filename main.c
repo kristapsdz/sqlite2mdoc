@@ -94,6 +94,7 @@ enum	tag {
 	TAG_LI_OPEN,
 	TAG_OL_CLOSE,
 	TAG_OL_OPEN,
+	TAG_P_OPEN,
 	TAG_PRE_CLOSE,
 	TAG_PRE_OPEN,
 	TAG_TABLE_CLOSE,
@@ -203,6 +204,7 @@ static	const struct taginfo tags[TAG__MAX] = {
 	{ "<li>", ".It", 0 }, /* TAG_LI_OPEN */
 	{ "</ol>", ".El\n.Pp", 0 }, /* TAG_OL_CLOSE */
 	{ "<ol>", ".Bl -enum", 0 }, /* TAG_OL_OPEN */
+	{ "<p>", ".Pp", 0 }, /* TAG_P_OPEN */
 	{ "</pre>", ".Ed\n.Pp", 0 }, /* TAG_PRE_CLOSE */
 	{ "<pre>", ".Bd -literal", 0 }, /* TAG_PRE_OPEN */
 	{ "</table>", ".Pp", 0 }, /* TAG_TABLE_CLOSE */
