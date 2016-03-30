@@ -26,8 +26,9 @@ Linux, in which case you'll need
 You'll also need to uncomment the `LDADD` line in the
 [Makefile](Makefile), in this case.
 
-
 This software has been used on OpenBSD, Mac OS X, and Linux machines.
+
+It has also been scanned as a [Coverity project](https://scan.coverity.com/projects/sqlite2mdoc).
 
 ## License
 

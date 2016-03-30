@@ -297,9 +297,9 @@ again:
 	} else {
 		assert(0 == d->instruct);
 		e = calloc(1, sizeof(struct decl));
-		e->type = DECLTYPE_C;
 		if (NULL == e)
 			err(EXIT_FAILURE, "%s:%zu: calloc", p->fn, p->ln);
+		e->type = DECLTYPE_C;
 		TAILQ_INSERT_TAIL(&d->dcqhead, e, entries);
 	}
 
@@ -1033,6 +1033,7 @@ lookup(char *key)
 	struct defn	*d;
 
 	ent.key = key;
+	ent.data = NULL;
 	res = hsearch(ent, FIND);
 	if (NULL == res) 
 		return(NULL);
@@ -1595,6 +1596,7 @@ main(int argc, char *argv[])
 
 	while ( ! TAILQ_EMPTY(&p.dqhead)) {
 		d = TAILQ_FIRST(&p.dqhead);
+		/* coverity[use_after_free] */
 		TAILQ_REMOVE(&p.dqhead, d, entries);
 		while ( ! TAILQ_EMPTY(&d->dcqhead)) {
 			e = TAILQ_FIRST(&d->dcqhead);
@@ -1618,6 +1620,8 @@ main(int argc, char *argv[])
 		free(d->seealso);
 		free(d->keybuf);
 		free(d);
+		/* Shut up coverity. */
+		d = NULL;
 	}
 
 	return(rc ? EXIT_SUCCESS : EXIT_FAILURE);
