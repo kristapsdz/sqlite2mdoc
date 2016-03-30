@@ -1595,8 +1595,8 @@ main(int argc, char *argv[])
 	}
 
 	while ( ! TAILQ_EMPTY(&p.dqhead)) {
-		d = TAILQ_FIRST(&p.dqhead);
 		/* coverity[use_after_free] */
+		d = TAILQ_FIRST(&p.dqhead);
 		TAILQ_REMOVE(&p.dqhead, d, entries);
 		while ( ! TAILQ_EMPTY(&d->dcqhead)) {
 			e = TAILQ_FIRST(&d->dcqhead);
