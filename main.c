@@ -23,6 +23,9 @@
 #include <ctype.h>
 #include <err.h>
 #include <getopt.h>
+#ifdef __APPLE__
+#include <sandbox.h>
+#endif
 #include <search.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -72,20 +75,35 @@ enum	tag {
 	TAG_B_OPEN,
 	TAG_BLOCK_CLOSE,
 	TAG_BLOCK_OPEN,
+	TAG_BR_OPEN,
 	TAG_DD_CLOSE,
 	TAG_DD_OPEN,
 	TAG_DL_CLOSE,
 	TAG_DL_OPEN,
 	TAG_DT_CLOSE,
 	TAG_DT_OPEN,
+	TAG_EM_CLOSE,
+	TAG_EM_OPEN,
 	TAG_H3_CLOSE,
 	TAG_H3_OPEN,
+	TAG_I_CLOSE,
+	TAG_I_OPEN,
 	TAG_LI_CLOSE,
 	TAG_LI_OPEN,
 	TAG_OL_CLOSE,
 	TAG_OL_OPEN,
 	TAG_PRE_CLOSE,
 	TAG_PRE_OPEN,
+	TAG_TABLE_CLOSE,
+	TAG_TABLE_OPEN,
+	TAG_TD_CLOSE,
+	TAG_TD_OPEN,
+	TAG_TH_CLOSE,
+	TAG_TH_OPEN,
+	TAG_TR_CLOSE,
+	TAG_TR_OPEN,
+	TAG_U_CLOSE,
+	TAG_U_OPEN,
 	TAG_UL_CLOSE,
 	TAG_UL_OPEN,
 	TAG__MAX
@@ -159,6 +177,7 @@ struct	taginfo {
 static	const struct taginfo tags[TAG__MAX] = {
 	{ "</b>", "\\fP", TAGINFO_INLINE }, /* TAG_B_CLOSE */
 	{ "<b>", "\\fB", TAGINFO_INLINE }, /* TAG_B_OPEN */
+	{ "<br>", " ", TAGINFO_INLINE }, /* TAG_BR_OPEN */
 	{ "</blockquote>", ".Ed\n.Pp", 0 }, /* TAG_BLOCK_CLOSE */
 	{ "<blockquote>", ".Bd -ragged", 0 }, /* TAG_BLOCK_OPEN */
 	{ "</dd>", "", TAGINFO_NOOP }, /* TAG_DD_CLOSE */
@@ -167,14 +186,28 @@ static	const struct taginfo tags[TAG__MAX] = {
 	{ "<dl>", ".Bl -tag -width Ds", 0 }, /* TAG_DL_OPEN */
 	{ "</dt>", "", TAGINFO_NOBR | TAGINFO_NOSP}, /* TAG_DT_CLOSE */
 	{ "<dt>", ".It", TAGINFO_NOBR }, /* TAG_DT_OPEN */
+	{ "</em>", "\\fP", TAGINFO_INLINE }, /* TAG_EM_CLOSE */
+	{ "<em>", "\\fB", TAGINFO_INLINE }, /* TAG_EM_OPEN */
 	{ "</h3>", "", TAGINFO_NOBR | TAGINFO_NOSP}, /* TAG_H3_CLOSE */
 	{ "<h3>", ".Ss", TAGINFO_NOBR }, /* TAG_H3_OPEN */
+	{ "</i>", "\\fP", TAGINFO_INLINE }, /* TAG_I_CLOSE */
+	{ "<i>", "\\fI", TAGINFO_INLINE }, /* TAG_I_OPEN */
 	{ "</li>", "", TAGINFO_NOOP }, /* TAG_LI_CLOSE */
 	{ "<li>", ".It", 0 }, /* TAG_LI_OPEN */
 	{ "</ol>", ".El\n.Pp", 0 }, /* TAG_OL_CLOSE */
 	{ "<ol>", ".Bl -enum", 0 }, /* TAG_OL_OPEN */
 	{ "</pre>", ".Ed\n.Pp", 0 }, /* TAG_PRE_CLOSE */
 	{ "<pre>", ".Bd -literal", 0 }, /* TAG_PRE_OPEN */
+	{ "</table>", ".Pp", 0 }, /* TAG_TABLE_CLOSE */
+	{ "<table>", ".Pp", 0 }, /* TAG_TABLE_OPEN */
+	{ "</td>", "", TAGINFO_NOOP }, /* TAG_TD_CLOSE */
+	{ "<td>", " ", TAGINFO_INLINE }, /* TAG_TD_OPEN */
+	{ "</th>", "", TAGINFO_NOOP }, /* TAG_TH_CLOSE */
+	{ "<th>", " ", TAGINFO_INLINE }, /* TAG_TH_OPEN */
+	{ "</tr>", "", TAGINFO_NOOP}, /* TAG_TR_CLOSE */
+	{ "<tr>", "", TAGINFO_NOBR }, /* TAG_TR_OPEN */
+	{ "</u>", "\\fP", TAGINFO_INLINE }, /* TAG_U_CLOSE */
+	{ "<u>", "\\fI", TAGINFO_INLINE }, /* TAG_U_OPEN */
 	{ "</ul>", ".El\n.Pp", 0 }, /* TAG_UL_CLOSE */
 	{ "<ul>", ".Bl -bullet", 0 }, /* TAG_UL_OPEN */
 };
@@ -1241,7 +1274,7 @@ emit(const struct defn *d)
 				i++;
 			for (tag = 0; tag < TAG__MAX; tag++) {
 				sz = strlen(tags[tag].html);
-				if (0 == strncmp(&d->desc[i], tags[tag].html, sz))
+				if (0 == strncasecmp(&d->desc[i], tags[tag].html, sz))
 					break;
 			}
 			if (TAG__MAX == tag ||
@@ -1449,6 +1482,22 @@ emit(const struct defn *d)
 		fclose(f);
 }
 
+#ifdef	__APPLE__
+static void
+sandbox_apple(void)
+{
+	char	*ep;
+	int	 rc;
+
+	rc = sandbox_init(kSBXProfileNoNetwork, SANDBOX_NAMED, &ep);
+	if (0 == rc)
+		return;
+	perror(ep);
+	sandbox_free_error(ep);
+	exit(EXIT_FAILURE);
+}
+#endif
+
 int
 main(int argc, char *argv[])
 {
@@ -1460,6 +1509,10 @@ main(int argc, char *argv[])
 	int		 rc, ch;
 	struct defn	*d;
 	struct decl	*e;
+
+#if defined(__APPLE__)
+	sandbox_apple();
+#endif
 
 	rc = 0;
 	prefix = ".";
