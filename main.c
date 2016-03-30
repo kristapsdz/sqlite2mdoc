@@ -71,6 +71,8 @@ enum	preproc {
  * HTML tags that we recognise.
  */
 enum	tag {
+	TAG_A_CLOSE,
+	TAG_A_OPEN_ATTRS,
 	TAG_B_CLOSE,
 	TAG_B_OPEN,
 	TAG_BLOCK_CLOSE,
@@ -96,8 +98,10 @@ enum	tag {
 	TAG_PRE_OPEN,
 	TAG_TABLE_CLOSE,
 	TAG_TABLE_OPEN,
+	TAG_TABLE_OPEN_ATTRS,
 	TAG_TD_CLOSE,
 	TAG_TD_OPEN,
+	TAG_TD_OPEN_ATTRS,
 	TAG_TH_CLOSE,
 	TAG_TH_OPEN,
 	TAG_TR_CLOSE,
@@ -172,9 +176,12 @@ struct	taginfo {
 #define	TAGINFO_NOOP	 0x02 /* just strip out */
 #define	TAGINFO_NOSP	 0x04 /* follow w/o space or newline */
 #define	TAGINFO_INLINE	 0x08 /* inline block (notused) */
+#define TAGINFO_ATTRS	 0x10 /* ignore attributes */
 };
 
 static	const struct taginfo tags[TAG__MAX] = {
+	{ "</a>", " ", TAGINFO_INLINE }, /* TAG_A_CLOSE */
+	{ "<a ", " ", TAGINFO_INLINE | TAGINFO_ATTRS }, /* TAG_A_OPEN_ATTRS */
 	{ "</b>", "\\fP", TAGINFO_INLINE }, /* TAG_B_CLOSE */
 	{ "<b>", "\\fB", TAGINFO_INLINE }, /* TAG_B_OPEN */
 	{ "<br>", " ", TAGINFO_INLINE }, /* TAG_BR_OPEN */
@@ -200,8 +207,10 @@ static	const struct taginfo tags[TAG__MAX] = {
 	{ "<pre>", ".Bd -literal", 0 }, /* TAG_PRE_OPEN */
 	{ "</table>", ".Pp", 0 }, /* TAG_TABLE_CLOSE */
 	{ "<table>", ".Pp", 0 }, /* TAG_TABLE_OPEN */
+	{ "<table ", ".Pp", TAGINFO_ATTRS }, /* TAG_TABLE_OPEN_ATTRS */
 	{ "</td>", "", TAGINFO_NOOP }, /* TAG_TD_CLOSE */
 	{ "<td>", " ", TAGINFO_INLINE }, /* TAG_TD_OPEN */
+	{ "<td ", " ", TAGINFO_INLINE | TAGINFO_ATTRS}, /* TAG_TD_OPEN_ATTRS */
 	{ "</th>", "", TAGINFO_NOOP }, /* TAG_TH_CLOSE */
 	{ "<th>", " ", TAGINFO_INLINE }, /* TAG_TH_OPEN */
 	{ "</tr>", "", TAGINFO_NOOP}, /* TAG_TR_CLOSE */
@@ -1323,9 +1332,23 @@ emit(const struct defn *d)
 		if ('<' == d->desc[i]) {
 			for (tag = 0; tag < TAG__MAX; tag++) {
 				sz = strlen(tags[tag].html);
+				assert(sz > 0);
 				if (strncmp(&d->desc[i], 
-				    tags[tag].html, sz))
+				    tags[tag].html, sz)) 
 					continue;
+
+				i += sz;
+
+				if (TAGINFO_ATTRS & tags[tag].flags) {
+					/* Blindly ignore attributes. */
+					while ('\0' != d->desc[i] &&
+						'>' != d->desc[i])
+						i++;
+					if ('\0' == d->desc[i])
+						break;
+					i++;
+				}
+
 				/*
 				 * NOOP tags don't do anything, such as
 				 * the case of `</dd>', which only
@@ -1335,13 +1358,11 @@ emit(const struct defn *d)
 				 * Skip the trailing space.
 				 */
 				if (TAGINFO_NOOP & tags[tag].flags) {
-					i += sz;
 					while (isspace((int)d->desc[i]))
 						i++;
 					break;
 				} else if (TAGINFO_INLINE & tags[tag].flags) {
 					fputs(tags[tag].mdoc, f);
-					i += sz;
 					break;
 				}
 
@@ -1364,7 +1385,6 @@ emit(const struct defn *d)
 					fputs(" ", f);
 					col++;
 				}
-				i += sz;
 				while (isspace((int)d->desc[i]))
 					i++;
 				break;
@@ -1402,6 +1422,10 @@ emit(const struct defn *d)
 			}
 			continue;
 		}
+
+		/* This can happen in scan-ahead cases. */
+		if ('\0' == d->desc[i])
+			continue;
 
 		if (' ' == d->desc[i] && 0 == col) {
 			while (' ' == d->desc[i])
