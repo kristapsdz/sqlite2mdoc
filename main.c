@@ -136,6 +136,8 @@ struct	defn {
 	TAILQ_ENTRY(defn) entries;
 	char		 *desc; /* long description */
 	size_t		  descsz; /* strlen(desc) */
+	char		 *fulldesc; /* description w/newlns */
+	size_t		  fulldescsz; /* strlen(fulldesc) */
 	struct declq	  dcqhead; /* declarations */
 	int		  multiline; /* used when parsing */
 	int		  instruct; /* used when parsing */
@@ -439,18 +441,24 @@ decl(struct parse *p, char *cp, size_t len)
 {
 	struct defn	*d;
 	struct decl	*e;
+	char		*oldcp;
+	size_t		 oldlen;
+
+	oldcp = cp;
+	oldlen = len;
 
 	while (isspace((int)*cp)) {
 		cp++;
 		len--;
 	}
 
+	d = TAILQ_LAST(&p->dqhead, defnq);
+	assert(NULL != d);
+
 	/* Check closure. */
 	if ('\0' == *cp) {
 		p->phase = PHASE_INIT;
 		/* Check multiline status. */
-		d = TAILQ_LAST(&p->dqhead, defnq);
-		assert(NULL != d);
 		if (d->multiline) {
 			warnx("%s:%zu: multiline declaration "
 				"still open (harmless?)", p->fn, p->ln);
@@ -461,6 +469,16 @@ decl(struct parse *p, char *cp, size_t len)
 		}
 		return;
 	} 
+
+	d->fulldesc = realloc(d->fulldesc, 
+		d->fulldescsz + oldlen + 1);
+	if (NULL == d->fulldesc)
+		err(EXIT_FAILURE, "%s:%zu: realloc", p->fn, p->ln);
+	if (0 == d->fulldescsz)
+		d->fulldesc[0] = '\0';
+	d->fulldescsz += oldlen + 2;
+	strlcat(d->fulldesc, oldcp, d->fulldescsz);
+	strlcat(d->fulldesc, "\n", d->fulldescsz);
 	
 	/* 
 	 * Catch preprocessor defines, but discard all other types of
@@ -1096,6 +1114,7 @@ emit(const struct defn *d)
 
 	fprintf(f, ".Nd %s\n", d->name);
 	fputs(".Sh SYNOPSIS\n", f);
+	fputs(".In sqlite.h\n", f);
 
 	TAILQ_FOREACH(first, &d->dcqhead, entries) {
 		if (DECLTYPE_CPP != first->type &&
@@ -1490,6 +1509,11 @@ emit(const struct defn *d)
 	if (col > 0)
 		fputs("\n", f);
 
+	fputs(".Sh IMPLEMENTATION NOTES\n", f);
+	fputs(".Bd -literal\n", f);
+	fputs(d->fulldesc, f);
+	fputs(".Ed\n", f);
+
 	if (d->xrsz > 0) {
 		/*
 		 * Look up all of our keywords (which are in the xrs
@@ -1674,6 +1698,7 @@ main(int argc, char *argv[])
 		}
 		free(d->name);
 		free(d->desc);
+		free(d->fulldesc);
 		free(d->dt);
 		for (i = 0; i < d->nmsz; i++)
 			free(d->nms[i]);
