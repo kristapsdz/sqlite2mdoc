@@ -1525,6 +1525,26 @@ sandbox_apple(void)
 }
 #endif
 
+/*
+ * Check to see whether there are any filename duplicates.
+ * This is just a warning, but will really screw things up, since the
+ * last filename will overwrite the first.
+ */
+static void
+check_dupes(struct parse *p)
+{
+	struct defn	*d, *dd;
+
+	TAILQ_FOREACH(d, &p->dqhead, entries)
+		TAILQ_FOREACH(dd, &p->dqhead, entries) {
+			if (dd == d || strcmp(d->fname, dd->fname))
+				continue;
+			warnx("%s:%zu: duplicate filename: "
+				"%s (from %s, line %zu)", d->fn, 
+				d->ln, d->fname, dd->nms[0], dd->ln);
+		}
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -1612,6 +1632,7 @@ main(int argc, char *argv[])
 				err(EXIT_FAILURE, "hcreate");
 			TAILQ_FOREACH(d, &p.dqhead, entries)
 				postprocess(prefix, d);
+			check_dupes(&p);
 			TAILQ_FOREACH(d, &p.dqhead, entries)
 				emit(d);
 			rc = 1;
