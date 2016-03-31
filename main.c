@@ -1510,6 +1510,8 @@ emit(const struct defn *d)
 		fputs("\n", f);
 
 	fputs(".Sh IMPLEMENTATION NOTES\n", f);
+	fprintf(f, "These declarations were extracted from the\n"
+	      "interface documentation at line %zu.\n", d->ln);
 	fputs(".Bd -literal\n", f);
 	fputs(d->fulldesc, f);
 	fputs(".Ed\n", f);
