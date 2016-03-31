@@ -1196,6 +1196,9 @@ emit(const struct defn *d)
 			while ('\0' != *str && 
 			       (ns || ',' != *str) && 
 			       (ns || ')' != *str)) {
+				/*
+				 * Handle comments in the declarations.
+				 */
 				if ('/' == str[0] && '*' == str[1]) {
 					str += 2;
 					for ( ; '\0' != str[0]; str++)
@@ -1215,8 +1218,26 @@ emit(const struct defn *d)
 					ns++;
 				else if (')' == *str)
 					ns--;
-				fputc(*str, f);
-				str++;
+
+				/*
+				 * Handle some instances of whitespace
+				 * by compressing it down.
+				 * However, if the whitespace ends at
+				 * the end-of-definition, then don't
+				 * print it at all.
+				 */
+				if (isspace((int)*str)) {
+					while (isspace((int)*str))
+						str++;
+					if ('\0' == *str ||
+					    (0 == ns && ',' == *str) ||
+					    (0 == ns && ')' == *str))
+						break;
+					fputc(' ', f);
+				} else {
+					fputc(*str, f);
+					str++;
+				}
 			}
 			fputs("\"\n", f);
 			if ('\0' == *str || ')' == *str)
