@@ -64,6 +64,7 @@ enum	preproc {
 	PREPROC_SQLITE_DEPRECATED,
 	PREPROC_SQLITE_EXPERIMENTAL,
 	PREPROC_SQLITE_EXTERN,
+	PREPROC_SQLITE_STDCALL,
 	PREPROC__MAX
 };
 
@@ -230,6 +231,7 @@ static	const char *const preprocs[TAG__MAX] = {
 	"SQLITE_DEPRECATED", /* PREPROC_SQLITE_DEPRECATED */
 	"SQLITE_EXPERIMENTAL", /* PREPROC_SQLITE_EXPERIMENTAL */
 	"SQLITE_EXTERN", /* PREPROC_SQLITE_EXTERN */
+	"SQLITE_STDCALL", /* PREPROC_SQLITE_STDCALL */
 };
 
 /* Verbose reporting. */
@@ -471,7 +473,7 @@ decl(struct parse *p, char *cp, size_t len)
 	} 
 
 	d->fulldesc = realloc(d->fulldesc, 
-		d->fulldescsz + oldlen + 1);
+		d->fulldescsz + oldlen + 2);
 	if (NULL == d->fulldesc)
 		err(EXIT_FAILURE, "%s:%zu: realloc", p->fn, p->ln);
 	if (0 == d->fulldescsz)
@@ -1248,6 +1250,9 @@ emit(const struct defn *d)
 				if (isspace((int)*str)) {
 					while (isspace((int)*str))
 						str++;
+					/* Are we at a comment? */
+					if ('/' == str[0] && '*' == str[1])
+						continue;
 					if ('\0' == *str ||
 					    (0 == ns && ',' == *str) ||
 					    (0 == ns && ')' == *str))
