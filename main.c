@@ -1586,13 +1586,20 @@ sandbox_pledge(int nofile)
 #endif
 
 #ifdef	__APPLE__
+/*
+ * Darwin's "seatbelt".
+ * If we're writing to stdout, then use pure computation.
+ * Otherwise we need file writing.
+ */
 static void
-sandbox_apple(void)
+sandbox_apple(int nofile)
 {
 	char	*ep;
 	int	 rc;
 
-	rc = sandbox_init(kSBXProfileNoNetwork, SANDBOX_NAMED, &ep);
+	rc = sandbox_init
+		(nofile ? kSBXProfilePureComputation : 
+		 kSBXProfileNoNetwork, SANDBOX_NAMED, &ep);
 	if (0 == rc)
 		return;
 	perror(ep);
@@ -1658,7 +1665,7 @@ main(int argc, char *argv[])
 		}
 
 #if defined(__APPLE__)
-	sandbox_apple();
+	sandbox_apple(nofile);
 #elif defined(__OpenBSD__) && OpenBSD >= 201605
 	sandbox_pledge(nofile);
 #endif
