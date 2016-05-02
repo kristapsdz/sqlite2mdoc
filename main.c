@@ -18,6 +18,9 @@
 #define _GNU_SOURCE
 #endif
 #include <sys/queue.h>
+#ifdef __OpenBSD__
+#include <sys/param.h>
+#endif
 
 #include <assert.h>
 #include <ctype.h>
@@ -30,6 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #ifdef __linux__
 #include <bsd/stdio.h>
 #include <bsd/stdlib.h>
@@ -1561,6 +1565,26 @@ emit(const struct defn *d)
 		fclose(f);
 }
 
+#if defined(__OpenBSD__) && OpenBSD >= 201605
+/*
+ * Only used for OpenBSD 5.9 and above.
+ * We pledge(2) stdio if we're receiving from stdin and writing to
+ * stdout, otherwise we need file-creation and writing.
+ */
+static void
+sandbox_pledge(int nofile)
+{
+
+	if (nofile) {
+		if (-1 == pledge("stdio", NULL))
+			err(EXIT_FAILURE, "pledge");
+	} else {
+		if (-1 == pledge("stdio wpath cpath", NULL))
+			err(EXIT_FAILURE, "pledge");
+	}
+}
+#endif
+
 #ifdef	__APPLE__
 static void
 sandbox_apple(void)
@@ -1609,10 +1633,6 @@ main(int argc, char *argv[])
 	struct defn	*d;
 	struct decl	*e;
 
-#if defined(__APPLE__)
-	sandbox_apple();
-#endif
-
 	rc = 0;
 	prefix = ".";
 	f = stdin;
@@ -1636,6 +1656,12 @@ main(int argc, char *argv[])
 		default:
 			goto usage;
 		}
+
+#if defined(__APPLE__)
+	sandbox_apple();
+#elif defined(__OpenBSD__) && OpenBSD >= 201605
+	sandbox_pledge(nofile);
+#endif
 
 	/*
 	 * Read in line-by-line and process in the phase dictated by our
