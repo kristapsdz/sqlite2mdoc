@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2016 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2016, 2018 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,31 +14,24 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifdef __linux__
-#define _GNU_SOURCE
-#endif
+#include "config.h"
+
 #include <sys/queue.h>
-#ifdef __OpenBSD__
-#include <sys/param.h>
-#endif
 
 #include <assert.h>
 #include <ctype.h>
-#include <err.h>
+#if HAVE_ERR
+# include <err.h>
+#endif
 #include <getopt.h>
-#ifdef __APPLE__
-#include <sandbox.h>
+#if HAVE_SANDBOX_INIT
+# include <sandbox.h>
 #endif
 #include <search.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#ifdef __linux__
-#include <bsd/stdio.h>
-#include <bsd/stdlib.h>
-#include <bsd/string.h>
-#endif
 
 /*
  * Phase of parsing input file.
@@ -1565,7 +1558,7 @@ emit(const struct defn *d)
 		fclose(f);
 }
 
-#if defined(__OpenBSD__) && OpenBSD >= 201605
+#if HAVE_PLEDGE
 /*
  * Only used for OpenBSD 5.9 and above.
  * We pledge(2) stdio if we're receiving from stdin and writing to
@@ -1585,7 +1578,7 @@ sandbox_pledge(int nofile)
 }
 #endif
 
-#ifdef	__APPLE__
+#if HAVE_SANDBOX_INIT
 /*
  * Darwin's "seatbelt".
  * If we're writing to stdout, then use pure computation.
@@ -1664,9 +1657,9 @@ main(int argc, char *argv[])
 			goto usage;
 		}
 
-#if defined(__APPLE__)
+#if HAVE_SANDBOX_INIT
 	sandbox_apple(nofile);
-#elif defined(__OpenBSD__) && OpenBSD >= 201605
+#elif HAVE_PLEDGE
 	sandbox_pledge(nofile);
 #endif
 
