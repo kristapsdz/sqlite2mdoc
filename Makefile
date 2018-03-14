@@ -1,15 +1,11 @@
-# If you're on Linux, un-comment the following.
-#LDADD	 = -lbsd
+include Makefile.configure
 
-#####################################################################
-# You probably don't want to change anything beneath here.
-#####################################################################
-
-CFLAGS	+= -g -W -Wall
-PREFIX	 = /usr/local
+VERSION		 = 0.1.0
 
 sqlite2mdoc: main.o
 	$(CC) -o $@ main.o $(LDADD)
+
+main.o: config.h
 
 install:
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
@@ -19,4 +15,3 @@ install:
 
 clean:
 	rm -f sqlite2mdoc main.o
-	rm -rf sqlite2mdoc.dSYM
