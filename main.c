@@ -483,7 +483,10 @@ decl(struct parse *p, const char *cp, size_t len)
 	/* 
 	 * Catch preprocessor defines, but discard all other types of
 	 * preprocessor statements.
+	 * We might already be in the middle of a declaration (a
+	 * function declaration), but that's ok.
 	 */
+
 	if ('#' == *cp) {
 		len--;
 		cp++;
@@ -495,6 +498,13 @@ decl(struct parse *p, const char *cp, size_t len)
 			decl_define(p, cp + 6, len - 6);
 		return;
 	}
+
+	/* Skip one-liner comments. */
+
+	if (len > 4 &&
+	    '/' == cp[0] && '*' == cp[1] && 
+	    '*' == cp[len - 2] && '/' == cp[len - 1])
+		return;
 
 	decl_function(p, cp, len);
 }
@@ -1470,7 +1480,7 @@ emit(const struct defn *d)
 
 		/* This can happen in scan-ahead cases. */
 		if ('\0' == d->desc[i])
-			continue;
+			break;
 
 		if (' ' == d->desc[i] && 0 == col) {
 			while (' ' == d->desc[i])
@@ -1614,7 +1624,8 @@ check_dupes(struct parse *p)
 
 	TAILQ_FOREACH(d, &p->dqhead, entries)
 		TAILQ_FOREACH(dd, &p->dqhead, entries) {
-			if (dd == d || strcmp(d->fname, dd->fname))
+			if (NULL == d->fname || NULL == dd->fname ||
+			    dd == d || strcmp(d->fname, dd->fname))
 				continue;
 			warnx("%s:%zu: duplicate filename: "
 				"%s (from %s, line %zu)", d->fn, 
@@ -1625,9 +1636,10 @@ check_dupes(struct parse *p)
 int
 main(int argc, char *argv[])
 {
-	size_t		 i, len;
+	size_t		 i, bufsz;
+	ssize_t		 len;
 	FILE		*f;
-	char		*cp;
+	char		*cp = NULL;
 	const char	*prefix;
 	struct parse	 p;
 	int		 rc, ch;
@@ -1658,17 +1670,30 @@ main(int argc, char *argv[])
 			goto usage;
 		}
 
+	argc -= optind;
+	argv += optind;
+
+	if (argc > 1)
+		goto usage;
+
+	if (argc > 0) {
+		f = fopen(argv[0], "r");
+		if (NULL == f)
+			err(EXIT_FAILURE, "%s", argv[0]);
+		p.fn = argv[0];
+	}
+
 #if HAVE_SANDBOX_INIT
 	sandbox_apple(nofile);
 #elif HAVE_PLEDGE
 	sandbox_pledge(nofile);
 #endif
-
 	/*
 	 * Read in line-by-line and process in the phase dictated by our
 	 * finite state automaton.
 	 */
-	while (NULL != (cp = fgetln(f, &len))) {
+	
+	while (-1 != (len = getline(&cp, &bufsz, f))) {
 		assert(len > 0);
 		p.ln++;
 		if ('\n' != cp[len - 1]) {
@@ -1700,7 +1725,8 @@ main(int argc, char *argv[])
 	 * If we hit the last line, then try to process.
 	 * Otherwise, we failed along the way.
 	 */
-	if (NULL == cp) {
+
+	if (feof(f)) {
 		/* 
 		 * Allow us to be at the declarations or scanning for
 		 * the next clause.
@@ -1718,7 +1744,7 @@ main(int argc, char *argv[])
 		} else if (PHASE_DECL != p.phase)
 			warnx("%s:%zu: exit when not in "
 				"initial state", p.fn, p.ln);
-	}
+	} 
 
 	while ( ! TAILQ_EMPTY(&p.dqhead)) {
 		/* coverity[use_after_free] */
