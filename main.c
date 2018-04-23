@@ -275,9 +275,10 @@ decl_function_copy(struct parse *p, char **etext,
  * This is more specifically any non-preprocessor text.
  */
 static int
-decl_function(struct parse *p, char *cp, size_t len)
+decl_function(struct parse *p, const char *cp, size_t len)
 {
-	char		*ep, *ncp, *lcp, *rcp;
+	char		*ep, *lcp, *rcp;
+	const char	*ncp;
 	size_t		 nlen;
 	struct defn	*d;
 	struct decl	*e;
@@ -381,7 +382,7 @@ again:
  * there are any instances of that in sqlite.h.
  */
 static int
-decl_define(struct parse *p, char *cp, size_t len)
+decl_define(struct parse *p, const char *cp, size_t len)
 {
 	struct defn	*d;
 	struct decl	*e;
@@ -436,11 +437,11 @@ decl_define(struct parse *p, char *cp, size_t len)
  * really anything else until we reach a blank line.
  */
 static void
-decl(struct parse *p, char *cp, size_t len)
+decl(struct parse *p, const char *cp, size_t len)
 {
 	struct defn	*d;
 	struct decl	*e;
-	char		*oldcp;
+	const char	*oldcp;
 	size_t		 oldlen;
 
 	oldcp = cp;
@@ -503,7 +504,7 @@ decl(struct parse *p, char *cp, size_t len)
  * interface description (unlike what they claim).
  */
 static void
-seealso(struct parse *p, char *cp, size_t len)
+seealso(struct parse *p, const char *cp, size_t len)
 {
 	struct defn	*d;
 
@@ -553,7 +554,7 @@ seealso(struct parse *p, char *cp, size_t len)
  * themselves.
  */
 static void
-desc(struct parse *p, char *cp, size_t len)
+desc(struct parse *p, const char *cp, size_t len)
 {
 	struct defn	*d;
 	size_t		 nsz;
@@ -640,7 +641,7 @@ desc(struct parse *p, char *cp, size_t len)
  * Copy all KEYWORDS into a buffer.
  */
 static void
-keys(struct parse *p, char *cp, size_t len)
+keys(struct parse *p, const char *cp, size_t len)
 {
 	struct defn	*d;
 
@@ -696,7 +697,7 @@ keys(struct parse *p, char *cp, size_t len)
  * instances of CAPI3REF.
  */
 static void
-init(struct parse *p, char *cp)
+init(struct parse *p, const char *cp)
 {
 	struct defn	*d;
 
