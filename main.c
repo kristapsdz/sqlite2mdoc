@@ -768,7 +768,8 @@ grok_name(const struct decl *e,
 	*sz = 0;
 
 	if (DECLTYPE_CPP != e->type) {
-		assert(';' == e->text[e->textsz - 1]);
+		if (';' != e->text[e->textsz - 1])
+			return;
 		cp = e->text;
 		do {
 			while (isspace((int)*cp))
@@ -1179,7 +1180,7 @@ emit(const struct defn *d)
 		}
 
 		str = &first->text[i];
-		if (NULL == (args = strchr(str, '('))) {
+		if (NULL == (args = strchr(str, '(')) || args == str) {
 			/* What is this? */
 			fputs(".Bd -literal\n", f);
 			fputs(&first->text[i], f);
@@ -1201,6 +1202,7 @@ emit(const struct defn *d)
 		 * If we can't find what came before, then the function
 		 * has no type, which is odd... let's just call it void.
 		 */
+
 		if (end > str) {
 			fprintf(f, ".Ft %.*s\n", 
 				(int)(end - str + 1), str);
@@ -1327,6 +1329,11 @@ emit(const struct defn *d)
 	 */
 	col = 0;
 	for (i = 0; i < d->descsz; ) {
+		if ('\0' == d->desc[i]) {
+			i++;
+			continue;
+		}
+
 		/* 
 		 * Newlines are paragraph breaks.
 		 * If we have multiple newlines, then keep to a single
@@ -1454,9 +1461,14 @@ emit(const struct defn *d)
 				    ']' == d->desc[sz])
 					break;
 
-			if (sz == d->descsz)
+			/* This is a degenerate case. */
+
+			if (sz == d->descsz) {
+				i++;
 				continue;
-			else if ('|' == d->desc[sz])
+			}
+
+			if ('|' == d->desc[sz])
 				i = sz + 1;
 			else
 				i = i + 1;
@@ -1477,10 +1489,6 @@ emit(const struct defn *d)
 			}
 			continue;
 		}
-
-		/* This can happen in scan-ahead cases. */
-		if ('\0' == d->desc[i])
-			break;
 
 		if (' ' == d->desc[i] && 0 == col) {
 			while (' ' == d->desc[i])
