@@ -292,7 +292,7 @@ decl_function(struct parse *p, const char *cp, size_t len)
 	 * number of times per a single line. 
 	 */
 again:
-	while (isspace((int)*cp)) {
+	while (isspace((unsigned char)*cp)) {
 		cp++;
 		len--;
 	}
@@ -388,7 +388,7 @@ decl_define(struct parse *p, const char *cp, size_t len)
 	struct decl	*e;
 	size_t		 sz;
 
-	while (isspace((int)*cp)) {
+	while (isspace((unsigned char)*cp)) {
 		cp++;
 		len--;
 	}
@@ -416,7 +416,7 @@ decl_define(struct parse *p, const char *cp, size_t len)
 	}
 
 	sz = 0;
-	while ('\0' != cp[sz] && ! isspace((int)cp[sz]))
+	while ('\0' != cp[sz] && ! isspace((unsigned char)cp[sz]))
 		sz++;
 
 	e = calloc(1, sizeof(struct decl));
@@ -447,7 +447,7 @@ decl(struct parse *p, const char *cp, size_t len)
 	oldcp = cp;
 	oldlen = len;
 
-	while (isspace((int)*cp)) {
+	while (isspace((unsigned char)*cp)) {
 		cp++;
 		len--;
 	}
@@ -490,7 +490,7 @@ decl(struct parse *p, const char *cp, size_t len)
 	if ('#' == *cp) {
 		len--;
 		cp++;
-		while (isspace((int)*cp)) {
+		while (isspace((unsigned char)*cp)) {
 			len--;
 			cp++;
 		}
@@ -535,7 +535,7 @@ seealso(struct parse *p, const char *cp, size_t len)
 
 	cp += 2;
 	len -= 2;
-	while (isspace((int)*cp)) {
+	while (isspace((unsigned char)*cp)) {
 		cp++;
 		len--;
 	}
@@ -588,7 +588,7 @@ desc(struct parse *p, const char *cp, size_t len)
 	cp += 2;
 	len -= 2;
 
-	while (isspace((int)*cp)) {
+	while (isspace((unsigned char)*cp)) {
 		cp++;
 		len--;
 	}
@@ -605,7 +605,7 @@ desc(struct parse *p, const char *cp, size_t len)
 	if (0 == strncasecmp(cp, "see also:", 9)) {
 		cp += 9;
 		len -= 9;
-		while (isspace((int)*cp)) {
+		while (isspace((unsigned char)*cp)) {
 			cp++;
 			len--;
 		}
@@ -678,7 +678,7 @@ keys(struct parse *p, const char *cp, size_t len)
 
 	cp += 2;
 	len -= 2;
-	while (isspace((int)*cp)) {
+	while (isspace((unsigned char)*cp)) {
 		cp++;
 		len--;
 	}
@@ -715,14 +715,14 @@ init(struct parse *p, const char *cp)
 	if ('*' != cp[0] || '*' != cp[1])
 		return;
 	cp += 2;
-	while (isspace((int)*cp))
+	while (isspace((unsigned char)*cp))
 		cp++;
 
 	/* Look for beginning of definition. */
 	if (strncmp(cp, "CAPI3REF:", 9))
 		return;
 	cp += 9;
-	while (isspace((int)*cp))
+	while (isspace((unsigned char)*cp))
 		cp++;
 	if ('\0' == *cp) {
 		warnx("%s:%zu: warn: unexpected end of "
@@ -772,7 +772,7 @@ grok_name(const struct decl *e,
 			return;
 		cp = e->text;
 		do {
-			while (isspace((int)*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			if (BPOINT(cp))
 				break;
@@ -784,7 +784,7 @@ grok_name(const struct decl *e,
 				cp++;
 			*start = cp;
 			*sz = 0;
-			while ( ! isspace((int)*cp)) {
+			while ( ! isspace((unsigned char)*cp)) {
 				if (BPOINT(cp))
 					break;
 				cp++;
@@ -850,7 +850,7 @@ postprocess(const char *prefix, struct defn *d)
 	memcpy(d->dt, start, sz);
 	d->dt[sz] = '\0';
 	for (i = 0; i < sz; i++)
-		d->dt[i] = toupper((int)d->dt[i]);
+		d->dt[i] = toupper((unsigned char)d->dt[i]);
 
 	/* Filename needs no special chars. */
 	asprintf(&d->fname, "%s/%.*s.3", 
@@ -860,7 +860,7 @@ postprocess(const char *prefix, struct defn *d)
 
 	offs = strlen(prefix) + 1;
 	for (i = 0; i < sz; i++) {
-		if (isalnum((int)d->fname[offs + i]) ||
+		if (isalnum((unsigned char)d->fname[offs + i]) ||
 		    '_' == d->fname[offs + i] ||
 		    '-' == d->fname[offs + i])
 			continue;
@@ -871,7 +871,7 @@ postprocess(const char *prefix, struct defn *d)
 	 * First, extract all keywords.
 	 */
 	for (i = 0; i < d->keybufsz; ) {
-		while (isspace((int)d->keybuf[i]))
+		while (isspace((unsigned char)d->keybuf[i]))
 			i++;
 		if (i == d->keybufsz)
 			break;
@@ -886,7 +886,7 @@ postprocess(const char *prefix, struct defn *d)
 				i++;
 		} else
 			for ( ; i < d->keybufsz; i++, sz++)
-				if (isspace((int)d->keybuf[i]))
+				if (isspace((unsigned char)d->keybuf[i]))
 					break;
 		if (0 == sz)
 			continue;
@@ -1113,12 +1113,14 @@ emit(const struct defn *d)
 		f = stdout;
 
 	/* Begin by outputting the mdoc(7) header. */
+
 	fputs(".Dd $" "Mdocdate$\n", f);
 	fprintf(f, ".Dt %s 3\n", d->dt);
 	fputs(".Os\n", f);
 	fputs(".Sh NAME\n", f);
 
 	/* Now print the name bits of each declaration. */
+
 	for (i = 0; i < d->nmsz; i++)
 		fprintf(f, ".Nm %s%s\n", d->nms[i], 
 			i < d->nmsz - 1 ? " ," : "");
@@ -1133,6 +1135,7 @@ emit(const struct defn *d)
 			continue;
 
 		/* Easy: just print the CPP name. */
+
 		if (DECLTYPE_CPP == first->type) {
 			fprintf(f, ".Fd #define %s\n",
 				first->text);
@@ -1140,6 +1143,7 @@ emit(const struct defn *d)
 		}
 
 		/* First, strip out the sqlite CPPs. */
+
 		for (i = 0; i < first->textsz; ) {
 			for (pre = 0; pre < PREPROC__MAX; pre++) {
 				sz = strlen(preprocs[pre]);
@@ -1147,7 +1151,7 @@ emit(const struct defn *d)
 				    &first->text[i], sz))
 					continue;
 				i += sz;
-				while (isspace((int)first->text[i]))
+				while (isspace((unsigned char)first->text[i]))
 					i++;
 				break;
 			}
@@ -1156,12 +1160,14 @@ emit(const struct defn *d)
 		}
 
 		/* If we're a typedef, immediately print Vt. */
+
 		if (0 == strncmp(&first->text[i], "typedef", 7)) {
 			fprintf(f, ".Vt %s\n", &first->text[i]);
 			continue;
 		}
 
 		/* Are we a struct? */
+
 		if (first->textsz > 2 && 
 		    '}' == first->text[first->textsz - 2] &&
 		    NULL != (cp = strchr(&first->text[i], '{'))) {
@@ -1173,6 +1179,7 @@ emit(const struct defn *d)
 		}
 
 		/* Catch remaining non-functions. */
+
 		if (first->textsz > 2 &&
 		    ')' != first->text[first->textsz - 2]) {
 			fprintf(f, ".Vt %s\n", &first->text[i]);
@@ -1189,13 +1196,15 @@ emit(const struct defn *d)
 		}
 
 		/* Scroll back to end of function name. */
+
 		end = args - 1;
-		while (end > str && isspace((int)*end))
+		while (end > str && isspace((unsigned char)*end))
 			end--;
 
 		/* Scroll back to what comes before. */
+
 		for ( ; end > str; end--)
-			if (isspace((int)*end) || '*' == *end)
+			if (isspace((unsigned char)*end) || '*' == *end)
 				break;
 
 		/* 
@@ -1218,9 +1227,10 @@ emit(const struct defn *d)
 		 * This also handles nested function pointers, which
 		 * would otherwise throw off the delimeters.
 		 */
+
 		for (;;) {
 			str = ++args;
-			while (isspace((int)*str))
+			while (isspace((unsigned char)*str))
 				str++;
 			fputs(".Fa \"", f);
 			ns = 0;
@@ -1238,7 +1248,7 @@ emit(const struct defn *d)
 					if ('\0' == *str)
 						break;
 					str += 2;
-					while (isspace((int)*str))
+					while (isspace((unsigned char)*str))
 						str++;
 					if ('\0' == *str ||
 					    (0 == ns && ',' == *str) ||
@@ -1257,8 +1267,9 @@ emit(const struct defn *d)
 				 * the end-of-definition, then don't
 				 * print it at all.
 				 */
-				if (isspace((int)*str)) {
-					while (isspace((int)*str))
+
+				if (isspace((unsigned char)*str)) {
+					while (isspace((unsigned char)*str))
 						str++;
 					/* Are we at a comment? */
 					if ('/' == str[0] && '*' == str[1])
@@ -1291,6 +1302,7 @@ emit(const struct defn *d)
 	 *   <dl>[[foo bar]]<dt>foo bar</dt>...</dl>
 	 * These are not well-formed HTML.
 	 */
+
 	for (i = 0; i < d->descsz; i++) {
 		if ('^' == d->desc[i] && 
 		    '(' == d->desc[i + 1]) {
@@ -1327,6 +1339,7 @@ emit(const struct defn *d)
 	 * Do on-the-fly processing of any HTML we encounter into
 	 * mdoc(7) and try to break lines up.
 	 */
+
 	col = 0;
 	for (i = 0; i < d->descsz; ) {
 		if ('\0' == d->desc[i]) {
@@ -1341,8 +1354,9 @@ emit(const struct defn *d)
 		 * Only do this if we're not before a block-level HTML,
 		 * as this would mean, for instance, a `Pp'-`Bd' pair.
 		 */
+
 		if ('\n' == d->desc[i]) {
-			while (isspace((int)d->desc[i]))
+			while (isspace((unsigned char)d->desc[i]))
 				i++;
 			for (tag = 0; tag < TAG__MAX; tag++) {
 				sz = strlen(tags[tag].html);
@@ -1365,6 +1379,7 @@ emit(const struct defn *d)
 		 * We guess whether this is the case by using the
 		 * dumbest possible heuristic.
 		 */
+
 		if (' ' == d->desc[i] && i &&
 		    '.' == d->desc[i - 1]) {
 			while (' ' == d->desc[i])
@@ -1377,6 +1392,7 @@ emit(const struct defn *d)
 		 * After 65 characters, force a break when we encounter
 		 * white-space to keep our lines more or less tidy.
 		 */
+
 		if (col > 65 && ' ' == d->desc[i]) {
 			while (' ' == d->desc[i]) 
 				i++;
@@ -1391,6 +1407,7 @@ emit(const struct defn *d)
 		 * like markdown or something?  
 		 * Sheesh.
 		 */
+
 		if ('<' == d->desc[i]) {
 			for (tag = 0; tag < TAG__MAX; tag++) {
 				sz = strlen(tags[tag].html);
@@ -1420,7 +1437,7 @@ emit(const struct defn *d)
 				 * Skip the trailing space.
 				 */
 				if (TAGINFO_NOOP & tags[tag].flags) {
-					while (isspace((int)d->desc[i]))
+					while (isspace((unsigned char)d->desc[i]))
 						i++;
 					break;
 				} else if (TAGINFO_INLINE & tags[tag].flags) {
@@ -1447,7 +1464,7 @@ emit(const struct defn *d)
 					fputs(" ", f);
 					col++;
 				}
-				while (isspace((int)d->desc[i]))
+				while (isspace((unsigned char)d->desc[i]))
 					i++;
 				break;
 			}
@@ -1504,7 +1521,14 @@ emit(const struct defn *d)
 		 * could find.
 		 * There might be others...
 		 */
-		if (0 == strncmp(&d->desc[i], "&nbsp;", 6)) {
+
+		if (0 == strncmp(&d->desc[i], "&rarr;", 6)) {
+			i += 6;
+			fputs("\\(->", f);
+		} else if (0 == strncmp(&d->desc[i], "&larr;", 6)) {
+			i += 6;
+			fputs("\\(<-", f);
+		} else if (0 == strncmp(&d->desc[i], "&nbsp;", 6)) {
 			i += 6;
 			fputc(' ', f);
 		} else if (0 == strncmp(&d->desc[i], "&lt;", 4)) {
