@@ -189,7 +189,7 @@ static	const struct taginfo tags[TAG__MAX] = {
 	{ "</blockquote>", ".Ed\n.Pp", 0 }, /* TAG_BLOCK_CLOSE */
 	{ "<blockquote>", ".Bd -ragged", 0 }, /* TAG_BLOCK_OPEN */
 	{ "</dd>", "", TAGINFO_NOOP }, /* TAG_DD_CLOSE */
-	{ "<dd>", "", TAGINFO_NOOP }, /* TAG_DD_OPEN */
+	{ "<dd>", "", TAGINFO_NOBR | TAGINFO_NOSP }, /* TAG_DD_OPEN */
 	{ "</dl>", ".El\n.Pp", 0 }, /* TAG_DL_CLOSE */
 	{ "<dl>", ".Bl -tag -width Ds", 0 }, /* TAG_DL_OPEN */
 	{ "</dt>", "", TAGINFO_NOBR | TAGINFO_NOSP}, /* TAG_DT_CLOSE */
