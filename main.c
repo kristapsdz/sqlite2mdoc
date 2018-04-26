@@ -1507,6 +1507,9 @@ emit(struct defn *d)
 			else
 				i = i + 1;
 
+			while (isspace((unsigned char)d->desc[i]))
+				i++;
+
 			/*
 			 * Now handle in-page references.
 			 * Print them out as-is: we've already
