@@ -181,8 +181,8 @@ struct	taginfo {
 };
 
 static	const struct taginfo tags[TAG__MAX] = {
-	{ "</a>", " ", TAGINFO_INLINE }, /* TAG_A_CLOSE */
-	{ "<a ", " ", TAGINFO_INLINE | TAGINFO_ATTRS }, /* TAG_A_OPEN_ATTRS */
+	{ "</a>", "", TAGINFO_INLINE }, /* TAG_A_CLOSE */
+	{ "<a ", "", TAGINFO_INLINE | TAGINFO_ATTRS }, /* TAG_A_OPEN_ATTRS */
 	{ "</b>", "\\fP", TAGINFO_INLINE }, /* TAG_B_CLOSE */
 	{ "<b>", "\\fB", TAGINFO_INLINE }, /* TAG_B_OPEN */
 	{ "<br>", " ", TAGINFO_INLINE }, /* TAG_BR_OPEN */
