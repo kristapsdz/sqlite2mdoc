@@ -1088,10 +1088,10 @@ lookup(char *key)
  * Emit a valid mdoc(7) document within the given prefix.
  */
 static void
-emit(const struct defn *d)
+emit(struct defn *d)
 {
 	struct decl	*first;
-	size_t		 sz, i, col, last, ns;
+	size_t		 sz, i, j, col, last, ns;
 	FILE		*f;
 	char		*cp;
 	const char	*res, *lastres, *args, *str, *end;
@@ -1301,36 +1301,53 @@ emit(const struct defn *d)
 	 * parsing of the HTML, for instance,
 	 *   <dl>[[foo bar]]<dt>foo bar</dt>...</dl>
 	 * These are not well-formed HTML.
+	 * Note that d->desc[d->descz] is the NUL terminator, so we
+	 * don't need to check d->descsz - 1.
 	 */
 
 	for (i = 0; i < d->descsz; i++) {
 		if ('^' == d->desc[i] && 
 		    '(' == d->desc[i + 1]) {
-			d->desc[i] = d->desc[i + 1] = ' ';
-			i++;
+			memmove(&d->desc[i],
+				&d->desc[i + 2],
+				d->descsz - i - 2);
+			d->descsz -= 2;
+			i--;
 			continue;
 		} else if (')' == d->desc[i] && 
 			   '^' == d->desc[i + 1]) {
-			d->desc[i] = d->desc[i + 1] = ' ';
-			i++;
+			memmove(&d->desc[i],
+				&d->desc[i + 2],
+				d->descsz - i - 2);
+			d->descsz -= 2;
+			i--;
 			continue;
 		} else if ('^' == d->desc[i]) {
-			d->desc[i] = ' ';
+			memmove(&d->desc[i],
+				&d->desc[i + 1],
+				d->descsz - i - 1);
+			d->descsz -= 1;
+			i--;
 			continue;
 		} else if ('[' != d->desc[i] || 
 			   '[' != d->desc[i + 1]) 
 			continue;
-		d->desc[i] = d->desc[i + 1] = ' ';
-		for (i += 2; i < d->descsz; i++) {
-			if (']' == d->desc[i] && 
-			    ']' == d->desc[i + 1]) 
+
+		for (j = i; j < d->descsz; j++)
+			if (']' == d->desc[j] && 
+			    ']' == d->desc[j + 1]) 
 				break;
-			d->desc[i] = ' ';
-		}
-		if (i == d->descsz)
+
+		if (j == d->descsz)
 			continue;
-		d->desc[i] = d->desc[i + 1] = ' ';
-		i++;
+
+		assert(j > i);
+		j += 2;
+		memmove(&d->desc[i], 
+		        &d->desc[j],
+			d->descsz - i - (j - i));
+		d->descsz -= (j - i);
+		i--;
 	}
 
 	/*
