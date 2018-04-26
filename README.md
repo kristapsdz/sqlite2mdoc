@@ -26,6 +26,14 @@ There are no compile-time or run-time dependencies.
 
 This software has been used on OpenBSD, Mac OS X, and Linux machines.
 
+## Examples
+
+I've used [mandoc](https://mandoc.bsd.lv) to generate some Markdown from
+the [mdoc(7)](https://man.openbsd.org/mdoc.7) output.
+
+- [sqlite3\_open(3)](samples/sqlite3_open.3.md)
+- [SQLITE\_FCNTL\_LOCKSTATE(3)](samples/sqlite_fcntl_lockstate.3.md)
+
 ## License
 
 All sources use the ISC (like OpenBSD) license.
