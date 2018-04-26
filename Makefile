@@ -4,8 +4,8 @@ include Makefile.configure
 
 VERSION		 = 0.1.0
 
-sqlite2mdoc: main.o
-	$(CC) -o $@ main.o $(LDFLAGS) $(LDADD)
+sqlite2mdoc: main.o compats.o
+	$(CC) -o $@ main.o compats.o $(LDFLAGS) $(LDADD)
 
 main.o: config.h
 
@@ -19,4 +19,4 @@ distclean: clean
 	rm -f config.h config.log Makefile.configure
 
 clean:
-	rm -f sqlite2mdoc main.o
+	rm -f sqlite2mdoc main.o compats.o
