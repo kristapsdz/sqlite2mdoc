@@ -99,6 +99,16 @@ SQLITE_API int sqlite3_libversion_number(void);
 ** compile time.  ^The SQLITE_ prefix may be omitted from the 
 ** option name passed to sqlite3_compileoption_used().  
 **
+** [[SQLITE_STATUS_MALLOC_COUNT]] ^(<dt>SQLITE_STATUS_MALLOC_COUNT</dt>
+** <dd>This parameter records the number of separate memory allocations
+** currently checked out.</dd>)^
+**
+** [[SQLITE_STATUS_PAGECACHE_USED]] ^(<dt>SQLITE_STATUS_PAGECACHE_USED</dt>
+** <dd>This parameter returns the number of pages used out of the
+** [pagecache memory allocator] that was configured using 
+** [SQLITE_CONFIG_PAGECACHE].  The
+** value returned is in pages, not in bytes.</dd>)^
+**
 ** ^The sqlite3_compileoption_get() function allows iterating
 ** over the list of options that were defined at compile time by
 ** returning the N-th compile time option string.  ^If N is out of range,
@@ -155,22 +165,6 @@ SQLITE_API const char *sqlite3_compileoption_get(int N);
 ** See the [threading mode] documentation for additional information.
 */
 SQLITE_API int sqlite3_threadsafe(void);
-
-/*
-** CAPI3REF: Database Connection Handle
-** KEYWORDS: {database connection} {database connections}
-**
-** Each open SQLite database is represented by a pointer to an instance of
-** the opaque structure named "sqlite3".  It is useful to think of an sqlite3
-** pointer as an object.  The [sqlite3_open()], [sqlite3_open16()], and
-** [sqlite3_open_v2()] interfaces are its constructors, and [sqlite3_close()]
-** and [sqlite3_close_v2()] are its destructors.  There are many other
-** interfaces (such as
-** [sqlite3_prepare_v2()], [sqlite3_create_function()], and
-** [sqlite3_busy_timeout()] to name but three) that are methods on an
-** sqlite3 object.
-*/
-typedef struct sqlite3 sqlite3;
 
 /*
 ** CAPI3REF: 64-Bit Integer Types
