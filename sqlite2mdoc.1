@@ -24,6 +24,7 @@
 .Nm sqlite2mdoc
 .Op Fl nv
 .Op Fl p Ar prefix
+.Op Ar file
 .Sh DESCRIPTION
 The
 .Nm
@@ -56,8 +57,8 @@ Output into
 which must already exist.
 .El
 .Pp
-This tool was designed for SQLite's header file
-.Pa sqlite.h ,
+This tool was designed for SQLite3's header file
+.Pa sqlite3.h ,
 although it will work for any document following the
 .Sx SYNTAX .
 Historically, all of the SQLite C reference documentation (called the
