@@ -233,8 +233,12 @@ static	const char *const preprocs[TAG__MAX] = {
 
 /* Verbose reporting. */
 static	int verbose;
+
 /* Don't output any files: use stdout. */
 static	int nofile;
+
+/* Print out only filename. */
+static	int filename;
 
 static void
 decl_function_add(struct parse *p, char **etext, 
@@ -407,8 +411,9 @@ decl_define(struct parse *p, const char *cp, size_t len)
 	 * It might be a comment or an error.
 	 */
 	if (d->multiline) {
-		warnx("%s:%zu: multiline declaration "
-			"still open (harmless?)", p->fn, p->ln);
+		if (verbose)
+			warnx("%s:%zu: multiline declaration "
+				"still open", p->fn, p->ln);
 		e = TAILQ_LAST(&d->dcqhead, declq);
 		assert(NULL != e);
 		e->type = DECLTYPE_NEITHER;
@@ -460,8 +465,9 @@ decl(struct parse *p, const char *cp, size_t len)
 		p->phase = PHASE_INIT;
 		/* Check multiline status. */
 		if (d->multiline) {
-			warnx("%s:%zu: multiline declaration "
-				"still open (harmless?)", p->fn, p->ln);
+			if (verbose)
+				warnx("%s:%zu: multiline declaration "
+					"still open", p->fn, p->ln);
 			e = TAILQ_LAST(&d->dcqhead, declq);
 			assert(NULL != e);
 			e->type = DECLTYPE_NEITHER;
@@ -670,7 +676,7 @@ keys(struct parse *p, const char *cp, size_t len)
 				"interface keywords", p->fn, p->ln);
 			p->phase = PHASE_INIT;
 			return;
-		} else 
+		} else if (verbose)
 			warnx("%s:%zu: warn: workaround in effect "
 				"for unexpected end of "
 				"interface keywords", p->fn, p->ln);
@@ -1109,6 +1115,9 @@ emit(struct defn *d)
 			warn("%s: fopen", d->fname);
 			return;
 		}
+	} else if (filename) {
+		printf("%s\n", d->fname);
+		return;
 	} else
 		f = stdout;
 
@@ -1707,10 +1716,14 @@ main(int argc, char *argv[])
 	p.phase = PHASE_INIT;
 	TAILQ_INIT(&p.dqhead);
 
-	while (-1 != (ch = getopt(argc, argv, "np:v")))
+	while (-1 != (ch = getopt(argc, argv, "nNp:v")))
 		switch (ch) {
 		case ('n'):
 			nofile = 1;
+			break;
+		case ('N'):
+			nofile = 1;
+			filename = 1;
 			break;
 		case ('p'):
 			prefix = optarg;
@@ -1831,6 +1844,6 @@ main(int argc, char *argv[])
 
 	return(rc ? EXIT_SUCCESS : EXIT_FAILURE);
 usage:
-	fprintf(stderr, "usage: %s [-nv] [-p prefix]\n", getprogname());
+	fprintf(stderr, "usage: %s [-nNv] [-p prefix]\n", getprogname());
 	return(EXIT_FAILURE);
 }
