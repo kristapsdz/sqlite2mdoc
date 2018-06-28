@@ -863,9 +863,9 @@ postprocess(const char *prefix, struct defn *d)
 		asprintf(&d->fname, "%.*s.3", (int)sz, start);
 		offs = 0;
 	} else {
-		offs = strlen(prefix + 1);
 		asprintf(&d->fname, "%s/%.*s.3", 
 			prefix, (int)sz, start);
+		offs = strlen(prefix) + 1;
 	}
 
 	if (NULL == d->fname)
