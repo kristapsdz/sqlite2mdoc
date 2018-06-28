@@ -2,10 +2,30 @@
 
 include Makefile.configure
 
-VERSION		 = 0.1.0
+WWWDIR		 = /var/www/vhosts/kristaps.bsd.lv/htdocs/sqlite2mdoc
+VERSION		 = 0.1.2
+DOTAR 		 = Makefile \
+		   compats.c \
+		   main.c \
+		   tests.c \
+		   sqlite2mdoc.1
+
+www: sqlite2mdoc.tar.gz
+
+installwww: www
+	mkdir -p $(WWWDIR)/snapshots
+	install -m 0444 sqlite2mdoc.tar.gz $(WWWDIR)
+	install -m 0444 sqlite2mdoc.tar.gz $(WWWDIR)/sqlite2mdoc-$(VERSION).tar.gz
 
 sqlite2mdoc: main.o compats.o
 	$(CC) -o $@ main.o compats.o $(LDFLAGS) $(LDADD)
+
+sqlite2mdoc.tar.gz:
+	mkdir -p .dist/sqlite2mdoc-$(VERSION)/
+	install -m 0644 $(DOTAR) .dist/sqlite2mdoc-$(VERSION)
+	install -m 0755 configure .dist/sqlite2mdoc-$(VERSION)
+	( cd .dist/ && tar zcf ../$@ ./ )
+	rm -rf .dist/
 
 main.o: config.h
 
