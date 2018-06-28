@@ -859,12 +859,18 @@ postprocess(const char *prefix, struct defn *d)
 		d->dt[i] = toupper((unsigned char)d->dt[i]);
 
 	/* Filename needs no special chars. */
-	asprintf(&d->fname, "%s/%.*s.3", 
-		prefix, (int)sz, start);
+	if (filename) {
+		asprintf(&d->fname, "%.*s.3", (int)sz, start);
+		offs = 0;
+	} else {
+		offs = strlen(prefix + 1);
+		asprintf(&d->fname, "%s/%.*s.3", 
+			prefix, (int)sz, start);
+	}
+
 	if (NULL == d->fname)
 		err(EXIT_FAILURE, "asprintf");
 
-	offs = strlen(prefix) + 1;
 	for (i = 0; i < sz; i++) {
 		if (isalnum((unsigned char)d->fname[offs + i]) ||
 		    '_' == d->fname[offs + i] ||
