@@ -10,15 +10,17 @@ DOTAR 		 = Makefile \
 		   tests.c \
 		   sqlite2mdoc.1
 
+all: sqlite2mdoc
+
+sqlite2mdoc: main.o compats.o
+	$(CC) -o $@ main.o compats.o $(LDFLAGS) $(LDADD)
+
 www: sqlite2mdoc.tar.gz
 
 installwww: www
 	mkdir -p $(WWWDIR)/snapshots
 	install -m 0444 sqlite2mdoc.tar.gz $(WWWDIR)
 	install -m 0444 sqlite2mdoc.tar.gz $(WWWDIR)/sqlite2mdoc-$(VERSION).tar.gz
-
-sqlite2mdoc: main.o compats.o
-	$(CC) -o $@ main.o compats.o $(LDFLAGS) $(LDADD)
 
 sqlite2mdoc.tar.gz:
 	mkdir -p .dist/sqlite2mdoc-$(VERSION)/
@@ -39,4 +41,4 @@ distclean: clean
 	rm -f config.h config.log Makefile.configure
 
 clean:
-	rm -f sqlite2mdoc main.o compats.o
+	rm -f sqlite2mdoc main.o compats.o sqlite2mdoc.tar.gz
