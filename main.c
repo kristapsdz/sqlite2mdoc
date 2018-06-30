@@ -1097,6 +1097,35 @@ lookup(char *key)
 }
 
 /*
+ * Return non-zero if "new sentence, new line" is in effect, zero
+ * otherwise.
+ * Accepts the start and finish offset of a buffer.
+ */
+static int
+newsentence(size_t start, size_t finish, const char *buf)
+{
+	size_t	 span = finish - start;
+	
+	assert(finish >= start);
+
+	/* Ignore "x.", which must be an alpha character. */
+
+	if (span == 2 && isalpha((unsigned char)buf[finish - 2]))
+		return 0;
+
+	/* Ignore "i.e." and "e.g.". */
+
+	if ((span >= 4 && 
+	     0 == strncasecmp(&buf[finish - 4], "i.e.", 4)) ||
+	    (span >= 4 && 
+	     0 == strncasecmp(&buf[finish - 4], "e.g.", 4)))
+		return 0;
+
+	warnx("%.*s (%zu)", (int)(span), &buf[start], span);
+	return 1;
+}
+
+/*
  * Emit a valid mdoc(7) document within the given prefix.
  */
 static void
@@ -1414,11 +1443,18 @@ emit(struct defn *d)
 
 		if (' ' == d->desc[i] && i &&
 		    '.' == d->desc[i - 1]) {
-			while (' ' == d->desc[i])
-				i++;
-			fputs("\n", f);
-			col = 0;
-			continue;
+			for (j = i - 1; j > 0; j--)
+				if (isspace((unsigned char)d->desc[j])) {
+					j++;
+					break;
+				}
+			if (newsentence(j, i, d->desc)) {
+				while (' ' == d->desc[i])
+					i++;
+				fputs("\n", f);
+				col = 0;
+				continue;
+			}
 		}
 		/*
 		 * After 65 characters, force a break when we encounter
