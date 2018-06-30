@@ -19,8 +19,8 @@ www: sqlite2mdoc.tar.gz
 
 installwww: www
 	mkdir -p $(WWWDIR)/snapshots
-	install -m 0444 sqlite2mdoc.tar.gz $(WWWDIR)
-	install -m 0444 sqlite2mdoc.tar.gz $(WWWDIR)/sqlite2mdoc-$(VERSION).tar.gz
+	install -m 0444 sqlite2mdoc.tar.gz $(WWWDIR)/snapshots
+	install -m 0444 sqlite2mdoc.tar.gz $(WWWDIR)/snapshots/sqlite2mdoc-$(VERSION).tar.gz
 
 sqlite2mdoc.tar.gz:
 	mkdir -p .dist/sqlite2mdoc-$(VERSION)/
