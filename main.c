@@ -1116,7 +1116,6 @@ newsentence(size_t start, size_t finish, const char *buf)
 	     0 == strncasecmp(&buf[finish - 4], "e.g.", 4)))
 		return 0;
 
-	warnx("%.*s (%zu)", (int)(span), &buf[start], span);
 	return 1;
 }
 
