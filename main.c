@@ -1108,11 +1108,6 @@ newsentence(size_t start, size_t finish, const char *buf)
 	
 	assert(finish >= start);
 
-	/* Ignore "x.", which must be an alpha character. */
-
-	if (span == 2 && isalpha((unsigned char)buf[finish - 2]))
-		return 0;
-
 	/* Ignore "i.e." and "e.g.". */
 
 	if ((span >= 4 && 
