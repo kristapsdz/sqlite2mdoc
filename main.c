@@ -1126,10 +1126,10 @@ static void
 emit(struct defn *d)
 {
 	struct decl	*first;
-	size_t		 sz, i, j, col, last, ns;
+	size_t		 sz, i, j, col, last, ns, fnsz;
 	FILE		*f;
 	char		*cp;
-	const char	*res, *lastres, *args, *str, *end;
+	const char	*res, *lastres, *args, *str, *end, *fn;
 	enum tag	 tag;
 	enum preproc	 pre;
 
@@ -1233,17 +1233,51 @@ emit(struct defn *d)
 			continue;
 		}
 
-		/* Scroll back to end of function name. */
+		/* 
+		 * Current state:
+		 *  type_t *function      (args...)
+		 *  ^str                  ^args
+		 * Scroll back to end of function name.
+		 */
 
 		end = args - 1;
 		while (end > str && isspace((unsigned char)*end))
 			end--;
 
-		/* Scroll back to what comes before. */
+		/* 
+		 * Current state:
+		 *  type_t *function      (args...)
+		 *  ^str           ^end   ^args
+		 * Scroll back to what comes before.
+		 */
 
-		for ( ; end > str; end--)
-			if (isspace((unsigned char)*end) || '*' == *end)
+		for (fnsz = 0; end > str; end--, fnsz++)
+			if (isspace((unsigned char)*end) || *end == '*')
 				break;
+
+		if (fnsz == 0)
+			warnx("%s:%zu: zero-length "
+				"function name", d->fn, d->ln);
+		fn = end + 1;
+
+		/*
+		 * Current state:
+		 *  type_t *function      (args...)
+		 *  ^str   ^end           ^args
+		 *  type_t  function      (args...)
+		 *  ^str   ^end           ^args
+		 * Strip away whitespace.
+		 */
+
+		while (end > str && isspace((unsigned char)*end))
+			end--;
+
+		/*
+		 * type_t *function      (args...)
+		 * ^str   ^end           ^args
+		 * type_t  function      (args...)
+		 * ^str ^end             ^args
+		 */
 
 		/* 
 		 * If we can't find what came before, then the function
@@ -1253,11 +1287,10 @@ emit(struct defn *d)
 		if (end > str) {
 			fprintf(f, ".Ft %.*s\n", 
 				(int)(end - str + 1), str);
-			fprintf(f, ".Fo %.*s\n", 
-				(int)(args - end - 1), end + 1);
+			fprintf(f, ".Fo %.*s\n", (int)fnsz, fn);
 		} else {
 			fputs(".Ft void\n", f);
-			fprintf(f, ".Fo %.*s\n", (int)(args - end), end);
+			fprintf(f, ".Fo %.*s\n", (int)fnsz, fn);
 		}
 
 		/*
