@@ -1,4 +1,4 @@
-.PHONY: distclean clean
+.PHONY: distclean clean regress distcheck
 
 include Makefile.configure
 
@@ -15,7 +15,7 @@ all: sqlite2mdoc
 sqlite2mdoc: main.o compats.o
 	$(CC) -o $@ main.o compats.o $(LDFLAGS) $(LDADD)
 
-www: sqlite2mdoc.tar.gz
+www: sqlite2mdoc.tar.gz sqlite2mdoc.tar.gz.sha512
 
 installwww: www
 	mkdir -p $(WWWDIR)/snapshots
@@ -24,10 +24,17 @@ installwww: www
 
 sqlite2mdoc.tar.gz:
 	mkdir -p .dist/sqlite2mdoc-$(VERSION)/
+	mkdir -p .dist/sqlite2mdoc-$(VERSION)/regress
+	mkdir -p .dist/sqlite2mdoc-$(VERSION)/regress/expect
 	$(INSTALL) -m 0644 $(DOTAR) .dist/sqlite2mdoc-$(VERSION)
+	$(INSTALL) -m 0644 regress/sqlite3.h .dist/sqlite2mdoc-$(VERSION)/regress
+	$(INSTALL) -m 0644 regress/expect/*.3 .dist/sqlite2mdoc-$(VERSION)/regress/expect
 	$(INSTALL) -m 0755 configure .dist/sqlite2mdoc-$(VERSION)
 	( cd .dist/ && tar zcf ../$@ ./ )
 	rm -rf .dist/
+
+sqlite2mdoc.tar.gz.sha512: sqlite2mdoc.tar.gz
+	openssl dgst -sha512 -hex sqlite2mdoc.tar.gz >$@
 
 main.o: config.h
 
@@ -37,8 +44,29 @@ install:
 	$(INSTALL_PROGRAM) sqlite2mdoc $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL_MAN) -m 0444 sqlite2mdoc.1 $(DESTDIR)$(PREFIX)/man/man1
 
+distcheck: sqlite2mdoc.tar.gz sqlite2mdoc.tar.gz.sha512
+	mandoc -Tlint -Wwarning sqlite2mdoc.1
+	rm -rf .distcheck
+	[ "`openssl dgst -sha512 -hex sqlite2mdoc.tar.gz`" = "`cat sqlite2mdoc.tar.gz.sha512`" ] || \
+ 		{ echo "Checksum does not match." 1>&2 ; exit 1 ; }
+	mkdir -p .distcheck
+	( cd .distcheck && tar -zvxpf ../sqlite2mdoc.tar.gz )
+	( cd .distcheck/sqlite2mdoc-$(VERSION) && ./configure PREFIX=prefix )
+	( cd .distcheck/sqlite2mdoc-$(VERSION) && $(MAKE) )
+	( cd .distcheck/sqlite2mdoc-$(VERSION) && $(MAKE) regress )
+	( cd .distcheck/sqlite2mdoc-$(VERSION) && $(MAKE) install )
+	rm -rf .distcheck
+
 distclean: clean
 	rm -f config.h config.log Makefile.configure
 
+regress: all
+	rm -rf regress/out
+	mkdir regress/out
+	./sqlite2mdoc -p regress/out regress/sqlite3.h
+	diff -r regress/out regress/expect
+	rm -rf regress/out
+
 clean:
-	rm -f sqlite2mdoc main.o compats.o sqlite2mdoc.tar.gz
+	rm -f sqlite2mdoc main.o compats.o sqlite2mdoc.tar.gz sqlite2mdoc.tar.gz.sha512
+	rm -rf regress/out
