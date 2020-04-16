@@ -34,8 +34,8 @@ This software has been used on OpenBSD, Mac OS X, and Linux machines.
 I've used [mandoc](https://mandoc.bsd.lv) to generate some Markdown from
 the [mdoc(7)](https://man.openbsd.org/mdoc.7) output.
 
-- [sqlite3\_open(3)](samples/sqlite3_open.3.md)
-- [SQLITE\_FCNTL\_LOCKSTATE(3)](samples/sqlite_fcntl_lockstate.3.md)
+- [sqlite3\_open(3)](samples/sample3_open.3.md)
+- [SQLITE\_FCNTL\_LOCKSTATE(3)](samples/SQLITE_FCNTL_LOCKSTATE.3.md)
 
 ## License
 
