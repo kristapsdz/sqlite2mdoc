@@ -19,13 +19,13 @@ www: sqlite2mdoc.tar.gz
 
 installwww: www
 	mkdir -p $(WWWDIR)/snapshots
-	install -m 0444 sqlite2mdoc.tar.gz $(WWWDIR)/snapshots
-	install -m 0444 sqlite2mdoc.tar.gz $(WWWDIR)/snapshots/sqlite2mdoc-$(VERSION).tar.gz
+	$(INSTALL_DATA) sqlite2mdoc.tar.gz $(WWWDIR)/snapshots
+	$(INSTALL_DATA) sqlite2mdoc.tar.gz $(WWWDIR)/snapshots/sqlite2mdoc-$(VERSION).tar.gz
 
 sqlite2mdoc.tar.gz:
 	mkdir -p .dist/sqlite2mdoc-$(VERSION)/
-	install -m 0644 $(DOTAR) .dist/sqlite2mdoc-$(VERSION)
-	install -m 0755 configure .dist/sqlite2mdoc-$(VERSION)
+	$(INSTALL) -m 0644 $(DOTAR) .dist/sqlite2mdoc-$(VERSION)
+	$(INSTALL) -m 0755 configure .dist/sqlite2mdoc-$(VERSION)
 	( cd .dist/ && tar zcf ../$@ ./ )
 	rm -rf .dist/
 
@@ -34,8 +34,8 @@ main.o: config.h
 install:
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	mkdir -p $(DESTDIR)$(PREFIX)/man/man1
-	install -m 0755 sqlite2mdoc $(DESTDIR)$(PREFIX)/bin
-	install -m 0444 sqlite2mdoc.1 $(DESTDIR)$(PREFIX)/man/man1
+	$(INSTALL_PROGRAM) sqlite2mdoc $(DESTDIR)$(PREFIX)/bin
+	$(INSTALL_MAN) -m 0444 sqlite2mdoc.1 $(DESTDIR)$(PREFIX)/man/man1
 
 distclean: clean
 	rm -f config.h config.log Makefile.configure
