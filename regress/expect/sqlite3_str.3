@@ -1,0 +1,35 @@
+.Dd $Mdocdate$
+.Dt SQLITE3_STR 3
+.Os
+.Sh NAME
+.Nm sqlite3_str
+.Nd Dynamic String Object
+.Sh SYNOPSIS
+.In sqlite.h
+.Vt typedef struct sqlite3_str sqlite3_str;
+.Sh DESCRIPTION
+An instance of the sqlite3_str object contains a dynamically-sized
+string under construction.
+.Pp
+The lifecycle of an sqlite3_str object is as follows: 
+.Bl -enum
+.It
+The sqlite3_str object is created using sqlite3_str_new().
+.It
+Text is appended to the sqlite3_str object using various methods, such
+as sqlite3_str_appendf().
+.It
+The sqlite3_str object is destroyed and the string it created is returned
+using the sqlite3_str_finish() interface.
+.El
+.Pp
+.Sh IMPLEMENTATION NOTES
+These declarations were extracted from the
+interface documentation at line 7415.
+.Bd -literal
+typedef struct sqlite3_str sqlite3_str;
+.Ed
+.Sh SEE ALSO
+.Xr sqlite3_str_appendf 3 ,
+.Xr sqlite3_str_finish 3 ,
+.Xr sqlite3_str_new 3

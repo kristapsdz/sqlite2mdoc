@@ -1,0 +1,35 @@
+.Dd $Mdocdate$
+.Dt SQLITE3_VTAB_NOCHANGE 3
+.Os
+.Sh NAME
+.Nm sqlite3_vtab_nochange
+.Nd Determine If Virtual Table Column Access Is For UPDATE
+.Sh SYNOPSIS
+.In sqlite.h
+.Ft int
+.Fo sqlite3_vtab_nochange
+.Fa "sqlite3_context*"
+.Fc
+.Sh DESCRIPTION
+If the sqlite3_vtab_nochange(X) routine is called within the xColumn
+method of a virtual table, then it returns true if and
+only if the column is being fetched as part of an UPDATE operation
+during which the column value will not change.
+Applications might use this to substitute a return value that is less
+expensive to compute and that the corresponding xUpdate method
+understands as a "no-change" value.
+.Pp
+If the xColumn method calls sqlite3_vtab_nochange() and finds
+that the column is not changed by the UPDATE statement, then the xColumn
+method can optionally return without setting a result, without calling
+any of the sqlite3_result_xxxxx() interfaces.
+In that case, sqlite3_value_nochange(X) will
+return true for the same column in the xUpdate method.
+.Sh IMPLEMENTATION NOTES
+These declarations were extracted from the
+interface documentation at line 8810.
+.Bd -literal
+SQLITE_API int sqlite3_vtab_nochange(sqlite3_context*);
+.Ed
+.Sh SEE ALSO
+.Xr sqlite3_result_blob 3

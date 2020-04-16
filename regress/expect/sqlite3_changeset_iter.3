@@ -1,0 +1,18 @@
+.Dd $Mdocdate$
+.Dt SQLITE3_CHANGESET_ITER 3
+.Os
+.Sh NAME
+.Nm sqlite3_changeset_iter
+.Nd Changeset Iterator Handle
+.Sh SYNOPSIS
+.In sqlite.h
+.Vt typedef struct sqlite3_changeset_iter sqlite3_changeset_iter;
+.Sh DESCRIPTION
+An instance of this object acts as a cursor for iterating over the
+elements of a changeset or patchset.
+.Sh IMPLEMENTATION NOTES
+These declarations were extracted from the
+interface documentation at line 9576.
+.Bd -literal
+typedef struct sqlite3_changeset_iter sqlite3_changeset_iter;
+.Ed
