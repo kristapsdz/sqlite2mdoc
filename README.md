@@ -32,6 +32,8 @@ This software has been tested and run on
 [FreeBSD](https://www.freebsd.org),
 [NetBSD](https://www.netbsd.org),
 IllumOS, Solaris, Mac OS X, and Linux (glibc and musl).
+The portability measures are continuously tested by the BSD.lv
+[build system](https://kristaps.bsd.lv/cgi-bin/minci.cgi/index.html?project-name=sqlite2mdoc).
 
 ## Examples
 
