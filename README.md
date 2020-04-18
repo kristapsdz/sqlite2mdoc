@@ -27,7 +27,11 @@ plan on using it for other documentation.
 
 There are no compile-time or run-time dependencies.
 
-This software has been used on OpenBSD, Mac OS X, and Linux machines.
+This software has been tested and run on 
+[OpenBSD](https://www.openbsd.org),
+[FreeBSD](https://www.freebsd.org),
+[NetBSD](https://www.netbsd.org),
+IllumOS, Solaris, Mac OS X, and Linux (glibc and musl).
 
 ## Examples
 
