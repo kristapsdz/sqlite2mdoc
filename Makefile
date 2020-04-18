@@ -3,7 +3,7 @@
 include Makefile.configure
 
 WWWDIR		 = /var/www/vhosts/kristaps.bsd.lv/htdocs/sqlite2mdoc
-VERSION		 = 0.1.4
+VERSION		 = 0.1.5
 DOTAR 		 = Makefile \
 		   compats.c \
 		   main.c \
@@ -45,7 +45,7 @@ install:
 	$(INSTALL_MAN) -m 0444 sqlite2mdoc.1 $(DESTDIR)$(PREFIX)/man/man1
 
 distcheck: sqlite2mdoc.tar.gz sqlite2mdoc.tar.gz.sha512
-	mandoc -Tlint -Wwarning sqlite2mdoc.1
+	mandoc -Tlint -Werror sqlite2mdoc.1
 	rm -rf .distcheck
 	[ "`openssl dgst -sha512 -hex sqlite2mdoc.tar.gz`" = "`cat sqlite2mdoc.tar.gz.sha512`" ] || \
  		{ echo "Checksum does not match." 1>&2 ; exit 1 ; }
@@ -60,11 +60,26 @@ distcheck: sqlite2mdoc.tar.gz sqlite2mdoc.tar.gz.sha512
 distclean: clean
 	rm -f config.h config.log Makefile.configure
 
+# We can't use diff -r because of the CVS directory.
+# Instead use both directions (out -> expect, expect -> out)
+# to catch any nonexistent files.
+
 regress: all
 	rm -rf regress/out
 	mkdir regress/out
 	./sqlite2mdoc -p regress/out regress/sqlite3.h
-	diff -r regress/out regress/expect
+	@for f in regress/out/*.3 ; do \
+		sed 1d $$f > $$f.tmp ; \
+		mv -f $$f.tmp $$f ; \
+	done
+	@for f in regress/out/*.3 ; do \
+		echo diff $$f regress/expect/`basename $$f` ; \
+		diff $$f regress/expect/`basename $$f` ; \
+	done
+	@for f in regress/expect/*.3 ; do \
+		echo diff $$f regress/out/`basename $$f` ; \
+		diff $$f regress/out/`basename $$f` ; \
+	done
 	rm -rf regress/out
 
 clean:
