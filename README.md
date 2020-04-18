@@ -1,6 +1,6 @@
 ## Synopsis
 
-This utility accepts an [SQLitee](https://www.sqlite.org) header file
+This utility accepts an [SQLite](https://www.sqlite.org) header file
 `sqlite3.h` and produces a set of decently well-formed
 [mdoc(7)](https://man.openbsd.org/OpenBSD-current/man7/mdoc.7) files
 documenting the C API.
