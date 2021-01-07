@@ -30,7 +30,7 @@ sqlite2mdoc.tar.gz:
 	$(INSTALL) -m 0644 regress/sqlite3.h .dist/sqlite2mdoc-$(VERSION)/regress
 	$(INSTALL) -m 0644 regress/expect/*.3 .dist/sqlite2mdoc-$(VERSION)/regress/expect
 	$(INSTALL) -m 0755 configure .dist/sqlite2mdoc-$(VERSION)
-	( cd .dist/ && tar zcf ../$@ ./ )
+	( cd .dist/ && tar zcf ../$@ sqlite2mdoc-$(VERSION) )
 	rm -rf .dist/
 
 sqlite2mdoc.tar.gz.sha512: sqlite2mdoc.tar.gz
