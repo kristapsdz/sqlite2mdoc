@@ -1680,7 +1680,8 @@ emit(struct defn *d)
 			fputc('[', f);
 		} else {
 			/* Make sure we don't trigger a macro. */
-			if (0 == col && '.' == d->desc[i])
+			if (0 == col &&
+			    ('.' == d->desc[i] || '\'' == d->desc[i]))
 				fputs("\\&", f);
 			fputc(d->desc[i], f);
 			i++;
