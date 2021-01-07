@@ -1498,12 +1498,7 @@ emit(struct defn *d)
 			continue;
 		}
 
-		/*
-		 * Parsing HTML tags.
-		 * Why, sqlite guys, couldn't you have used something
-		 * like markdown or something?  
-		 * Sheesh.
-		 */
+		/* Parse HTML tags and links. */
 
 		if ('<' == d->desc[i]) {
 			for (tag = 0; tag < TAG__MAX; tag++) {
@@ -1582,28 +1577,71 @@ emit(struct defn *d)
 				continue;
 			}
 
-			if ('|' == d->desc[sz])
-				i = sz + 1;
-			else
+			/*
+			 * Look for a trailing "()", using "j" as a
+			 * sentinel in case it was found.  This lets us
+			 * print out a "Fn xxxx" instead of having the
+			 * function be ugly.
+			 */
+
+			j = 0;
+			if ('|' != d->desc[sz]) {
 				i = i + 1;
+				if (sz > 2 && 
+				    ')' == d->desc[sz - 1] && 
+				    '(' == d->desc[sz - 2]) {
+					if (col > 0)
+						fputc('\n', f);
+					fputs(".Fn ", f);
+					j = sz - 2;
+					assert(j > 0);
+				}
+
+			} else
+				i = sz + 1;
 
 			while (isspace((unsigned char)d->desc[i]))
 				i++;
 
 			/*
-			 * Now handle in-page references.
-			 * Print them out as-is: we've already
-			 * accumulated them into our "SEE ALSO" values,
-			 * which we'll use below.
+			 * Now handle in-page references.  If we're a
+			 * function reference (e.g., function()), then
+			 * omit the trailing parentheses and put in a Fn
+			 * block.  Otherwise print them out as-is: we've
+			 * already accumulated them into our "SEE ALSO"
+			 * values, which we'll use below.
 			 */
+
 			for ( ; i < d->descsz; i++, col++) {
-				if (']' == d->desc[i]) {
+				if (j > 0 && i == j) {
+					i += 3;
+					for ( ; i < d->descsz; i++)
+						if (d->desc[i] == '.')
+							fputs(" .", f);
+						else if (d->desc[i] == ',')
+							fputs(" ,", f);
+						else if (d->desc[i] == ')')
+							fputs(" )", f);
+						else 
+							break;
+
+					/* Trim trailing space. */
+
+					while (i < d->descsz && 
+					       isspace((unsigned char)d->desc[i]))
+						i++;	
+
+					fputc('\n', f);
+					col = 0;
+					break;
+				} else if (']' == d->desc[i]) {
 					i++;
 					break;
 				}
 				fputc(d->desc[i], f);
 				col++;
 			}
+
 			continue;
 		}
 
