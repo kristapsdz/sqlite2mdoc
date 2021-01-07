@@ -64,6 +64,14 @@ distclean: clean
 # Instead use both directions (out -> expect, expect -> out)
 # to catch any nonexistent files.
 
+regen_regress: all
+	rm -f regress/expect/*.3
+	./sqlite2mdoc -p regress/expect regress/sqlite3.h
+	@for f in regress/expect/*.3 ; do \
+		sed 1d $$f > $$f.tmp ; \
+		mv -f $$f.tmp $$f ; \
+	done
+
 regress: all
 	rm -rf regress/out
 	mkdir regress/out
