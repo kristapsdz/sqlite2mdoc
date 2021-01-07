@@ -15,7 +15,8 @@
 .Sh DESCRIPTION
 If it is not already attached to the session object passed as the first
 argument, this function attaches table zTbl in the same manner as the
-sqlite3session_attach() function.
+.Fn sqlite3session_attach
+function.
 If zTbl does not exist, or if it does not have a primary key, this
 function is a no-op (but does not return an error).
 .Pp
@@ -56,9 +57,10 @@ different non-PK values in each, an UPDATE record is added to the session.
 .El
 .Pp
 To clarify, if this function is called and then a changeset constructed
-using sqlite3session_changeset(), then after
-applying that changeset to database zFrom the contents of the two compatible
-tables would be identical.
+using 
+.Fn sqlite3session_changeset ,
+then after applying that changeset to database zFrom the contents of
+the two compatible tables would be identical.
 .Pp
 It an error if database zFrom does not exist or does not contain the
 required compatible table.

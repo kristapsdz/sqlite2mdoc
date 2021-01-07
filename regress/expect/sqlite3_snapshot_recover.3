@@ -14,11 +14,13 @@
 If a WAL file remains on disk after all database connections
 close (either through the use of the SQLITE_FCNTL_PERSIST_WAL
 file control or because the last process to have the database
-opened exited without calling sqlite3_close()) and a
-new connection is subsequently opened on that database and WAL file,
-the sqlite3_snapshot_open() interface will only
-be able to open the last transaction added to the WAL file even though
-the WAL file contains other valid transactions.
+opened exited without calling 
+.Fn sqlite3_close )
+and a new connection is subsequently opened on that database and WAL file,
+the 
+.Fn sqlite3_snapshot_open
+interface will only be able to open the last transaction added to the
+WAL file even though the WAL file contains other valid transactions.
 .Pp
 This function attempts to scan the WAL file associated with database
 zDb of database handle db and make all valid snapshots available to

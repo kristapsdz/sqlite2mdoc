@@ -26,34 +26,33 @@ using the SQLITE_CONFIG_GETMUTEX option.
 The xMutexInit method defined by this structure is invoked as part
 of system initialization by the sqlite3_initialize() function.
 The xMutexInit routine is called by SQLite exactly once for each effective
-call to sqlite3_initialize().
-.Pp
+call to 
+.Fn sqlite3_initialize .
 The xMutexEnd method defined by this structure is invoked as part of
 system shutdown by the sqlite3_shutdown() function.
 The implementation of this method is expected to release all outstanding
 resources obtained by the mutex methods implementation, especially
 those obtained by the xMutexInit method.
 The xMutexEnd() interface is invoked exactly once for each call to
-sqlite3_shutdown().
-.Pp
+.Fn sqlite3_shutdown .
 The remaining seven methods defined by this structure (xMutexAlloc,
 xMutexFree, xMutexEnter, xMutexTry, xMutexLeave, xMutexHeld and xMutexNotheld)
 implement the following interfaces (respectively): 
 .Bl -bullet
 .It
-sqlite3_mutex_alloc() 
+.Fn sqlite3_mutex_alloc
 .It
-sqlite3_mutex_free() 
+.Fn sqlite3_mutex_free
 .It
-sqlite3_mutex_enter() 
+.Fn sqlite3_mutex_enter
 .It
-sqlite3_mutex_try() 
+.Fn sqlite3_mutex_try
 .It
-sqlite3_mutex_leave() 
+.Fn sqlite3_mutex_leave
 .It
-sqlite3_mutex_held() 
+.Fn sqlite3_mutex_held
 .It
-sqlite3_mutex_notheld() 
+.Fn sqlite3_mutex_notheld
 .El
 .Pp
 The only difference is that the public sqlite3_XXX functions enumerated
@@ -70,14 +69,16 @@ It must be harmless to invoke xMutexInit() multiple times within the
 same process and without intervening calls to xMutexEnd().
 Second and subsequent calls to xMutexInit() must be no-ops.
 .Pp
-xMutexInit() must not use SQLite memory allocation (sqlite3_malloc()
+xMutexInit() must not use SQLite memory allocation (
+.Fn sqlite3_malloc
 and its associates).
 Similarly, xMutexAlloc() must not use SQLite memory allocation for
 a static mutex.
 However xMutexAlloc() may use SQLite memory allocation for a fast or
 recursive mutex.
 .Pp
-SQLite will invoke the xMutexEnd() method when sqlite3_shutdown()
+SQLite will invoke the xMutexEnd() method when 
+.Fn sqlite3_shutdown
 is called, but only if the prior call to xMutexInit returned SQLITE_OK.
 If xMutexInit fails in any way, it is expected to clean up after itself
 prior to returning.

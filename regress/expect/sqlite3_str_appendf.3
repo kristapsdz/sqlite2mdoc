@@ -45,8 +45,8 @@
 .Fc
 .Sh DESCRIPTION
 These interfaces add content to an sqlite3_str object previously obtained
-from sqlite3_str_new().
-.Pp
+from 
+.Fn sqlite3_str_new .
 The sqlite3_str_appendf(X,F,...) and sqlite3_str_vappendf(X,F,V)
 interfaces uses the built-in printf functionality of
 SQLite to append formatted text onto the end of sqlite3_str
@@ -57,7 +57,8 @@ exactly N bytes from string S onto the end of the sqlite3_str
 object X.
 N must be non-negative.
 S must contain at least N non-zero bytes of content.
-To append a zero-terminated string in its entirety, use the sqlite3_str_appendall()
+To append a zero-terminated string in its entirety, use the 
+.Fn sqlite3_str_appendall
 method instead.
 .Pp
 The sqlite3_str_appendall(X,S) method appends

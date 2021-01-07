@@ -10,13 +10,15 @@
 .Fa "sqlite3_session *pSession"
 .Fc
 .Sh DESCRIPTION
-Delete a session object previously allocated using sqlite3session_create().
+Delete a session object previously allocated using 
+.Fn sqlite3session_create .
 Once a session object has been deleted, the results of attempting to
 use pSession with any other session module function are undefined.
 .Pp
 Session objects must be deleted before the database handle to which
 they are attached is closed.
-Refer to the documentation for sqlite3session_create()
+Refer to the documentation for 
+.Fn sqlite3session_create
 for details.
 .Sh IMPLEMENTATION NOTES
 These declarations were extracted from the

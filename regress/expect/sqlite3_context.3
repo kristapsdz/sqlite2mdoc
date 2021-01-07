@@ -12,9 +12,13 @@ object.
 A pointer to an sqlite3_context object is always first parameter to
 application-defined SQL functions.
 The application-defined SQL function implementation will pass this
-pointer through into calls to sqlite3_result(), sqlite3_aggregate_context(),
-sqlite3_user_data(), sqlite3_context_db_handle(),
-sqlite3_get_auxdata(), and/or sqlite3_set_auxdata().
+pointer through into calls to sqlite3_result(), 
+.Fn sqlite3_aggregate_context ,
+.Fn sqlite3_user_data ,
+.Fn sqlite3_context_db_handle ,
+.Fn sqlite3_get_auxdata ,
+and/or 
+.Fn sqlite3_set_auxdata .
 .Sh IMPLEMENTATION NOTES
 These declarations were extracted from the
 interface documentation at line 4026.

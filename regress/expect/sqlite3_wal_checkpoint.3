@@ -19,11 +19,13 @@ into the database file and for the write-ahead log to be reset.
 See the checkpointing documentation for addition information.
 .Pp
 This interface used to be the only way to cause a checkpoint to occur.
-But then the newer and more powerful sqlite3_wal_checkpoint_v2()
+But then the newer and more powerful 
+.Fn sqlite3_wal_checkpoint_v2
 interface was added.
 This interface is retained for backwards compatibility and as a convenience
 for applications that need to manually start a callback but which do
-not need the full power (and corresponding complication) of sqlite3_wal_checkpoint_v2().
+not need the full power (and corresponding complication) of 
+.Fn sqlite3_wal_checkpoint_v2 .
 .Sh IMPLEMENTATION NOTES
 These declarations were extracted from the
 interface documentation at line 8604.

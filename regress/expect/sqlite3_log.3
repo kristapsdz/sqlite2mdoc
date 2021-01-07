@@ -12,12 +12,15 @@
 .Fa "..."
 .Fc
 .Sh DESCRIPTION
-The sqlite3_log() interface writes a message into the
-error log established by the SQLITE_CONFIG_LOG
-option to sqlite3_config().
+The 
+.Fn sqlite3_log
+interface writes a message into the error log established
+by the SQLITE_CONFIG_LOG option to 
+.Fn sqlite3_config .
 If logging is enabled, the zFormat string and subsequent arguments
-are used with sqlite3_snprintf() to generate the
-final output string.
+are used with 
+.Fn sqlite3_snprintf
+to generate the final output string.
 .Pp
 The sqlite3_log() interface is intended for use by extensions such
 as virtual tables, collating functions, and SQL functions.

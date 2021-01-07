@@ -13,7 +13,8 @@
 .Fc
 .Sh DESCRIPTION
 This function should only be used with iterator objects passed to a
-conflict-handler callback by sqlite3changeset_apply()
+conflict-handler callback by 
+.Fn sqlite3changeset_apply
 with either SQLITE_CHANGESET_DATA or SQLITE_CHANGESET_CONFLICT.
 If this function is called on any other iterator, SQLITE_MISUSE
 is returned and *ppValue is set to NULL.

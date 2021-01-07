@@ -12,8 +12,9 @@
 .Sh DESCRIPTION
 The sqlite3_db_release_memory(D) interface attempts to free as much
 heap memory as possible from database connection D.
-Unlike the sqlite3_release_memory() interface,
-this interface is in effect even when the SQLITE_ENABLE_MEMORY_MANAGEMENT
+Unlike the 
+.Fn sqlite3_release_memory
+interface, this interface is in effect even when the SQLITE_ENABLE_MEMORY_MANAGEMENT
 compile-time option is omitted.
 .Pp
 .Sh IMPLEMENTATION NOTES

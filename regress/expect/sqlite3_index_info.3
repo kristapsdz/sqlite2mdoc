@@ -55,8 +55,8 @@ SQLite.
 .Pp
 The idxNum and idxPtr values are recorded and passed into the xFilter
 method.
-sqlite3_free() is used to free idxPtr if and only if
-needToFreeIdxPtr is true.
+.Fn sqlite3_free
+is used to free idxPtr if and only if needToFreeIdxPtr is true.
 .Pp
 The orderByConsumed means that output from xFilter/xNext
 will occur in the correct order to satisfy the ORDER BY clause so that
@@ -95,7 +95,8 @@ structure for SQLite version 3.8.2 (dateof:3.8.2).
 If a virtual table extension is used with an SQLite version earlier
 than 3.8.2, the results of attempting to read or write the estimatedRows
 field are undefined (but are likely to included crashing the application).
-The estimatedRows field should therefore only be used if sqlite3_libversion_number()
+The estimatedRows field should therefore only be used if 
+.Fn sqlite3_libversion_number
 returns a value greater than or equal to 3008002.
 Similarly, the idxFlags field was added for version 3.9.0
 (dateof:3.9.0).

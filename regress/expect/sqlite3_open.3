@@ -37,7 +37,10 @@ of a pointer to the sqlite3 object.
 If the database is opened (and/or created) successfully, then SQLITE_OK
 is returned.
 Otherwise an error code is returned.
-The sqlite3_errmsg() or sqlite3_errmsg16()
+The 
+.Fn sqlite3_errmsg
+or 
+.Fn sqlite3_errmsg16
 routines can be used to obtain an English language description of the
 error following a failure of any of the sqlite3_open() routines.
 .Pp
@@ -48,8 +51,9 @@ be UTF-16 in the native byte order.
 .Pp
 Whether or not an error occurs when it is opened, resources associated
 with the database connection handle should be released
-by passing it to sqlite3_close() when it is no longer
-required.
+by passing it to 
+.Fn sqlite3_close
+when it is no longer required.
 .Pp
 The sqlite3_open_v2() interface works like sqlite3_open() except that
 it accepts two additional parameters for additional control over the
@@ -87,7 +91,8 @@ the database connection opens in the serialized threading mode
 unless single-thread was previously selected at compile-time or start-time.
 The SQLITE_OPEN_SHAREDCACHE flag causes the
 database connection to be eligible to use shared cache mode,
-regardless of whether or not shared cache is enabled using sqlite3_enable_shared_cache().
+regardless of whether or not shared cache is enabled using 
+.Fn sqlite3_enable_shared_cache .
 The SQLITE_OPEN_PRIVATECACHE flag causes the
 database connection to not participate in shared cache mode
 even if it is enabled.
@@ -119,8 +124,9 @@ URI.
 URI filename interpretation is enabled if the SQLITE_OPEN_URI
 flag is set in the third argument to sqlite3_open_v2(), or if it has
 been enabled globally using the SQLITE_CONFIG_URI
-option with the sqlite3_config() method or by the SQLITE_USE_URI
-compile-time option.
+option with the 
+.Fn sqlite3_config
+method or by the SQLITE_USE_URI compile-time option.
 URI filename interpretation is turned off by default, but future releases
 of SQLite might enable URI filename interpretation by default.
 See "URI filenames" for additional information.

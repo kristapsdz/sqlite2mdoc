@@ -47,9 +47,13 @@ of SQLite.
 The update hook implementation must not do anything that will modify
 the database connection that invoked the update hook.
 Any actions to modify the database connection must be deferred until
-after the completion of the sqlite3_step() call that
-triggered the update hook.
-Note that sqlite3_prepare_v2() and sqlite3_step()
+after the completion of the 
+.Fn sqlite3_step
+call that triggered the update hook.
+Note that 
+.Fn sqlite3_prepare_v2
+and 
+.Fn sqlite3_step
 both modify their database connections for the meaning of "modify"
 in this paragraph.
 .Pp
@@ -57,8 +61,12 @@ The sqlite3_update_hook(D,C,P) function returns the P argument from
 the previous call on the same database connection
 D, or NULL for the first call on D.
 .Pp
-See also the sqlite3_commit_hook(), sqlite3_rollback_hook(),
-and sqlite3_preupdate_hook() interfaces.
+See also the 
+.Fn sqlite3_commit_hook ,
+.Fn sqlite3_rollback_hook ,
+and 
+.Fn sqlite3_preupdate_hook
+interfaces.
 .Sh IMPLEMENTATION NOTES
 These declarations were extracted from the
 interface documentation at line 5955.

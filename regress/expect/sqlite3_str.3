@@ -13,13 +13,17 @@ string under construction.
 The lifecycle of an sqlite3_str object is as follows: 
 .Bl -enum
 .It
-The sqlite3_str object is created using sqlite3_str_new().
+The sqlite3_str object is created using 
+.Fn sqlite3_str_new .
 .It
 Text is appended to the sqlite3_str object using various methods, such
-as sqlite3_str_appendf().
+as 
+.Fn sqlite3_str_appendf .
 .It
 The sqlite3_str object is destroyed and the string it created is returned
-using the sqlite3_str_finish() interface.
+using the 
+.Fn sqlite3_str_finish
+interface.
 .El
 .Pp
 .Sh IMPLEMENTATION NOTES

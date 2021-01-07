@@ -143,7 +143,10 @@
 .Sh DESCRIPTION
 These routines are used by the xFunc or xFinal callbacks that implement
 SQL functions and aggregates.
-See sqlite3_create_function() and sqlite3_create_function16()
+See 
+.Fn sqlite3_create_function
+and 
+.Fn sqlite3_create_function16
 for additional information.
 .Pp
 These functions work very much like the parameter binding
@@ -235,7 +238,8 @@ of the parameter nor call a destructor on the content when it has finished
 using that result.
 If the 4th parameter to the sqlite3_result_text* interfaces or sqlite3_result_blob
 is the special constant SQLITE_TRANSIENT then SQLite makes a copy of
-the result into space obtained from sqlite3_malloc()
+the result into space obtained from 
+.Fn sqlite3_malloc
 before it returns.
 .Pp
 The sqlite3_result_value() interface sets the result of the application-defined
@@ -255,7 +259,8 @@ SQL NULL value, just like sqlite3_result_null(C),
 except that it also associates the host-language pointer P or type
 T with that NULL value such that the pointer can be retrieved within
 an application-defined SQL function
-using sqlite3_value_pointer().
+using 
+.Fn sqlite3_value_pointer .
 If the D parameter is not NULL, then it is a pointer to a destructor
 for the P parameter.
 SQLite invokes D with P as its only argument when SQLite is finished

@@ -22,8 +22,12 @@
 .Sh DESCRIPTION
 The sqlite3_sql(P) interface returns a pointer to a copy of the UTF-8
 SQL text used to create prepared statement P if P
-was created by sqlite3_prepare_v2(), sqlite3_prepare_v3(),
-sqlite3_prepare16_v2(), or sqlite3_prepare16_v3().
+was created by 
+.Fn sqlite3_prepare_v2 ,
+.Fn sqlite3_prepare_v3 ,
+.Fn sqlite3_prepare16_v2 ,
+or 
+.Fn sqlite3_prepare16_v3 .
 The sqlite3_expanded_sql(P) interface returns a pointer to a UTF-8
 string containing the SQL text of prepared statement P with bound parameters
 expanded.
@@ -52,8 +56,10 @@ The strings returned by sqlite3_sql(P) and sqlite3_normalized_sql(P)
 are managed by SQLite and are automatically freed when the prepared
 statement is finalized.
 The string returned by sqlite3_expanded_sql(P), on the other hand,
-is obtained from sqlite3_malloc() and must be free
-by the application by passing it to sqlite3_free().
+is obtained from 
+.Fn sqlite3_malloc
+and must be free by the application by passing it to 
+.Fn sqlite3_free .
 .Sh IMPLEMENTATION NOTES
 These declarations were extracted from the
 interface documentation at line 3873.

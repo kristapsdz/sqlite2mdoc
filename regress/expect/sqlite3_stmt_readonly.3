@@ -18,8 +18,9 @@ Note that application-defined SQL functions
 or virtual tables might change the database indirectly
 as a side effect.
 For example, if an application defines a function "eval()" that calls
-sqlite3_exec(), then the following SQL statement would
-change the database file through side-effects: 
+.Fn sqlite3_exec ,
+then the following SQL statement would change the database file through
+side-effects: 
 .Bd -ragged
 .Bd -literal
 SELECT eval('DELETE FROM t1') FROM t2; 

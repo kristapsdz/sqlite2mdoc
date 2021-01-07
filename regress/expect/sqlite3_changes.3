@@ -52,8 +52,9 @@ program, the value returned reflects the number of rows modified by
 the previous INSERT, UPDATE or DELETE statement within the same trigger.
 .Pp
 If a separate thread makes changes on the same database connection
-while sqlite3_changes() is running then the value
-returned is unpredictable and not meaningful.
+while 
+.Fn sqlite3_changes
+is running then the value returned is unpredictable and not meaningful.
 .Pp
 .Sh IMPLEMENTATION NOTES
 These declarations were extracted from the

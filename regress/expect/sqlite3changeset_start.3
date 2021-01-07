@@ -30,22 +30,26 @@ The following functions can be used to advance and query a changeset
 iterator created by this function: 
 .Bl -bullet
 .It
-sqlite3changeset_next() 
+.Fn sqlite3changeset_next
 .It
-sqlite3changeset_op() 
+.Fn sqlite3changeset_op
 .It
-sqlite3changeset_new() 
+.Fn sqlite3changeset_new
 .It
-sqlite3changeset_old() 
+.Fn sqlite3changeset_old
 .El
 .Pp
 It is the responsibility of the caller to eventually destroy the iterator
-by passing it to sqlite3changeset_finalize().
+by passing it to 
+.Fn sqlite3changeset_finalize .
 The buffer containing the changeset (pChangeset) must remain valid
 until after the iterator is destroyed.
 .Pp
-Assuming the changeset blob was created by one of the sqlite3session_changeset(),
-sqlite3changeset_concat() or sqlite3changeset_invert()
+Assuming the changeset blob was created by one of the 
+.Fn sqlite3session_changeset ,
+.Fn sqlite3changeset_concat
+or 
+.Fn sqlite3changeset_invert
 functions, all changes within the changeset that apply to a single
 table are grouped together.
 This means that when an application iterates through a changeset using

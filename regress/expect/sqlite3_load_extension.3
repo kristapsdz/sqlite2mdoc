@@ -32,22 +32,27 @@ characters in the filename from the last "/" to the first following
 "." and omitting any initial "lib".
 The sqlite3_load_extension() interface returns SQLITE_OK on
 success and SQLITE_ERROR if something goes wrong.
-If an error occurs and pzErrMsg is not 0, then the sqlite3_load_extension()
+If an error occurs and pzErrMsg is not 0, then the 
+.Fn sqlite3_load_extension
 interface shall attempt to fill *pzErrMsg with error message text stored
-in memory obtained from sqlite3_malloc().
-The calling function should free this memory by calling sqlite3_free().
-.Pp
-Extension loading must be enabled using sqlite3_enable_load_extension()
+in memory obtained from 
+.Fn sqlite3_malloc .
+The calling function should free this memory by calling 
+.Fn sqlite3_free .
+Extension loading must be enabled using 
+.Fn sqlite3_enable_load_extension
 or sqlite3_db_config(db,SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION,1,NULL)
 prior to calling this API, otherwise an error will be returned.
 .Pp
 \fBSecurity warning:\fP It is recommended that the SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION
 method be used to enable only this interface.
-The use of the sqlite3_enable_load_extension()
+The use of the 
+.Fn sqlite3_enable_load_extension
 interface should be avoided.
-This will keep the SQL function load_extension() disabled
-and prevent SQL injections from giving attackers access to extension
-loading capabilities.
+This will keep the SQL function 
+.Fn load_extension
+disabled and prevent SQL injections from giving attackers access to
+extension loading capabilities.
 .Pp
 See also the load_extension() SQL function.
 .Sh IMPLEMENTATION NOTES

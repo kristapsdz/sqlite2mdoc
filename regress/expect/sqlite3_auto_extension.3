@@ -29,13 +29,18 @@ const struct sqlite3_api_routines *pThunk    );
 .Ed
 .Pp
 If the xEntryPoint routine encounters an error, it should make *pzErrMsg
-point to an appropriate error message (obtained from sqlite3_mprintf())
+point to an appropriate error message (obtained from 
+.Fn sqlite3_mprintf )
 and return an appropriate error code.
 SQLite ensures that *pzErrMsg is NULL before calling the xEntryPoint().
-SQLite will invoke sqlite3_free() on *pzErrMsg after
-xEntryPoint() returns.
-If any xEntryPoint() returns an error, the sqlite3_open(),
-sqlite3_open16(), or sqlite3_open_v2()
+SQLite will invoke 
+.Fn sqlite3_free
+on *pzErrMsg after xEntryPoint() returns.
+If any xEntryPoint() returns an error, the 
+.Fn sqlite3_open ,
+.Fn sqlite3_open16 ,
+or 
+.Fn sqlite3_open_v2
 call that provoked the xEntryPoint() will fail.
 .Pp
 Calling sqlite3_auto_extension(X) with an entry point X that is already

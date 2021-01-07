@@ -49,8 +49,11 @@ a UTF-8 or UTF-16 string.
 The _database_ routines return the database name, the _table_ routines
 return the table name, and the origin_ routines return the column name.
 The returned string is valid until the prepared statement
-is destroyed using sqlite3_finalize() or until the
-statement is automatically reprepared by the first call to sqlite3_step()
+is destroyed using 
+.Fn sqlite3_finalize
+or until the statement is automatically reprepared by the first call
+to 
+.Fn sqlite3_step
 for a particular run or until the same information is requested again
 in a different encoding.
 .Pp

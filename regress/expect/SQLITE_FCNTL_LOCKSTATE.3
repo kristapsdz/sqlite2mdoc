@@ -76,7 +76,8 @@
 .Fd #define SQLITE_FCNTL_SIZE_LIMIT
 .Sh DESCRIPTION
 These integer constants are opcodes for the xFileControl method of
-the sqlite3_io_methods object and for the sqlite3_file_control()
+the sqlite3_io_methods object and for the 
+.Fn sqlite3_file_control
 interface.
 .Bl -bullet
 .It
@@ -99,7 +100,8 @@ based on this hint in order to help writes to the database file run
 faster.
 .It
 The SQLITE_FCNTL_SIZE_LIMIT opcode is used by
-in-memory VFS that implements sqlite3_deserialize()
+in-memory VFS that implements 
+.Fn sqlite3_deserialize
 to set an upper bound on the size of the in-memory database.
 The argument is a pointer to a sqlite3_int64.
 If the integer pointed to is negative, then it is filled in with the
@@ -111,7 +113,8 @@ The integer pointed to is set to the new limit.
 The SQLITE_FCNTL_CHUNK_SIZE opcode is used to
 request that the VFS extends and truncates the database file in chunks
 of a size specified by the user.
-The fourth argument to sqlite3_file_control()
+The fourth argument to 
+.Fn sqlite3_file_control
 should point to an integer (type int) containing the new chunk-size
 to use for the nominated database.
 Allocating database file space in large chunks (say 1MB at a time),
@@ -143,7 +146,8 @@ However, if the database file is being synced as part of a multi-database
 commit, the argument points to a nul-terminated string containing the
 transactions master-journal file name.
 VFSes that do not need this signal should silently ignore this opcode.
-Applications should not call sqlite3_file_control()
+Applications should not call 
+.Fn sqlite3_file_control
 with this opcode as doing so may disrupt the operation of the specialized
 VFSes that do require it.
 .It
@@ -151,7 +155,8 @@ The SQLITE_FCNTL_COMMIT_PHASETWO opcode
 is generated internally by SQLite and sent to the VFS after a transaction
 has been committed immediately but before the database is unlocked.
 VFSes that do not need this signal should silently ignore this opcode.
-Applications should not call sqlite3_file_control()
+Applications should not call 
+.Fn sqlite3_file_control
 with this opcode as doing so may disrupt the operation of the specialized
 VFSes that do require it.
 .It
@@ -184,7 +189,8 @@ Persisting the files is useful when other processes that do not have
 write permission on the directory containing the database file want
 to read the database file, as the WAL and shared memory files must
 exist in order for the database to be readable.
-The fourth parameter to sqlite3_file_control()
+The fourth parameter to 
+.Fn sqlite3_file_control
 for this opcode should be a pointer to an integer.
 That integer is 0 to disable persistent WAL mode or 1 to enable persistent
 WAL mode.
@@ -196,7 +202,8 @@ opcode is used to set or query the persistent "powersafe-overwrite"
 or "PSOW" setting.
 The PSOW setting determines the SQLITE_IOCAP_POWERSAFE_OVERWRITE
 bit of the xDeviceCharacteristics methods.
-The fourth parameter to sqlite3_file_control()
+The fourth parameter to 
+.Fn sqlite3_file_control
 for this opcode should be a pointer to an integer.
 That integer is 0 to disable zero-damage mode or 1 to enable zero-damage
 mode.
@@ -212,9 +219,12 @@ This is used by VACUUM operations.
 The SQLITE_FCNTL_VFSNAME opcode can be used to
 obtain the names of all VFSes in the VFS stack.
 The names are of all VFS shims and the final bottom-level VFS are written
-into memory obtained from sqlite3_malloc() and the
-result is stored in the char* variable that the fourth parameter of
-sqlite3_file_control() points to.
+into memory obtained from 
+.Fn sqlite3_malloc
+and the result is stored in the char* variable that the fourth parameter
+of 
+.Fn sqlite3_file_control
+points to.
 The caller is responsible for freeing the memory when done.
 As with all file-control actions, there is no guarantee that this will
 actually do anything.
@@ -239,9 +249,10 @@ of the array is the name of the pragma and the third element is the
 argument to the pragma or NULL if the pragma has no argument.
 The handler for an SQLITE_FCNTL_PRAGMA file control
 can optionally make the first element of the char** argument point
-to a string obtained from sqlite3_mprintf() or the
-equivalent and that string will become the result of the pragma or
-the error message if the pragma fails.
+to a string obtained from 
+.Fn sqlite3_mprintf
+or the equivalent and that string will become the result of the pragma
+or the error message if the pragma fails.
 If the SQLITE_FCNTL_PRAGMA file control returns
 SQLITE_NOTFOUND, then normal PRAGMA processing
 continues.
@@ -275,9 +286,11 @@ file-control to have SQLite generate a temporary filename using the
 same algorithm that is followed to generate temporary filenames for
 TEMP tables and other internal uses.
 The argument should be a char** which will be filled with the filename
-written into memory obtained from sqlite3_malloc().
-The caller should invoke sqlite3_free() on the result
-to avoid a memory leak.
+written into memory obtained from 
+.Fn sqlite3_malloc .
+The caller should invoke 
+.Fn sqlite3_free
+on the result to avoid a memory leak.
 .It
 The SQLITE_FCNTL_MMAP_SIZE file control is used
 to query or set the maximum number of bytes that will be used for memory-mapped
@@ -379,13 +392,15 @@ The "data version" changes whenever any change occurs to the corresponding
 database file, either through SQL statements on the same database connection
 or through transactions committed by separate database connections
 possibly in other processes.
-The sqlite3_total_changes() interface can be
-used to find if any database on the connection has changed, but that
-interface responds to changes on TEMP as well as MAIN and does not
-provide a mechanism to detect changes to MAIN only.
-Also, the sqlite3_total_changes() interface
-responds to internal changes only and omits changes made by other database
-connections.
+The 
+.Fn sqlite3_total_changes
+interface can be used to find if any database on the connection has
+changed, but that interface responds to changes on TEMP as well as
+MAIN and does not provide a mechanism to detect changes to MAIN only.
+Also, the 
+.Fn sqlite3_total_changes
+interface responds to internal changes only and omits changes made
+by other database connections.
 The PRAGMA data_version command provide a mechanism
 to detect changes to a single attached database that occur due to other
 database connections, but omits changes implemented by the database

@@ -13,8 +13,9 @@
 .Fa "void*"
 .Fc
 .Sh DESCRIPTION
-The sqlite3_file_control() interface makes a
-direct call to the xFileControl method for the sqlite3_io_methods
+The 
+.Fn sqlite3_file_control
+interface makes a direct call to the xFileControl method for the sqlite3_io_methods
 object associated with a particular database identified by the second
 argument.
 The name of the database is "main" for the main database or "temp"
@@ -27,8 +28,9 @@ through to the second and third parameters of the xFileControl method.
 The return value of the xFileControl method becomes the return value
 of this routine.
 .Pp
-A few opcodes for sqlite3_file_control() are
-handled directly by the SQLite core and never invoke the sqlite3_io_methods.xFileControl
+A few opcodes for 
+.Fn sqlite3_file_control
+are handled directly by the SQLite core and never invoke the sqlite3_io_methods.xFileControl
 method.
 The SQLITE_FCNTL_FILE_POINTER value for the
 op parameter causes a pointer to the underlying sqlite3_file
@@ -43,8 +45,10 @@ data version counter from the pager.
 .Pp
 If the second parameter (zDbName) does not match the name of any open
 database file, then SQLITE_ERROR is returned.
-This error code is not remembered and will not be recalled by sqlite3_errcode()
-or sqlite3_errmsg().
+This error code is not remembered and will not be recalled by 
+.Fn sqlite3_errcode
+or 
+.Fn sqlite3_errmsg .
 The underlying xFileControl method might also return SQLITE_ERROR.
 There is no way to distinguish between an incorrect zDbName and an
 SQLITE_ERROR return from the underlying xFileControl method.

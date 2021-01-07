@@ -162,8 +162,9 @@ column corresponding to X is unchanged by the UPDATE operation that
 the xUpdate method call was invoked to implement and if and the prior
 xColumn method call that was invoked to extracted the value
 for that column returned without setting a result (probably because
-it queried sqlite3_vtab_nochange() and found
-that the column was unchanging).
+it queried 
+.Fn sqlite3_vtab_nochange
+and found that the column was unchanging).
 Within an xUpdate method, any value for which sqlite3_value_nochange(X)
 is true will in all other respects appear to be a NULL value.
 If sqlite3_value_nochange(X) is invoked anywhere other than within
@@ -176,12 +177,17 @@ If X comes from an SQL literal value, or a table column, and expression,
 then sqlite3_value_frombind(X) returns zero.
 .Pp
 Please pay particular attention to the fact that the pointer returned
-from sqlite3_value_blob(), sqlite3_value_text(),
-or sqlite3_value_text16() can be invalidated
-by a subsequent call to sqlite3_value_bytes(),
-sqlite3_value_bytes16(), sqlite3_value_text(),
-or sqlite3_value_text16().
-.Pp
+from 
+.Fn sqlite3_value_blob ,
+.Fn sqlite3_value_text ,
+or 
+.Fn sqlite3_value_text16
+can be invalidated by a subsequent call to 
+.Fn sqlite3_value_bytes ,
+.Fn sqlite3_value_bytes16 ,
+.Fn sqlite3_value_text ,
+or 
+.Fn sqlite3_value_text16 .
 These routines must be called from the same thread as the SQL function
 that supplied the sqlite3_value* parameters.
 .Pp
@@ -209,9 +215,10 @@ sqlite3_value_bytes16()
 If an out-of-memory error occurs, then the return value from these
 routines is the same as if the column had contained an SQL NULL value.
 Valid SQL NULL returns can be distinguished from out-of-memory errors
-by invoking the sqlite3_errcode() immediately after
-the suspect return value is obtained and before any other SQLite interface
-is called on the same database connection.
+by invoking the 
+.Fn sqlite3_errcode
+immediately after the suspect return value is obtained and before any
+other SQLite interface is called on the same database connection.
 .Sh IMPLEMENTATION NOTES
 These declarations were extracted from the
 interface documentation at line 4992.

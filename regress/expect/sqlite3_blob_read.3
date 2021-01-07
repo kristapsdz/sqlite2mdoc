@@ -23,7 +23,9 @@ is returned and no data is read.
 If N or iOffset is less than zero, SQLITE_ERROR is returned
 and no data is read.
 The size of the blob (and hence the maximum value of N+iOffset) can
-be determined using the sqlite3_blob_bytes() interface.
+be determined using the 
+.Fn sqlite3_blob_bytes
+interface.
 .Pp
 An attempt to read from an expired BLOB handle fails with
 an error code of SQLITE_ABORT.
@@ -33,8 +35,10 @@ Otherwise, an error code or an extended error code
 is returned.
 .Pp
 This routine only works on a BLOB handle which has been
-created by a prior successful call to sqlite3_blob_open()
-and which has not been closed by sqlite3_blob_close().
+created by a prior successful call to 
+.Fn sqlite3_blob_open
+and which has not been closed by 
+.Fn sqlite3_blob_close .
 Passing any other pointer in to this routine results in undefined and
 probably undesirable behavior.
 .Pp

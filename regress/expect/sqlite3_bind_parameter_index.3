@@ -16,9 +16,10 @@ The index value returned is suitable for use as the second parameter
 to sqlite3_bind().
 A zero is returned if no matching parameter is found.
 The parameter name must be given in UTF-8 even if the original statement
-was prepared from UTF-16 text using sqlite3_prepare16_v2()
-or sqlite3_prepare16_v3().
-.Pp
+was prepared from UTF-16 text using 
+.Fn sqlite3_prepare16_v2
+or 
+.Fn sqlite3_prepare16_v3 .
 .Sh IMPLEMENTATION NOTES
 These declarations were extracted from the
 interface documentation at line 4223.

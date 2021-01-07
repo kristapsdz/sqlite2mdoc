@@ -10,10 +10,12 @@
 .Fa "sqlite3_changeset_iter *pIter"
 .Fc
 .Sh DESCRIPTION
-This function may only be used with iterators created by function sqlite3changeset_start().
+This function may only be used with iterators created by function 
+.Fn sqlite3changeset_start .
 If it is called on an iterator passed to a conflict-handler callback
-by sqlite3changeset_apply(), SQLITE_MISUSE
-is returned and the call has no effect.
+by 
+.Fn sqlite3changeset_apply ,
+SQLITE_MISUSE is returned and the call has no effect.
 .Pp
 Immediately after an iterator is created by sqlite3changeset_start(),
 it does not point to any change in the changeset.

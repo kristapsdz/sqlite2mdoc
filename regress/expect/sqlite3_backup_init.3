@@ -83,8 +83,12 @@ If an error occurs within sqlite3_backup_init(D,N,S,M), then NULL is
 returned and an error code and error message are stored in the destination
 database connection D.
 The error code and message for the failed call to sqlite3_backup_init()
-can be retrieved using the sqlite3_errcode(), sqlite3_errmsg(),
-and/or sqlite3_errmsg16() functions.
+can be retrieved using the 
+.Fn sqlite3_errcode ,
+.Fn sqlite3_errmsg ,
+and/or 
+.Fn sqlite3_errmsg16
+functions.
 A successful call to sqlite3_backup_init() returns a pointer to an
 sqlite3_backup object.
 The sqlite3_backup object may be used with the sqlite3_backup_step()

@@ -26,7 +26,8 @@ the same sequence of bytes which would be written to disk if that database
 where backed up to disk.
 .Pp
 The usual case is that sqlite3_serialize() copies the serialization
-of the database into memory obtained from sqlite3_malloc64()
+of the database into memory obtained from 
+.Fn sqlite3_malloc64
 and returns a pointer to that memory.
 The caller is responsible for freeing the returned value to avoid a
 memory leak.

@@ -12,7 +12,8 @@
 .Fd #define SQLITE_TRANSIENT
 .Sh DESCRIPTION
 These are special values for the destructor that is passed in as the
-final argument to routines like sqlite3_result_blob().
+final argument to routines like 
+.Fn sqlite3_result_blob .
 If the destructor argument is SQLITE_STATIC, it means that the content
 pointer is constant and will never change.
 It does not need to be destroyed.

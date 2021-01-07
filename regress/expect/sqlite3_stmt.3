@@ -19,17 +19,22 @@ run.
 The life-cycle of a prepared statement object usually goes like this:
 .Bl -enum
 .It
-Create the prepared statement object using sqlite3_prepare_v2().
+Create the prepared statement object using 
+.Fn sqlite3_prepare_v2 .
 .It
 Bind values to parameters using the sqlite3_bind_*() interfaces.
 .It
-Run the SQL by calling sqlite3_step() one or more times.
+Run the SQL by calling 
+.Fn sqlite3_step
+one or more times.
 .It
-Reset the prepared statement using sqlite3_reset() then
-go back to step 2.
+Reset the prepared statement using 
+.Fn sqlite3_reset
+then go back to step 2.
 Do this zero or more times.
 .It
-Destroy the object using sqlite3_finalize().
+Destroy the object using 
+.Fn sqlite3_finalize .
 .El
 .Pp
 .Sh IMPLEMENTATION NOTES

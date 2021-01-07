@@ -37,7 +37,10 @@ The C argument is a copy of the context pointer.
 The P and X arguments are pointers whose meanings depend on T.
 .Pp
 The sqlite3_trace_v2() interface is intended to replace the legacy
-interfaces sqlite3_trace() and sqlite3_profile(),
+interfaces 
+.Fn sqlite3_trace
+and 
+.Fn sqlite3_profile ,
 both of which are deprecated.
 .Sh IMPLEMENTATION NOTES
 These declarations were extracted from the

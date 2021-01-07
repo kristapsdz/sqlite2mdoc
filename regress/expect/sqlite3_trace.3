@@ -20,14 +20,16 @@
 .Fc
 .Sh DESCRIPTION
 These routines are deprecated.
-Use the sqlite3_trace_v2() interface instead of the
-routines described here.
+Use the 
+.Fn sqlite3_trace_v2
+interface instead of the routines described here.
 .Pp
 These routines register callback functions that can be used for tracing
 and profiling the execution of SQL statements.
 .Pp
 The callback function registered by sqlite3_trace() is invoked at various
-times when an SQL statement is being run by sqlite3_step().
+times when an SQL statement is being run by 
+.Fn sqlite3_step .
 The sqlite3_trace() callback is invoked with a UTF-8 rendering of the
 SQL statement text as the statement first begins executing.
 Additional sqlite3_trace() callbacks might occur as each triggered
@@ -48,7 +50,10 @@ implementation is only capable of millisecond resolution so the six
 least significant digits in the time are meaningless.
 Future versions of SQLite might provide greater resolution on the profiler
 callback.
-Invoking either sqlite3_trace() or sqlite3_trace_v2()
+Invoking either 
+.Fn sqlite3_trace
+or 
+.Fn sqlite3_trace_v2
 will cancel the profile callback.
 .Sh IMPLEMENTATION NOTES
 These declarations were extracted from the

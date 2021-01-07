@@ -10,8 +10,9 @@
 .Fa "sqlite3_stmt*"
 .Fc
 .Sh DESCRIPTION
-Contrary to the intuition of many, sqlite3_reset() does
-not reset the bindings on a prepared statement.
+Contrary to the intuition of many, 
+.Fn sqlite3_reset
+does not reset the bindings on a prepared statement.
 Use this routine to reset all host parameters to NULL.
 .Sh IMPLEMENTATION NOTES
 These declarations were extracted from the

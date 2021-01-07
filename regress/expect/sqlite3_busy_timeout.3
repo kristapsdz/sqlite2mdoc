@@ -16,14 +16,17 @@ amount of time when a table is locked.
 The handler will sleep multiple times until at least "ms" milliseconds
 of sleeping have accumulated.
 After at least "ms" milliseconds of sleeping, the handler returns 0
-which causes sqlite3_step() to return SQLITE_BUSY.
+which causes 
+.Fn sqlite3_step
+to return SQLITE_BUSY.
 .Pp
 Calling this routine with an argument less than or equal to zero turns
 off all busy handlers.
 .Pp
 There can only be a single busy handler for a particular database connection
 at any given moment.
-If another busy handler was defined  (using sqlite3_busy_handler())
+If another busy handler was defined  (using 
+.Fn sqlite3_busy_handler )
 prior to calling this routine, that other busy handler is cleared.
 .Pp
 .Sh IMPLEMENTATION NOTES

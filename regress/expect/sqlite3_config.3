@@ -23,14 +23,18 @@ The application must ensure that no other SQLite interfaces are invoked
 by other threads while sqlite3_config() is running.\fP 
 .Pp
 The sqlite3_config() interface may only be invoked prior to library
-initialization using sqlite3_initialize() or after
-shutdown by sqlite3_shutdown().
-If sqlite3_config() is called after sqlite3_initialize()
-and before sqlite3_shutdown() then it will return
-SQLITE_MISUSE.
+initialization using 
+.Fn sqlite3_initialize
+or after shutdown by 
+.Fn sqlite3_shutdown .
+If sqlite3_config() is called after 
+.Fn sqlite3_initialize
+and before 
+.Fn sqlite3_shutdown
+then it will return SQLITE_MISUSE.
 Note, however, that sqlite3_config() can be called as part of the implementation
-of an application-defined sqlite3_os_init().
-.Pp
+of an application-defined 
+.Fn sqlite3_os_init .
 The first argument to sqlite3_config() is an integer configuration option
 that determines what property of SQLite is to be configured.
 Subsequent arguments vary depending on the configuration option
