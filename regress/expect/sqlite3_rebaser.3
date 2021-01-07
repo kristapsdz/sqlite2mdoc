@@ -23,7 +23,7 @@ For example, if both the local and remote changesets contain an INSERT
 of the same key on "CREATE TABLE t1(a PRIMARY KEY, b)": 
 .Pp
 local:  INSERT INTO t1 VALUES(1, 'v1'); remote: INSERT INTO t1 VALUES(1,
-'v2'); 
+\&'v2'); 
 .Pp
 and the conflict resolution is REPLACE, then the INSERT change is removed
 from the local changeset (it was overridden).
