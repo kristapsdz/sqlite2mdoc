@@ -1809,36 +1809,35 @@ main(int argc, char *argv[])
 {
 	size_t		 i, bufsz;
 	ssize_t		 len;
-	FILE		*f;
+	FILE		*f = stdin;
 	char		*cp = NULL;
-	const char	*prefix;
+	const char	*prefix = ".";
 	struct parse	 p;
-	int		 rc, ch;
+	int		 rc = 0, ch;
 	struct defn	*d;
 	struct decl	*e;
 
-	rc = 0;
-	prefix = ".";
-	f = stdin;
 	memset(&p, 0, sizeof(struct parse));
+
 	p.fn = "<stdin>";
 	p.ln = 0;
 	p.phase = PHASE_INIT;
+
 	TAILQ_INIT(&p.dqhead);
 
-	while (-1 != (ch = getopt(argc, argv, "nNp:v")))
+	while ((ch = getopt(argc, argv, "nNp:v")) != -1)
 		switch (ch) {
-		case ('n'):
+		case 'n':
 			nofile = 1;
 			break;
-		case ('N'):
+		case 'N':
 			nofile = 1;
 			filename = 1;
 			break;
-		case ('p'):
+		case 'p':
 			prefix = optarg;
 			break;
-		case ('v'):
+		case 'v':
 			verbose = 1;
 			break;
 		default:
@@ -1852,8 +1851,7 @@ main(int argc, char *argv[])
 		goto usage;
 
 	if (argc > 0) {
-		f = fopen(argv[0], "r");
-		if (NULL == f)
+		if ((f = fopen(argv[0], "r")) == NULL)
 			err(EXIT_FAILURE, "%s", argv[0]);
 		p.fn = argv[0];
 	}
@@ -1868,29 +1866,31 @@ main(int argc, char *argv[])
 	 * finite state automaton.
 	 */
 	
-	while (-1 != (len = getline(&cp, &bufsz, f))) {
+	while ((len = getline(&cp, &bufsz, f)) != -1) {
 		assert(len > 0);
 		p.ln++;
-		if ('\n' != cp[len - 1]) {
+		if (cp[len - 1] != '\n') {
 			warnx("%s:%zu: unterminated line", p.fn, p.ln);
 			break;
 		}
 		cp[--len] = '\0';
-		/* Lines are always nil-terminated. */
+
+		/* Lines are now always nil-terminated. */
+
 		switch (p.phase) {
-		case (PHASE_INIT):
+		case PHASE_INIT:
 			init(&p, cp);
 			break;
-		case (PHASE_KEYS):
+		case PHASE_KEYS:
 			keys(&p, cp, len);
 			break;
-		case (PHASE_DESC):
+		case PHASE_DESC:
 			desc(&p, cp, len);
 			break;
-		case (PHASE_SEEALSO):
+		case PHASE_SEEALSO:
 			seealso(&p, cp, len);
 			break;
-		case (PHASE_DECL):
+		case PHASE_DECL:
 			decl(&p, cp, len);
 			break;
 		}
@@ -1906,9 +1906,9 @@ main(int argc, char *argv[])
 		 * Allow us to be at the declarations or scanning for
 		 * the next clause.
 		 */
-		if (PHASE_INIT == p.phase ||
-		    PHASE_DECL == p.phase) {
-			if (0 == hcreate(5000))
+		if (p.phase == PHASE_INIT ||
+		    p.phase == PHASE_DECL) {
+			if (hcreate(5000) == 0)
 				err(EXIT_FAILURE, "hcreate");
 			TAILQ_FOREACH(d, &p.dqhead, entries)
 				postprocess(prefix, d);
@@ -1916,17 +1916,14 @@ main(int argc, char *argv[])
 			TAILQ_FOREACH(d, &p.dqhead, entries)
 				emit(d);
 			rc = 1;
-		} else if (PHASE_DECL != p.phase)
+		} else if (p.phase != PHASE_DECL)
 			warnx("%s:%zu: exit when not in "
 				"initial state", p.fn, p.ln);
 	} 
 
-	while ( ! TAILQ_EMPTY(&p.dqhead)) {
-		/* coverity[use_after_free] */
-		d = TAILQ_FIRST(&p.dqhead);
+	while ((d = TAILQ_FIRST(&p.dqhead)) != NULL) {
 		TAILQ_REMOVE(&p.dqhead, d, entries);
-		while ( ! TAILQ_EMPTY(&d->dcqhead)) {
-			e = TAILQ_FIRST(&d->dcqhead);
+		while ((e = TAILQ_FIRST(&d->dcqhead)) != NULL) {
 			TAILQ_REMOVE(&d->dcqhead, e, entries);
 			free(e->text);
 			free(e);
@@ -1948,13 +1945,11 @@ main(int argc, char *argv[])
 		free(d->seealso);
 		free(d->keybuf);
 		free(d);
-		/* Shut up coverity. */
-		d = NULL;
 	}
 
-	return(rc ? EXIT_SUCCESS : EXIT_FAILURE);
+	return rc ? EXIT_SUCCESS : EXIT_FAILURE;
 usage:
 	fprintf(stderr, "usage: %s [-Nnv] [-p prefix] [file]\n",
 		getprogname());
-	return(EXIT_FAILURE);
+	return EXIT_FAILURE;
 }
