@@ -1954,7 +1954,7 @@ main(int argc, char *argv[])
 
 	return(rc ? EXIT_SUCCESS : EXIT_FAILURE);
 usage:
-	fprintf(stderr, "usage: %s [-nNv] [-p prefix] [file]\n", 
+	fprintf(stderr, "usage: %s [-Nnv] [-p prefix] [file]\n",
 		getprogname());
 	return(EXIT_FAILURE);
 }

@@ -22,7 +22,7 @@
 .Nd extract C reference manpages from SQLite header file
 .Sh SYNOPSIS
 .Nm sqlite2mdoc
-.Op Fl nv
+.Op Fl Nnv
 .Op Fl p Ar prefix
 .Op Ar file
 .Sh DESCRIPTION
@@ -34,21 +34,21 @@ using the SQLite documentation syntax (see
 It then emits the corresponding set of
 .Xr mdoc 7
 manpages, one per interface description.
-By default, 
+By default,
 .Nm
 reads from standard input and outputs files into the current directory.
 Its arguments are as follows:
 .Bl -tag -width Ds
-.It Fl n
-Don't create files in
-.Ar prefix :
-just dump everything to stdout.
 .It Fl N
 Emit only the manpage names that would be created.
 Automatically sets
 .Fl n
 and ignores
 .Fl p Ar prefix .
+.It Fl n
+Don't create files in
+.Ar prefix :
+just dump everything to stdout.
 .It Fl v
 Show all missing references.
 .It Fl p Ar prefix
