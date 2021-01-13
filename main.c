@@ -385,7 +385,7 @@ again:
  * then the value of that name.
  * We ignore the latter.
  * FIXME: this does not understand multi-line CPP, but I don't think
- * there are any instances of that in sqlite.h.
+ * there are any instances of that in sqlite3.h.
  */
 static int
 decl_define(struct parse *p, const char *cp, size_t len)
@@ -1167,7 +1167,7 @@ emit(struct defn *d)
 
 	fprintf(f, ".Nd %s\n", d->name);
 	fputs(".Sh SYNOPSIS\n", f);
-	fputs(".In sqlite.h\n", f);
+	fputs(".In sqlite3.h\n", f);
 
 	TAILQ_FOREACH(first, &d->dcqhead, entries) {
 		if (DECLTYPE_CPP != first->type &&
