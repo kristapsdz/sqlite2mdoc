@@ -811,7 +811,7 @@ xrcmp(const void *p1, const void *p2)
 	const char	*s1 = *(const char **)p1, 
 	     	 	*s2 = *(const char **)p2;
 
-	return(strcasecmp(s1, s2));
+	return strcasecmp(s1, s2);
 }
 
 /*
@@ -1089,13 +1089,15 @@ lookup(char *key)
 	ent.key = key;
 	ent.data = NULL;
 	res = hsearch(ent, FIND);
-	if (NULL == res) 
-		return(NULL);
+	if (res == NULL) 
+		return NULL;
+
 	d = (struct defn *)res->data;
-	if (0 == d->nmsz)
-		return(NULL);
+	if (d->nmsz == 0)
+		return NULL;
+
 	assert(NULL != d->nms[0]);
-	return(d->nms[0]);
+	return d->nms[0];
 }
 
 /*
@@ -1113,9 +1115,9 @@ newsentence(size_t start, size_t finish, const char *buf)
 	/* Ignore "i.e." and "e.g.". */
 
 	if ((span >= 4 && 
-	     0 == strncasecmp(&buf[finish - 4], "i.e.", 4)) ||
+	     strncasecmp(&buf[finish - 4], "i.e.", 4) == 0) ||
 	    (span >= 4 && 
-	     0 == strncasecmp(&buf[finish - 4], "e.g.", 4)))
+	     strncasecmp(&buf[finish - 4], "e.g.", 4) == 0))
 		return 0;
 
 	return 1;
@@ -1135,14 +1137,14 @@ emit(struct defn *d)
 	enum tag	 tag;
 	enum preproc	 pre;
 
-	if ( ! d->postprocessed) {
+	if (!d->postprocessed) {
 		warnx("%s:%zu: interface has errors, not "
 			"producing manpage", d->fn, d->ln);
 		return;
 	}
 
-	if (0 == nofile) {
-		if (NULL == (f = fopen(d->fname, "w"))) {
+	if (nofile == 0) {
+		if ((f = fopen(d->fname, "w")) == NULL) {
 			warn("%s: fopen", d->fname);
 			return;
 		}
@@ -1170,13 +1172,13 @@ emit(struct defn *d)
 	fputs(".In sqlite3.h\n", f);
 
 	TAILQ_FOREACH(first, &d->dcqhead, entries) {
-		if (DECLTYPE_CPP != first->type &&
-		    DECLTYPE_C != first->type)
+		if (first->type != DECLTYPE_CPP &&
+		    first->type != DECLTYPE_C)
 			continue;
 
 		/* Easy: just print the CPP name. */
 
-		if (DECLTYPE_CPP == first->type) {
+		if (first->type == DECLTYPE_CPP) {
 			fprintf(f, ".Fd #define %s\n",
 				first->text);
 			continue;
@@ -1201,7 +1203,7 @@ emit(struct defn *d)
 
 		/* If we're a typedef, immediately print Vt. */
 
-		if (0 == strncmp(&first->text[i], "typedef", 7)) {
+		if (strncmp(&first->text[i], "typedef", 7) == 0) {
 			fprintf(f, ".Vt %s\n", &first->text[i]);
 			continue;
 		}
@@ -1209,8 +1211,8 @@ emit(struct defn *d)
 		/* Are we a struct? */
 
 		if (first->textsz > 2 && 
-		    '}' == first->text[first->textsz - 2] &&
-		    NULL != (cp = strchr(&first->text[i], '{'))) {
+		    first->text[first->textsz - 2] == '}' &&
+		    (cp = strchr(&first->text[i], '{')) != NULL) {
 			*cp = '\0';
 			fprintf(f, ".Vt %s;\n", &first->text[i]);
 			/* Restore brace for later usage. */
@@ -1221,13 +1223,13 @@ emit(struct defn *d)
 		/* Catch remaining non-functions. */
 
 		if (first->textsz > 2 &&
-		    ')' != first->text[first->textsz - 2]) {
+		    first->text[first->textsz - 2] != ')') {
 			fprintf(f, ".Vt %s\n", &first->text[i]);
 			continue;
 		}
 
 		str = &first->text[i];
-		if (NULL == (args = strchr(str, '(')) || args == str) {
+		if ((args = strchr(str, '(')) == NULL || args == str) {
 			/* What is this? */
 			fputs(".Bd -literal\n", f);
 			fputs(&first->text[i], f);
@@ -1307,30 +1309,30 @@ emit(struct defn *d)
 				str++;
 			fputs(".Fa \"", f);
 			ns = 0;
-			while ('\0' != *str && 
-			       (ns || ',' != *str) && 
-			       (ns || ')' != *str)) {
+			while (*str != '\0' && 
+			       (ns || *str != ',') && 
+			       (ns || *str != ')')) {
 				/*
 				 * Handle comments in the declarations.
 				 */
-				if ('/' == str[0] && '*' == str[1]) {
+				if (str[0] == '/' && str[1] == '*') {
 					str += 2;
 					for ( ; '\0' != str[0]; str++)
-						if ('*' == str[0] && '/' == str[1])
+						if (str[0] == '*' && str[1] == '/')
 							break;
-					if ('\0' == *str)
+					if (*str == '\0')
 						break;
 					str += 2;
 					while (isspace((unsigned char)*str))
 						str++;
-					if ('\0' == *str ||
-					    (0 == ns && ',' == *str) ||
-					    (0 == ns && ')' == *str))
+					if (*str == '\0' ||
+					    (ns == 0 && *str == ',') ||
+					    (ns == 0 && *str == ')'))
 						break;
 				}
-				if ('(' == *str)
+				if (*str == '(')
 					ns++;
-				else if (')' == *str)
+				else if (*str == ')')
 					ns--;
 
 				/*
@@ -1345,11 +1347,11 @@ emit(struct defn *d)
 					while (isspace((unsigned char)*str))
 						str++;
 					/* Are we at a comment? */
-					if ('/' == str[0] && '*' == str[1])
+					if (str[0] == '/' && str[1] == '*')
 						continue;
-					if ('\0' == *str ||
-					    (0 == ns && ',' == *str) ||
-					    (0 == ns && ')' == *str))
+					if (*str == '\0' ||
+					    (ns == 0 && *str == ',') ||
+					    (ns == 0 && *str == ')'))
 						break;
 					fputc(' ', f);
 				} else {
@@ -1358,7 +1360,7 @@ emit(struct defn *d)
 				}
 			}
 			fputs("\"\n", f);
-			if ('\0' == *str || ')' == *str)
+			if (*str == '\0' || *str == ')')
 				break;
 			args = str;
 		}
@@ -1651,7 +1653,7 @@ emit(struct defn *d)
 			continue;
 		}
 
-		assert('\n' != d->desc[i]);
+		assert(d->desc[i] != '\n');
 
 		/*
 		 * Handle some oddities.
@@ -1660,28 +1662,28 @@ emit(struct defn *d)
 		 * There might be others...
 		 */
 
-		if (0 == strncmp(&d->desc[i], "&rarr;", 6)) {
+		if (strncmp(&d->desc[i], "&rarr;", 6) == 0) {
 			i += 6;
 			fputs("\\(->", f);
-		} else if (0 == strncmp(&d->desc[i], "&larr;", 6)) {
+		} else if (strncmp(&d->desc[i], "&larr;", 6) == 0) {
 			i += 6;
 			fputs("\\(<-", f);
-		} else if (0 == strncmp(&d->desc[i], "&nbsp;", 6)) {
+		} else if (strncmp(&d->desc[i], "&nbsp;", 6) == 0) {
 			i += 6;
 			fputc(' ', f);
-		} else if (0 == strncmp(&d->desc[i], "&lt;", 4)) {
+		} else if (strncmp(&d->desc[i], "&lt;", 4) == 0) {
 			i += 4;
 			fputc('<', f);
-		} else if (0 == strncmp(&d->desc[i], "&gt;", 4)) {
+		} else if (strncmp(&d->desc[i], "&gt;", 4) == 0) {
 			i += 4;
 			fputc('>', f);
-		} else if (0 == strncmp(&d->desc[i], "&#91;", 5)) {
+		} else if (strncmp(&d->desc[i], "&#91;", 5) == 0) {
 			i += 5;
 			fputc('[', f);
 		} else {
 			/* Make sure we don't trigger a macro. */
-			if (0 == col &&
-			    ('.' == d->desc[i] || '\'' == d->desc[i]))
+			if (col == 0 &&
+			    (d->desc[i] == '.' || d->desc[i] == '\''))
 				fputs("\\&", f);
 			fputc(d->desc[i], f);
 			i++;
@@ -1700,29 +1702,33 @@ emit(struct defn *d)
 	fputs(d->fulldesc, f);
 	fputs(".Ed\n", f);
 
+	/*
+	 * Look up all of our keywords (which are in the xrs field) in
+	 * the table of all known keywords.
+	 * Don't print duplicates.
+	 */
+
 	if (d->xrsz > 0) {
-		/*
-		 * Look up all of our keywords (which are in the xrs
-		 * field) in the table of all known keywords.
-		 * Don't print duplicates.
-		 */
 		lastres = NULL;
 		for (last = 0, i = 0; i < d->xrsz; i++) {
 			res = lookup(d->xrs[i]);
+
 			/* Ignore self-reference. */
+
 			if (res == d->nms[0] && verbose) 
 				warnx("%s:%zu: self-reference: %s",
 					d->fn, d->ln, d->xrs[i]);
 			if (res == d->nms[0] && verbose) 
 				continue;
-			if (NULL == res && verbose) 
+			if (res == NULL && verbose) 
 				warnx("%s:%zu: ref not found: %s",  
 					d->fn, d->ln, d->xrs[i]);
-			if (NULL == res)
+			if (res == NULL)
 				continue;
 
 			/* Ignore duplicates. */
-			if (NULL != lastres && lastres == res)
+
+			if (lastres != NULL && lastres == res)
 				continue;
 			if (last)
 				fputs(" ,\n", f);
@@ -1736,7 +1742,7 @@ emit(struct defn *d)
 			fputs("\n", f);
 	}
 
-	if (0 == nofile)
+	if (nofile == 0)
 		fclose(f);
 }
 
@@ -1751,10 +1757,10 @@ sandbox_pledge(int nofile)
 {
 
 	if (nofile) {
-		if (-1 == pledge("stdio", NULL))
+		if (pledge("stdio", NULL) == -1)
 			err(EXIT_FAILURE, "pledge");
 	} else {
-		if (-1 == pledge("stdio wpath cpath", NULL))
+		if (pledge("stdio wpath cpath", NULL) == -1)
 			err(EXIT_FAILURE, "pledge");
 	}
 }
@@ -1775,7 +1781,7 @@ sandbox_apple(int nofile)
 	rc = sandbox_init
 		(nofile ? kSBXProfilePureComputation : 
 		 kSBXProfileNoNetwork, SANDBOX_NAMED, &ep);
-	if (0 == rc)
+	if (rc == 0)
 		return;
 	perror(ep);
 	sandbox_free_error(ep);
@@ -1795,8 +1801,10 @@ check_dupes(struct parse *p)
 
 	TAILQ_FOREACH(d, &p->dqhead, entries)
 		TAILQ_FOREACH(dd, &p->dqhead, entries) {
-			if (NULL == d->fname || NULL == dd->fname ||
-			    dd == d || strcmp(d->fname, dd->fname))
+			if (d->fname == NULL || 
+			    dd->fname == NULL ||
+			    dd == d || 
+			    strcmp(d->fname, dd->fname))
 				continue;
 			warnx("%s:%zu: duplicate filename: "
 				"%s (from %s, line %zu)", d->fn, 
