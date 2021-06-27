@@ -1766,7 +1766,7 @@ emit(struct defn *d)
  * stdout, otherwise we need file-creation and writing.
  */
 static void
-sandbox_pledge(int nofile)
+sandbox_pledge(void)
 {
 
 	if (nofile) {
@@ -1786,7 +1786,7 @@ sandbox_pledge(int nofile)
  * Otherwise we need file writing.
  */
 static void
-sandbox_apple(int nofile)
+sandbox_apple(void)
 {
 	char	*ep;
 	int	 rc;
@@ -1879,9 +1879,9 @@ main(int argc, char *argv[])
 	}
 
 #if HAVE_SANDBOX_INIT
-	sandbox_apple(nofile);
+	sandbox_apple();
 #elif HAVE_PLEDGE
-	sandbox_pledge(nofile);
+	sandbox_pledge();
 #endif
 	/*
 	 * Read in line-by-line and process in the phase dictated by our
