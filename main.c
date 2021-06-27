@@ -1718,7 +1718,7 @@ emit(struct defn *d)
 			if (res == d->nms[0] && verbose) 
 				warnx("%s:%zu: self-reference: %s",
 					d->fn, d->ln, d->xrs[i]);
-			if (res == d->nms[0] && verbose) 
+			if (res == d->nms[0])
 				continue;
 			if (res == NULL && verbose) 
 				warnx("%s:%zu: ref not found: %s",  
