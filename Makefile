@@ -39,10 +39,10 @@ sqlite2mdoc.tar.gz.sha512: sqlite2mdoc.tar.gz
 main.o: config.h
 
 install:
-	mkdir -p $(DESTDIR)$(PREFIX)/bin
-	mkdir -p $(DESTDIR)$(PREFIX)/man/man1
-	$(INSTALL_PROGRAM) sqlite2mdoc $(DESTDIR)$(PREFIX)/bin
-	$(INSTALL_MAN) -m 0444 sqlite2mdoc.1 $(DESTDIR)$(PREFIX)/man/man1
+	mkdir -p $(DESTDIR)$(BINDIR)
+	mkdir -p $(DESTDIR)$(MANDIR)/man1
+	$(INSTALL_PROGRAM) sqlite2mdoc $(DESTDIR)$(BINDIR)
+	$(INSTALL_MAN) sqlite2mdoc.1 $(DESTDIR)$(MANDIR)/man1
 
 distcheck: sqlite2mdoc.tar.gz sqlite2mdoc.tar.gz.sha512
 	mandoc -Tlint -Werror sqlite2mdoc.1
