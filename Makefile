@@ -3,7 +3,7 @@
 include Makefile.configure
 
 WWWDIR		 = /var/www/vhosts/kristaps.bsd.lv/htdocs/sqlite2mdoc
-VERSION		 = 0.1.8
+VERSION		 = 0.1.9
 DOTAR 		 = Makefile \
 		   compats.c \
 		   main.c \
