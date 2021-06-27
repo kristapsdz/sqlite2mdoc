@@ -1810,13 +1810,14 @@ sandbox_apple(int nofile)
 static void
 check_dupes(struct parse *p)
 {
-	struct defn	*d, *dd;
+	const struct defn	*d, *dd;
 
 	TAILQ_FOREACH(d, &p->dqhead, entries)
-		TAILQ_FOREACH(dd, &p->dqhead, entries) {
+		TAILQ_FOREACH_REVERSE(dd, &p->dqhead, defnq, entries) {
+			if (dd == d)
+				break;
 			if (d->fname == NULL || 
 			    dd->fname == NULL ||
-			    dd == d || 
 			    strcmp(d->fname, dd->fname))
 				continue;
 			warnx("%s:%zu: duplicate filename: "
