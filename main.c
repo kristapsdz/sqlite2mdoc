@@ -251,14 +251,13 @@ decl_function_add(struct parse *p, char **etext,
 	if (' ' != (*etext)[*etextsz - 1]) {
 		*etext = realloc(*etext, *etextsz + 2);
 		if (NULL == *etext)
-			err(EXIT_FAILURE, "%s:%zu: "
-				"realloc", p->fn, p->ln);
+			err(1, NULL);
 		(*etextsz)++;
 		strlcat(*etext, " ", *etextsz + 1);
 	}
 	*etext = realloc(*etext, *etextsz + len + 1);
 	if (NULL == *etext)
-		err(EXIT_FAILURE, "%s:%zu: realloc", p->fn, p->ln);
+		err(1, NULL);
 	memcpy(*etext + *etextsz, cp, len);
 	*etextsz += len;
 	(*etext)[*etextsz] = '\0';
@@ -271,7 +270,7 @@ decl_function_copy(struct parse *p, char **etext,
 
 	*etext = malloc(len + 1);
 	if (NULL == *etext)
-		err(EXIT_FAILURE, "%s:%zu: strdup", p->fn, p->ln);
+		err(1, NULL);
 	memcpy(*etext, cp, len);
 	*etextsz = len;
 	(*etext)[*etextsz] = '\0';
@@ -318,7 +317,7 @@ again:
 		assert(0 == d->instruct);
 		e = calloc(1, sizeof(struct decl));
 		if (NULL == e)
-			err(EXIT_FAILURE, "%s:%zu: calloc", p->fn, p->ln);
+			err(1, NULL);
 		e->type = DECLTYPE_C;
 		TAILQ_INSERT_TAIL(&d->dcqhead, e, entries);
 	}
@@ -429,11 +428,11 @@ decl_define(struct parse *p, const char *cp, size_t len)
 
 	e = calloc(1, sizeof(struct decl));
 	if (NULL == e) 
-		err(EXIT_FAILURE, "%s:%zu: calloc", p->fn, p->ln);
+		err(1, NULL);
 	e->type = DECLTYPE_CPP;
 	e->text = calloc(1, sz + 1);
 	if (NULL == e->text)
-		err(EXIT_FAILURE, "%s:%zu: calloc", p->fn, p->ln);
+		err(1, NULL);
 	strlcpy(e->text, cp, sz + 1);
 	e->textsz = sz;
 	TAILQ_INSERT_TAIL(&d->dcqhead, e, entries);
@@ -482,7 +481,7 @@ decl(struct parse *p, const char *cp, size_t len)
 	d->fulldesc = realloc(d->fulldesc, 
 		d->fulldescsz + oldlen + 2);
 	if (NULL == d->fulldesc)
-		err(EXIT_FAILURE, "%s:%zu: realloc", p->fn, p->ln);
+		err(1, NULL);
 	if (0 == d->fulldescsz)
 		d->fulldesc[0] = '\0';
 	d->fulldescsz += oldlen + 2;
@@ -633,8 +632,7 @@ desc(struct parse *p, const char *cp, size_t len)
 	    '\n' != d->desc[d->descsz - 1]) {
 		d->desc = realloc(d->desc, d->descsz + 2);
 		if (NULL == d->desc)
-			err(EXIT_FAILURE, "%s:%zu: realloc", 
-				p->fn, p->ln);
+			err(1, NULL);
 		d->descsz++;
 		strlcat(d->desc, " ", d->descsz + 1);
 	}
@@ -644,13 +642,11 @@ desc(struct parse *p, const char *cp, size_t len)
 	if (NULL == d->desc) {
 		d->desc = calloc(1, nsz + 1);
 		if (NULL == d->desc)
-			err(EXIT_FAILURE, "%s:%zu: calloc", 
-				p->fn, p->ln);
+			err(1, NULL);
 	} else {
 		d->desc = realloc(d->desc, d->descsz + nsz + 1);
 		if (NULL == d->desc)
-			err(EXIT_FAILURE, "%s:%zu: realloc", 
-				p->fn, p->ln);
+			err(1, NULL);
 	}
 	d->descsz += nsz;
 	strlcat(d->desc, 0 == len ? "\n" : cp, d->descsz + 1);
@@ -705,7 +701,7 @@ keys(struct parse *p, const char *cp, size_t len)
 	assert(NULL != d);
 	d->keybuf = realloc(d->keybuf, d->keybufsz + len + 1);
 	if (NULL == d->keybuf)
-		err(EXIT_FAILURE, "%s:%zu: realloc", p->fn, p->ln);
+		err(1, NULL);
 	memcpy(d->keybuf + d->keybufsz, cp, len);
 	d->keybufsz += len;
 	d->keybuf[d->keybufsz] = '\0';
@@ -742,10 +738,10 @@ init(struct parse *p, const char *cp)
 	/* Add definition to list of existing ones. */
 	d = calloc(1, sizeof(struct defn));
 	if (NULL == d)
-		err(EXIT_FAILURE, "%s:%zu: calloc", p->fn, p->ln);
+		err(1, NULL);
 	d->name = strdup(cp);
 	if (NULL == d->name)
-		err(EXIT_FAILURE, "%s:%zu: strdup", p->fn, p->ln);
+		err(1, NULL);
 	d->fn = p->fn;
 	d->ln = p->ln;
 	p->phase = PHASE_KEYS;
@@ -846,7 +842,7 @@ postprocess(const char *prefix, struct defn *d)
 	/* Document name needs all-caps. */
 	d->dt = malloc(sz + 1);
 	if (NULL == d->dt)
-		err(EXIT_FAILURE, "malloc");
+		err(1, NULL);
 	memcpy(d->dt, start, sz);
 	d->dt[sz] = '\0';
 	for (i = 0; i < sz; i++)
@@ -863,7 +859,7 @@ postprocess(const char *prefix, struct defn *d)
 	}
 
 	if (NULL == d->fname)
-		err(EXIT_FAILURE, "asprintf");
+		err(1, NULL);
 
 	for (i = 0; i < sz; i++) {
 		if (isalnum((unsigned char)d->fname[offs + i]) ||
@@ -899,10 +895,10 @@ postprocess(const char *prefix, struct defn *d)
 		d->keys = realloc(d->keys,
 			(d->keysz + 1) * sizeof(char *));
 		if (NULL == d->keys) 
-			err(EXIT_FAILURE, "realloc");
+			err(1, NULL);
 		d->keys[d->keysz] = malloc(sz + 1);
 		if (NULL == d->keys[d->keysz]) 
-			err(EXIT_FAILURE, "malloc");
+			err(1, NULL);
 		memcpy(d->keys[d->keysz], start, sz);
 		d->keys[d->keysz][sz] = '\0';
 		d->keysz++;
@@ -929,10 +925,10 @@ postprocess(const char *prefix, struct defn *d)
 		d->nms = realloc(d->nms, 
 			(d->nmsz + 1) * sizeof(char *));
 		if (NULL == d->nms)
-			err(EXIT_FAILURE, "realloc");
+			err(1, NULL);
 		d->nms[d->nmsz] = malloc(sz + 1);
 		if (NULL == d->nms[d->nmsz])
-			err(EXIT_FAILURE, "malloc");
+			err(1, NULL);
 		memcpy(d->nms[d->nmsz], start, sz);
 		d->nms[d->nmsz][sz] = '\0';
 		d->nmsz++;
@@ -1005,10 +1001,10 @@ postprocess(const char *prefix, struct defn *d)
 		d->xrs = realloc(d->xrs,
 			(d->xrsz + 1) * sizeof(char *));
 		if (NULL == d->xrs)
-			err(EXIT_FAILURE, "realloc");
+			err(1, NULL);
 		d->xrs[d->xrsz] = malloc(sz + 1);
 		if (NULL == d->xrs[d->xrsz])
-			err(EXIT_FAILURE, "malloc");
+			err(1, NULL);
 		memcpy(d->xrs[d->xrsz], start, sz);
 		d->xrs[d->xrsz][sz] = '\0';
 		d->xrsz++;
@@ -1054,10 +1050,10 @@ postprocess(const char *prefix, struct defn *d)
 		d->xrs = realloc(d->xrs,
 			(d->xrsz + 1) * sizeof(char *));
 		if (NULL == d->xrs)
-			err(EXIT_FAILURE, "realloc");
+			err(1, NULL);
 		d->xrs[d->xrsz] = malloc(sz + 1);
 		if (NULL == d->xrs[d->xrsz])
-			err(EXIT_FAILURE, "malloc");
+			err(1, NULL);
 		memcpy(d->xrs[d->xrsz], start, sz);
 		d->xrs[d->xrsz][sz] = '\0';
 		d->xrsz++;
@@ -1771,10 +1767,10 @@ sandbox_pledge(void)
 
 	if (nofile) {
 		if (pledge("stdio", NULL) == -1)
-			err(EXIT_FAILURE, "pledge");
+			err(1, NULL);
 	} else {
 		if (pledge("stdio wpath cpath", NULL) == -1)
-			err(EXIT_FAILURE, "pledge");
+			err(1, NULL);
 	}
 }
 #endif
@@ -1798,7 +1794,7 @@ sandbox_apple(void)
 		return;
 	perror(ep);
 	sandbox_free_error(ep);
-	exit(EXIT_FAILURE);
+	exit(1);
 }
 #endif
 
@@ -1874,7 +1870,7 @@ main(int argc, char *argv[])
 
 	if (argc > 0) {
 		if ((f = fopen(argv[0], "r")) == NULL)
-			err(EXIT_FAILURE, "%s", argv[0]);
+			err(1, "%s", argv[0]);
 		p.fn = argv[0];
 	}
 
@@ -1931,7 +1927,7 @@ main(int argc, char *argv[])
 		if (p.phase == PHASE_INIT ||
 		    p.phase == PHASE_DECL) {
 			if (hcreate(5000) == 0)
-				err(EXIT_FAILURE, "hcreate");
+				err(1, NULL);
 			TAILQ_FOREACH(d, &p.dqhead, entries)
 				postprocess(prefix, d);
 			check_dupes(&p);
@@ -1969,9 +1965,9 @@ main(int argc, char *argv[])
 		free(d);
 	}
 
-	return rc ? EXIT_SUCCESS : EXIT_FAILURE;
+	return !rc;
 usage:
 	fprintf(stderr, "usage: %s [-Nnv] [-p prefix] [file]\n",
 		getprogname());
-	return EXIT_FAILURE;
+	return 1;
 }
