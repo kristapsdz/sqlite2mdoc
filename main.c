@@ -892,8 +892,8 @@ postprocess(const char *prefix, struct defn *d)
 					break;
 		if (0 == sz)
 			continue;
-		d->keys = realloc(d->keys,
-			(d->keysz + 1) * sizeof(char *));
+		d->keys = reallocarray(d->keys,
+			d->keysz + 1, sizeof(char *));
 		if (NULL == d->keys) 
 			err(1, NULL);
 		d->keys[d->keysz] = malloc(sz + 1);
@@ -922,8 +922,8 @@ postprocess(const char *prefix, struct defn *d)
 		grok_name(first, &start, &sz);
 		if (NULL == start) 
 			continue;
-		d->nms = realloc(d->nms, 
-			(d->nmsz + 1) * sizeof(char *));
+		d->nms = reallocarray(d->nms, 
+			d->nmsz + 1, sizeof(char *));
 		if (NULL == d->nms)
 			err(1, NULL);
 		d->nms[d->nmsz] = malloc(sz + 1);
@@ -998,8 +998,8 @@ postprocess(const char *prefix, struct defn *d)
 	 	    ')' == start[sz - 1])
 			sz -= 2;
 
-		d->xrs = realloc(d->xrs,
-			(d->xrsz + 1) * sizeof(char *));
+		d->xrs = reallocarray(d->xrs,
+			d->xrsz + 1, sizeof(char *));
 		if (NULL == d->xrs)
 			err(1, NULL);
 		d->xrs[d->xrsz] = malloc(sz + 1);
@@ -1047,8 +1047,8 @@ postprocess(const char *prefix, struct defn *d)
 		    ')' == start[sz - 1])
 			sz -= 2;
 
-		d->xrs = realloc(d->xrs,
-			(d->xrsz + 1) * sizeof(char *));
+		d->xrs = reallocarray(d->xrs,
+			d->xrsz + 1, sizeof(char *));
 		if (NULL == d->xrs)
 			err(1, NULL);
 		d->xrs[d->xrsz] = malloc(sz + 1);
