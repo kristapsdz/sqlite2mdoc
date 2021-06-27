@@ -60,17 +60,22 @@ distcheck: sqlite2mdoc.tar.gz sqlite2mdoc.tar.gz.sha512
 distclean: clean
 	rm -f config.h config.log Makefile.configure
 
-# We can't use diff -r because of the CVS directory.
-# Instead use both directions (out -> expect, expect -> out)
-# to catch any nonexistent files.
-
 regen_regress: all
-	rm -f regress/expect/*.3
-	./sqlite2mdoc -p regress/expect regress/sqlite3.h
-	@for f in regress/expect/*.3 ; do \
-		sed 1d $$f > $$f.tmp ; \
-		mv -f $$f.tmp $$f ; \
+	mkdir -p regress/expect/tmp
+	./sqlite2mdoc -p regress/expect/tmp regress/sqlite3.h
+	@for f in regress/expect/tmp/*.3 ; do \
+		bn=`basename $$f` ; \
+		echo $$bn ; \
+		sed 1d $$f > regress/expect/$$bn.tmp ; \
+		set +e ; \
+		cmp regress/expect/$$bn.tmp regress/expect/$$bn >/dev/null 2>&1 ; \
+		if [ $$? -ne 0 ] ; then \
+			diff -u regress/expect/$$bn regress/expect/$$bn.tmp ; \
+		fi ; \
+		set -e ; \
+		mv -f regress/expect/$$bn.tmp regress/expect/$$bn ; \
 	done
+	rm -rf regress/expect/tmp
 
 regress: all
 	rm -rf regress/out
