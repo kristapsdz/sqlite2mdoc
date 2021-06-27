@@ -1904,16 +1904,16 @@ main(int argc, char *argv[])
 			init(&p, cp);
 			break;
 		case PHASE_KEYS:
-			keys(&p, cp, len);
+			keys(&p, cp, (size_t)len);
 			break;
 		case PHASE_DESC:
-			desc(&p, cp, len);
+			desc(&p, cp, (size_t)len);
 			break;
 		case PHASE_SEEALSO:
-			seealso(&p, cp, len);
+			seealso(&p, cp, (size_t)len);
 			break;
 		case PHASE_DECL:
-			decl(&p, cp, len);
+			decl(&p, cp, (size_t)len);
 			break;
 		}
 	}
