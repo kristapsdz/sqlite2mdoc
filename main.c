@@ -30,6 +30,7 @@
 # include <sandbox.h>
 #endif
 #include <search.h>
+#include <stdint.h> /* uintptr_t */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -805,15 +806,6 @@ grok_name(const struct decl *e,
 	}
 }
 
-static int
-xrcmp(const void *p1, const void *p2)
-{
-	const char	*s1 = *(const char **)p1, 
-	     	 	*s2 = *(const char **)p2;
-
-	return strcasecmp(s1, s2);
-}
-
 /*
  * Extract information from the interface definition.
  * Mark it as "postprocessed" on success.
@@ -1071,33 +1063,51 @@ postprocess(const char *prefix, struct defn *d)
 		d->xrsz++;
 	}
 
-	qsort(d->xrs, d->xrsz, sizeof(char *), xrcmp);
 	d->postprocessed = 1;
 }
 
 /*
- * Convenience function to look up a keyword.
+ * Convenience function to look up which manpage "hosts" a certain
+ * keyword.  For example, SQLITE_OK(3) also handles SQLITE_TOOBIG and so
+ * on, so a reference to SQLITE_TOOBIG should actually point to
+ * SQLITE_OK.
  * Returns the keyword's file if found or NULL.
  */
 static const char *
-lookup(char *key)
+lookup(const char *key)
 {
-	ENTRY		 ent;
-	ENTRY		*res;
-	struct defn	*d;
+	ENTRY			 ent;
+	ENTRY			*res;
+	const struct defn	*d;
 
-	ent.key = key;
+	ent.key = (char *)(uintptr_t)key;
 	ent.data = NULL;
-	res = hsearch(ent, FIND);
-	if (res == NULL) 
+
+	if ((res = hsearch(ent, FIND)) == NULL)
 		return NULL;
 
-	d = (struct defn *)res->data;
+	d = (const struct defn *)res->data;
 	if (d->nmsz == 0)
 		return NULL;
 
-	assert(NULL != d->nms[0]);
+	assert(d->nms[0] != NULL);
 	return d->nms[0];
+}
+
+static int
+xrcmp(const void *p1, const void *p2)
+{
+	/* Silence bogus warnings about un-consting. */
+
+	const char	*s1 = lookup(*(const char **)(uintptr_t)p1),
+			*s2 = lookup(*(const char **)(uintptr_t)p2);
+
+	/* Stuff bad lookups at the end. */
+
+	if (s1 == NULL || s2 == NULL)
+		return -1;
+
+	return strcasecmp(s1, s2);
 }
 
 /*
@@ -1709,6 +1719,7 @@ emit(struct defn *d)
 	 */
 
 	if (d->xrsz > 0) {
+		qsort(d->xrs, d->xrsz, sizeof(char *), xrcmp);
 		lastres = NULL;
 		for (last = 0, i = 0; i < d->xrsz; i++) {
 			res = lookup(d->xrs[i]);
@@ -1728,12 +1739,14 @@ emit(struct defn *d)
 
 			/* Ignore duplicates. */
 
-			if (lastres != NULL && lastres == res)
+			if (lastres == res)
 				continue;
+
 			if (last)
 				fputs(" ,\n", f);
 			else
 				fputs(".Sh SEE ALSO\n", f);
+
 			fprintf(f, ".Xr %s 3", res);
 			last = 1;
 			lastres = res;
