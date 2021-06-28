@@ -106,6 +106,7 @@ enum	tag {
 	TAG_TD_OPEN_ATTRS,
 	TAG_TH_CLOSE,
 	TAG_TH_OPEN,
+	TAG_TH_OPEN_ATTRS,
 	TAG_TR_CLOSE,
 	TAG_TR_OPEN,
 	TAG_U_CLOSE,
@@ -218,6 +219,7 @@ static	const struct taginfo tags[TAG__MAX] = {
 	{ "<td ", " ", TAGINFO_INLINE | TAGINFO_ATTRS}, /* TAG_TD_OPEN_ATTRS */
 	{ "</th>", "", TAGINFO_NOOP }, /* TAG_TH_CLOSE */
 	{ "<th>", " ", TAGINFO_INLINE }, /* TAG_TH_OPEN */
+	{ "<th ", " ", TAGINFO_INLINE | TAGINFO_ATTRS}, /* TAG_TH_OPEN_ATTRS */
 	{ "</tr>", "", TAGINFO_NOOP}, /* TAG_TR_CLOSE */
 	{ "<tr>", "", TAGINFO_NOBR }, /* TAG_TR_OPEN */
 	{ "</u>", "\\fP", TAGINFO_INLINE }, /* TAG_U_CLOSE */
