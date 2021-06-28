@@ -34,7 +34,7 @@ This is to allow the following pattern (pseudo-code):
 sqlite3changeset_start(); while( SQLITE_ROW==sqlite3changeset_next()
 ){ // Do something with change.
 } rc = sqlite3changeset_finalize(); if( rc!=SQLITE_OK ){ // An error
-has occurred } 
+has occurred }
 .Ed
 .Pp
 .Sh IMPLEMENTATION NOTES

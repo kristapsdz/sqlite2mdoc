@@ -28,7 +28,7 @@ sqlite3_changegroup *pGrp; rc = sqlite3_changegroup_new(&pGrp); if(
 rc==SQLITE_OK ) rc = sqlite3changegroup_add(pGrp, nA, pA); if( rc==SQLITE_OK
 ) rc = sqlite3changegroup_add(pGrp, nB, pB); if( rc==SQLITE_OK ){ rc
 = sqlite3changegroup_output(pGrp, pnOut, ppOut); }else{ *ppOut = 0;
-*pnOut = 0; } 
+*pnOut = 0; }
 .Ed
 .Pp
 Refer to the sqlite3_changegroup documentation below for details.

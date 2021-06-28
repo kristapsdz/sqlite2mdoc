@@ -20,7 +20,7 @@ This interfaces opens a handle to the BLOB located in row iRow,
 column zColumn, table zTable in database zDb; in other words, the same
 BLOB that would be selected by:
 .Bd -literal
-SELECT zColumn FROM zDb.zTable WHERE rowid = iRow; 
+SELECT zColumn FROM zDb.zTable WHERE rowid = iRow;
 .Ed
 .Pp
 Parameter zDb is not the filename that contains the database, but rather
@@ -46,21 +46,21 @@ on *ppBlob after this function it returns.
 This function fails with SQLITE_ERROR if any of the following are true:
 .Bl -bullet
 .It
-Database zDb does not exist, 
+Database zDb does not exist,
 .It
-Table zTable does not exist within database zDb, 
+Table zTable does not exist within database zDb,
 .It
-Table zTable is a WITHOUT ROWID table, 
+Table zTable is a WITHOUT ROWID table,
 .It
-Column zColumn does not exist, 
+Column zColumn does not exist,
 .It
-Row iRow is not present in the table, 
+Row iRow is not present in the table,
 .It
 The specified column of row iRow contains a value that is not a TEXT
-or BLOB value, 
+or BLOB value,
 .It
 Column zColumn is part of an index, PRIMARY KEY or UNIQUE constraint
-and the blob is being opened for read/write access, 
+and the blob is being opened for read/write access,
 .It
 Foreign key constraints are enabled, column
 zColumn is part of a child key definition and the blob is

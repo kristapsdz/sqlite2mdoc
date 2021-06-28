@@ -81,22 +81,22 @@
 .Fa "sqlite3_value*"
 .Fc
 .Sh DESCRIPTION
-\fBSummary:\fP 
+\fBSummary:\fP
 .Bd -ragged
 .Pp
-  \fBsqlite3_value_blob\fP \(-> BLOB value 
-  \fBsqlite3_value_double\fP \(-> REAL value 
-  \fBsqlite3_value_int\fP \(-> 32-bit INTEGER value 
-  \fBsqlite3_value_int64\fP \(-> 64-bit INTEGER value 
-  \fBsqlite3_value_pointer\fP \(-> Pointer value 
-  \fBsqlite3_value_text\fP \(-> UTF-8 TEXT value 
-  \fBsqlite3_value_text16\fP \(-> UTF-16 TEXT value in the native byteorder 
-  \fBsqlite3_value_text16be\fP \(-> UTF-16be TEXT value 
-  \fBsqlite3_value_text16le\fP \(-> UTF-16le TEXT value 
-        
-  \fBsqlite3_value_bytes\fP \(-> Size of a BLOB or a UTF-8 TEXT in bytes 
-  \fBsqlite3_value_bytes16  \fP  \(->   Size of UTF-16 TEXT in bytes 
-  \fBsqlite3_value_type\fP \(-> Default datatype of the value 
+  \fBsqlite3_value_blob\fP \(-> BLOB value
+  \fBsqlite3_value_double\fP \(-> REAL value
+  \fBsqlite3_value_int\fP \(-> 32-bit INTEGER value
+  \fBsqlite3_value_int64\fP \(-> 64-bit INTEGER value
+  \fBsqlite3_value_pointer\fP \(-> Pointer value
+  \fBsqlite3_value_text\fP \(-> UTF-8 TEXT value
+  \fBsqlite3_value_text16\fP \(-> UTF-16 TEXT value in the native byteorder
+  \fBsqlite3_value_text16be\fP \(-> UTF-16be TEXT value
+  \fBsqlite3_value_text16le\fP \(-> UTF-16le TEXT value
+       
+  \fBsqlite3_value_bytes\fP \(-> Size of a BLOB or a UTF-8 TEXT in bytes
+  \fBsqlite3_value_bytes16  \fP  \(->   Size of UTF-16 TEXT in bytes
+  \fBsqlite3_value_type\fP \(-> Default datatype of the value
   \fBsqlite3_value_numeric_type  \fP  \(->   Best numeric datatype of the value
   \fBsqlite3_value_nochange  \fP  \(->   True if the column is unchanged in an
 UPDATE against a virtual table.
@@ -197,19 +197,19 @@ Only the following subset of interfaces are subject to out-of-memory
 errors:
 .Bl -bullet
 .It
-sqlite3_value_blob() 
+sqlite3_value_blob()
 .It
-sqlite3_value_text() 
+sqlite3_value_text()
 .It
-sqlite3_value_text16() 
+sqlite3_value_text16()
 .It
-sqlite3_value_text16le() 
+sqlite3_value_text16le()
 .It
-sqlite3_value_text16be() 
+sqlite3_value_text16be()
 .It
-sqlite3_value_bytes() 
+sqlite3_value_bytes()
 .It
-sqlite3_value_bytes16() 
+sqlite3_value_bytes16()
 .El
 .Pp
 If an out-of-memory error occurs, then the return value from these

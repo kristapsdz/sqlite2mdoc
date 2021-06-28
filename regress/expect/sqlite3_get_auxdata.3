@@ -46,19 +46,19 @@ or NULL if the metadata has been discarded.
 After each call to sqlite3_set_auxdata(C,N,P,X) where X is not NULL,
 SQLite will invoke the destructor function X with parameter P exactly
 once, when the metadata is discarded.
-SQLite is free to discard the metadata at any time, including: 
+SQLite is free to discard the metadata at any time, including:
 .Bl -bullet
 .It
-when the corresponding function parameter changes, or 
+when the corresponding function parameter changes, or
 .It
 when
 .Fn sqlite3_reset
 or
 .Fn sqlite3_finalize
-is called for the SQL statement, or 
+is called for the SQL statement, or
 .It
 when sqlite3_set_auxdata() is invoked again on the same parameter,
-or 
+or
 .It
 during the original sqlite3_set_auxdata() call when a memory allocation
 error occurs.

@@ -87,13 +87,11 @@ regress: all
 	done
 	@for f in regress/out/*.3 ; do \
 		echo diff $$f regress/expect/`basename $$f` ; \
-		set +e ; \
 		diff -u $$f regress/expect/`basename $$f` ; \
-		set -e ; \
 	done
 	@for f in regress/expect/*.3 ; do \
 		echo diff $$f regress/out/`basename $$f` ; \
-		diff $$f regress/out/`basename $$f` ; \
+		diff -u $$f regress/out/`basename $$f` ; \
 	done
 	rm -rf regress/out
 

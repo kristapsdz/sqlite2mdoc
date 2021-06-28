@@ -46,13 +46,13 @@ Thus, the backup may be performed on a live source database without
 preventing other database connections from reading or writing to the
 source database while the backup is underway.
 .Pp
-To perform a backup operation: 
+To perform a backup operation:
 .Bl -enum
 .It
-\fBsqlite3_backup_init()\fP is called once to initialize the backup, 
+\fBsqlite3_backup_init()\fP is called once to initialize the backup,
 .It
 \fBsqlite3_backup_step()\fP is called one or more times to transfer the data
-between the two databases, and finally 
+between the two databases, and finally
 .It
 \fBsqlite3_backup_finish()\fP is called to release all resources associated
 with the backup operation.
@@ -113,13 +113,13 @@ SQLITE_BUSY, SQLITE_LOCKED, or an SQLITE_IOERR_XXX
 extended error code.
 .Pp
 The sqlite3_backup_step() might return SQLITE_READONLY
-if 
+if
 .Bl -enum
 .It
-the destination database was opened read-only, or 
+the destination database was opened read-only, or
 .It
 the destination database is using write-ahead-log journaling and the
-destination and source page sizes differ, or 
+destination and source page sizes differ, or
 .It
 the destination database is an in-memory database and the destination
 and source page sizes differ.

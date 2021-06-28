@@ -125,13 +125,13 @@ that the sessions module invokes to incrementally request input data
 as it is required.
 In all cases, a pair of API function parameters such as
 .Bd -literal
-      int nChangeset,       void *pChangeset, 
+      int nChangeset,       void *pChangeset,
 .Ed
 .Pp
 Is replaced by:
 .Bd -literal
       int (*xInput)(void *pIn, void *pData, int *pnData),       void
-*pIn, 
+*pIn,
 .Ed
 .Pp
 Each time the xInput callback is invoked by the sessions module, the
@@ -159,13 +159,13 @@ return them in chunks by way of a callback function instead of via
 a pointer to a single large buffer.
 In this case, a pair of parameters such as:
 .Bd -literal
-      int *pnChangeset,       void **ppChangeset, 
+      int *pnChangeset,       void **ppChangeset,
 .Ed
 .Pp
 Is replaced by:
 .Bd -literal
       int (*xOutput)(void *pOut, const void *pData, int nData),   
-void *pOut 
+void *pOut
 .Ed
 .Pp
 The xOutput callback is invoked zero or more times to return data to

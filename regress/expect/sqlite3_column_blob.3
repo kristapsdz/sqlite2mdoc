@@ -65,21 +65,21 @@
 .Fa "int iCol"
 .Fc
 .Sh DESCRIPTION
-\fBSummary:\fP 
+\fBSummary:\fP
 .Bd -ragged
 .Pp
-  \fBsqlite3_column_blob\fP \(-> BLOB result 
-  \fBsqlite3_column_double\fP \(-> REAL result 
-  \fBsqlite3_column_int\fP \(-> 32-bit INTEGER result 
-  \fBsqlite3_column_int64\fP \(-> 64-bit INTEGER result 
-  \fBsqlite3_column_text\fP \(-> UTF-8 TEXT result 
-  \fBsqlite3_column_text16\fP \(-> UTF-16 TEXT result 
+  \fBsqlite3_column_blob\fP \(-> BLOB result
+  \fBsqlite3_column_double\fP \(-> REAL result
+  \fBsqlite3_column_int\fP \(-> 32-bit INTEGER result
+  \fBsqlite3_column_int64\fP \(-> 64-bit INTEGER result
+  \fBsqlite3_column_text\fP \(-> UTF-8 TEXT result
+  \fBsqlite3_column_text16\fP \(-> UTF-16 TEXT result
   \fBsqlite3_column_value\fP \(-> The result as an unprotected sqlite3_value
 object.
-        
+       
   \fBsqlite3_column_bytes\fP \(-> Size of a BLOB or a UTF-8 TEXT result in bytes
-  \fBsqlite3_column_bytes16  \fP  \(->   Size of UTF-16 TEXT in bytes 
-  \fBsqlite3_column_type\fP \(-> Default datatype of the result 
+  \fBsqlite3_column_bytes16  \fP  \(->   Size of UTF-16 TEXT in bytes
+  \fBsqlite3_column_type\fP \(-> Default datatype of the result
 .Pp
 .Ed
 .Pp
@@ -213,22 +213,22 @@ The following table details the conversions that are applied:
 .Bd -ragged
 .Pp
    Internal Type   Requested Type    Conversion
-    NULL      INTEGER     Result is 0 
-    NULL       FLOAT      Result is 0.0 
-    NULL        TEXT      Result is a NULL pointer 
-    NULL        BLOB      Result is a NULL pointer 
-   INTEGER     FLOAT      Convert from integer to float 
-   INTEGER      TEXT      ASCII rendering of the integer 
-   INTEGER      BLOB      Same as INTEGER->TEXT 
-    FLOAT     INTEGER     CAST to INTEGER 
-    FLOAT       TEXT      ASCII rendering of the float 
-    FLOAT       BLOB      CAST to BLOB 
-    TEXT      INTEGER     CAST to INTEGER 
-    TEXT       FLOAT      CAST to REAL 
-    TEXT        BLOB      No change 
-    BLOB      INTEGER     CAST to INTEGER 
-    BLOB       FLOAT      CAST to REAL 
-    BLOB        TEXT      Add a zero terminator if needed 
+    NULL      INTEGER     Result is 0
+    NULL       FLOAT      Result is 0.0
+    NULL        TEXT      Result is a NULL pointer
+    NULL        BLOB      Result is a NULL pointer
+   INTEGER     FLOAT      Convert from integer to float
+   INTEGER      TEXT      ASCII rendering of the integer
+   INTEGER      BLOB      Same as INTEGER->TEXT
+    FLOAT     INTEGER     CAST to INTEGER
+    FLOAT       TEXT      ASCII rendering of the float
+    FLOAT       BLOB      CAST to BLOB
+    TEXT      INTEGER     CAST to INTEGER
+    TEXT       FLOAT      CAST to REAL
+    TEXT        BLOB      No change
+    BLOB      INTEGER     CAST to INTEGER
+    BLOB       FLOAT      CAST to REAL
+    BLOB        TEXT      Add a zero terminator if needed
 .Pp
 .Ed
 .Pp
@@ -299,15 +299,15 @@ Only the following subset of interfaces are subject to out-of-memory
 errors:
 .Bl -bullet
 .It
-sqlite3_column_blob() 
+sqlite3_column_blob()
 .It
-sqlite3_column_text() 
+sqlite3_column_text()
 .It
-sqlite3_column_text16() 
+sqlite3_column_text16()
 .It
-sqlite3_column_bytes() 
+sqlite3_column_bytes()
 .It
-sqlite3_column_bytes16() 
+sqlite3_column_bytes16()
 .El
 .Pp
 If an out-of-memory error occurs, then the return value from these

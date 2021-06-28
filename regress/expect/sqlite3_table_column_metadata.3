@@ -52,11 +52,11 @@ element of metadata is omitted.
 .Bd -ragged
 .Pp
    Parameter   Output Type    Description
-   5th   const char*   Data type 
-   6th   const char*   Name of default collation sequence 
-   7th   int           True if column has a NOT NULL constraint 
-   8th   int           True if column is part of the PRIMARY KEY 
-   9th   int           True if column is AUTOINCREMENT 
+   5th   const char*   Data type
+   6th   const char*   Name of default collation sequence
+   7th   int           True if column has a NOT NULL constraint
+   8th   int           True if column is part of the PRIMARY KEY
+   9th   int           True if column is AUTOINCREMENT
 .Pp
 .Ed
 .Pp
@@ -75,7 +75,7 @@ If there is no INTEGER PRIMARY KEY column, then
 the outputs for the rowid are set as follows:
 .Bd -literal
 data type: "INTEGER" collation sequence: "BINARY" not null: 0 primary
-key: 1 auto increment: 0 
+key: 1 auto increment: 0
 .Ed
 .Pp
 This function causes all database schemas to be read from disk and

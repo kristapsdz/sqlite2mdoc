@@ -89,21 +89,21 @@ SQLite will also add one of the following flags to the xOpen() call,
 depending on the object being opened:
 .Bl -bullet
 .It
-SQLITE_OPEN_MAIN_DB 
+SQLITE_OPEN_MAIN_DB
 .It
-SQLITE_OPEN_MAIN_JOURNAL 
+SQLITE_OPEN_MAIN_JOURNAL
 .It
-SQLITE_OPEN_TEMP_DB 
+SQLITE_OPEN_TEMP_DB
 .It
-SQLITE_OPEN_TEMP_JOURNAL 
+SQLITE_OPEN_TEMP_JOURNAL
 .It
-SQLITE_OPEN_TRANSIENT_DB 
+SQLITE_OPEN_TRANSIENT_DB
 .It
-SQLITE_OPEN_SUBJOURNAL 
+SQLITE_OPEN_SUBJOURNAL
 .It
-SQLITE_OPEN_MASTER_JOURNAL 
+SQLITE_OPEN_MASTER_JOURNAL
 .It
-SQLITE_OPEN_WAL 
+SQLITE_OPEN_WAL
 .El
 .Pp
 The file I/O implementation can use the object type flags to change
@@ -119,9 +119,9 @@ up its I/O subsystem accordingly.
 SQLite might also add one of the following flags to the xOpen method:
 .Bl -bullet
 .It
-SQLITE_OPEN_DELETEONCLOSE 
+SQLITE_OPEN_DELETEONCLOSE
 .It
-SQLITE_OPEN_EXCLUSIVE 
+SQLITE_OPEN_EXCLUSIVE
 .El
 .Pp
 The SQLITE_OPEN_DELETEONCLOSE flag means the

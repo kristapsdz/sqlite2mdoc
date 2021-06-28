@@ -197,11 +197,11 @@ This step is only necessary if the application desires to keep the
 database in WAL mode after the reset if it was in WAL mode before the
 reset.
 .It
-sqlite3_db_config(db, SQLITE_DBCONFIG_RESET_DATABASE, 1, 0); 
+sqlite3_db_config(db, SQLITE_DBCONFIG_RESET_DATABASE, 1, 0);
 .It
-sqlite3_exec(db, "VACUUM", 0, 0, 0); 
+sqlite3_exec(db, "VACUUM", 0, 0, 0);
 .It
-sqlite3_db_config(db, SQLITE_DBCONFIG_RESET_DATABASE, 0, 0); 
+sqlite3_db_config(db, SQLITE_DBCONFIG_RESET_DATABASE, 0, 0);
 .El
 .Pp
 Because resetting a database is destructive and irreversible, the process

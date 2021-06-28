@@ -154,7 +154,7 @@ The SQLITE_CONFIG_MEMSTATUS option takes single argument of type int,
 interpreted as a boolean, which enables or disables the collection
 of memory allocation statistics.
 When memory allocation statistics are disabled, the following SQLite
-interfaces become non-operational: 
+interfaces become non-operational:
 .Bl -bullet
 .It
 .Fn sqlite3_memory_used
@@ -296,7 +296,7 @@ The SQLite logging interface is not reentrant; the logger function
 supplied by the application must not invoke any SQLite interface.
 In a multi-threaded application, the application-defined logger function
 must be threadsafe.
-.It SQLITE_CONFIG_URI 
+.It SQLITE_CONFIG_URI
 The SQLITE_CONFIG_URI option takes a single argument of type int.
 If non-zero, then URI handling is globally enabled.
 If the parameter is zero, then URI handling is globally disabled.
@@ -313,7 +313,7 @@ opened.
 By default, URI handling is globally disabled.
 The default value may be changed by compiling with the SQLITE_USE_URI
 symbol defined.
-.It SQLITE_CONFIG_COVERING_INDEX_SCAN 
+.It SQLITE_CONFIG_COVERING_INDEX_SCAN
 The SQLITE_CONFIG_COVERING_INDEX_SCAN option takes a single integer
 argument which is interpreted as a boolean in order to enable or disable
 the use of covering indices for full table scans in the query optimizer.
@@ -325,10 +325,10 @@ when the optimization is enabled.
 Providing the ability to disable the optimization allows the older,
 buggy application code to work without change even with newer versions
 of SQLite.
-.It SQLITE_CONFIG_PCACHE and SQLITE_CONFIG_GETPCACHE 
+.It SQLITE_CONFIG_PCACHE and SQLITE_CONFIG_GETPCACHE
 These options are obsolete and should not be used by new code.
 They are retained for backwards compatibility but are now no-ops.
-.It SQLITE_CONFIG_SQLLOG 
+.It SQLITE_CONFIG_SQLLOG
 This option is only available if sqlite is compiled with the SQLITE_ENABLE_SQLLOG
 pre-processor macro defined.
 The first argument should be a pointer to a function of type void(*)(void*,sqlite3*,const
@@ -347,7 +347,7 @@ as the second parameter is being closed.
 The third parameter is passed NULL In this case.
 An example of using this configuration option can be seen in the "test_sqllog.c"
 source file in the canonical SQLite source tree.
-.It SQLITE_CONFIG_MMAP_SIZE 
+.It SQLITE_CONFIG_MMAP_SIZE
 SQLITE_CONFIG_MMAP_SIZE takes two 64-bit integer (sqlite3_int64) values
 that are the default mmap size limit (the default setting for PRAGMA mmap_size)
 and the maximum allowed mmap size limit.
@@ -359,19 +359,19 @@ so that it does not exceed the compile-time maximum mmap size set by
 the SQLITE_MAX_MMAP_SIZE compile-time option.
 If either argument to this option is negative, then that argument is
 changed to its compile-time default.
-.It SQLITE_CONFIG_WIN32_HEAPSIZE 
+.It SQLITE_CONFIG_WIN32_HEAPSIZE
 The SQLITE_CONFIG_WIN32_HEAPSIZE option is only available if SQLite
 is compiled for Windows with the SQLITE_WIN32_MALLOC
 pre-processor macro defined.
 SQLITE_CONFIG_WIN32_HEAPSIZE takes a 32-bit unsigned integer value
 that specifies the maximum size of the created heap.
-.It SQLITE_CONFIG_PCACHE_HDRSZ 
+.It SQLITE_CONFIG_PCACHE_HDRSZ
 The SQLITE_CONFIG_PCACHE_HDRSZ option takes a single parameter which
 is a pointer to an integer and writes into that integer the number
 of extra bytes per page required for each page in SQLITE_CONFIG_PAGECACHE.
 The amount of extra space required can change depending on the compiler,
 target platform, and SQLite version.
-.It SQLITE_CONFIG_PMASZ 
+.It SQLITE_CONFIG_PMASZ
 The SQLITE_CONFIG_PMASZ option takes a single parameter which is an
 unsigned integer and sets the "Minimum PMA Size" for the multithreaded
 sorter to that integer.
@@ -382,7 +382,7 @@ sorting is enabled (using the PRAGMA threads command)
 and the amount of content to be sorted exceeds the page size times
 the minimum of the PRAGMA cache_size setting and this
 value.
-.It SQLITE_CONFIG_STMTJRNL_SPILL 
+.It SQLITE_CONFIG_STMTJRNL_SPILL
 The SQLITE_CONFIG_STMTJRNL_SPILL option takes a single parameter which
 becomes the statement journal spill-to-disk threshold.
 Statement journals are held in memory until their
@@ -395,7 +395,7 @@ threshold to a value such as 64KiB can greatly reduce the amount of
 I/O required to support statement rollback.
 The default value for this setting is controlled by the SQLITE_STMTJRNL_SPILL
 compile-time option.
-.It SQLITE_CONFIG_SORTERREF_SIZE 
+.It SQLITE_CONFIG_SORTERREF_SIZE
 The SQLITE_CONFIG_SORTERREF_SIZE option accepts a single parameter
 of type (int) - the new value of the sorter-reference size threshold.
 Usually, when SQLite uses an external sort to order records according
@@ -410,7 +410,7 @@ The default value for this option is to never use this optimization.
 Specifying a negative value for this option restores the default behaviour.
 This option is only available if SQLite is compiled with the SQLITE_ENABLE_SORTER_REFERENCES
 compile-time option.
-.It SQLITE_CONFIG_MEMDB_MAXSIZE 
+.It SQLITE_CONFIG_MEMDB_MAXSIZE
 The SQLITE_CONFIG_MEMDB_MAXSIZE option accepts a single parameter sqlite3_int64
 parameter which is the default maximum size for an in-memory database
 created using

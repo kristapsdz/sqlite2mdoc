@@ -12,7 +12,7 @@ These macros define the various options to the
 interface that virtual table implementations can use to
 customize and optimize their behavior.
 .Bl -tag -width Ds
-.It SQLITE_VTAB_CONSTRAINT_SUPPORT 
+.It SQLITE_VTAB_CONSTRAINT_SUPPORT
 Calls of the form sqlite3_vtab_config(db,SQLITE_VTAB_CONSTRAINT_SUPPORT,X)
 are supported, where X is an integer.
 If X is zero, then the virtual table whose xCreate

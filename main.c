@@ -1442,7 +1442,7 @@ emit(struct defn *d)
 
 	for (i = 0; i < d->descsz; ) {
 		/*
-		 * The "stripspace" variable is set to 2 if we've
+		 * The "stripspace" variable is set to >=2 if we've
 		 * stripped white-space off before an anticipated macro.
 		 * Without it, if the macro ends up *not* being a macro,
 		 * we wouldn't flush the line and thus end up losing a
@@ -1535,12 +1535,13 @@ emit(struct defn *d)
 
 				i += sz;
 
-				if (TAGINFO_ATTRS & tags[tag].flags) {
-					/* Blindly ignore attributes. */
-					while ('\0' != d->desc[i] &&
-						'>' != d->desc[i])
+				/* Blindly ignore attributes. */
+
+				if (tags[tag].flags & TAGINFO_ATTRS) {
+					while (d->desc[i] != '\0' &&
+					       d->desc[i] != '>')
 						i++;
-					if ('\0' == d->desc[i])
+					if (d->desc[i] == '\0')
 						break;
 					i++;
 				}
@@ -1554,12 +1555,18 @@ emit(struct defn *d)
 				 * Skip the trailing space.
 				 */
 
-				if (TAGINFO_NOOP & tags[tag].flags) {
+				if (tags[tag].flags & TAGINFO_NOOP) {
 					while (isspace((unsigned char)d->desc[i]))
 						i++;
 					break;
-				} else if (TAGINFO_INLINE & tags[tag].flags) {
+				} else if (tags[tag].flags & TAGINFO_INLINE) {
+					while (stripspace > 0) {
+						fputc(' ', f);
+						col++;
+						stripspace--;
+					}
 					fputs(tags[tag].mdoc, f);
+					/*col += strlen(tags[tag].mdoc);*/
 					break;
 				}
 
@@ -1577,10 +1584,10 @@ emit(struct defn *d)
 				}
 
 				fputs(tags[tag].mdoc, f);
-				if ( ! (TAGINFO_NOBR & tags[tag].flags)) {
+				if (!(tags[tag].flags & TAGINFO_NOBR)) {
 					fputs("\n", f);
 					col = 0;
-				} else if ( ! (TAGINFO_NOSP & tags[tag].flags)) {
+				} else if (!(tags[tag].flags & TAGINFO_NOSP)) {
 					fputs(" ", f);
 					col++;
 				}
@@ -1588,8 +1595,15 @@ emit(struct defn *d)
 					i++;
 				break;
 			}
-			if (tag < TAG__MAX)
+			if (tag < TAG__MAX) {
+				stripspace = 0;
 				continue;
+			}
+			while (stripspace > 0) {
+				fputc(' ', f);
+				col++;
+				stripspace--;
+			}
 		} else if ('[' == d->desc[i] && 
 			   ']' != d->desc[i + 1]) {
 			/* Do we start at the bracket or bar? */
@@ -1603,6 +1617,7 @@ emit(struct defn *d)
 
 			if (sz == d->descsz) {
 				i++;
+				stripspace = 0;
 				continue;
 			}
 
@@ -1680,6 +1695,7 @@ emit(struct defn *d)
 				col++;
 			}
 
+			stripspace = 0;
 			continue;
 		}
 
@@ -1691,15 +1707,25 @@ emit(struct defn *d)
 			continue;
 		}
 
-		/* Strip trailing spaces from output. */
+		/* 
+		 * Strip trailing spaces from output.
+		 * Set "stripspace" to be the number of white-space
+		 * characters that we've skipped, plus one.
+		 * This means that the next loop iteration while get the
+		 * actual amount we've skipped (for '<' or '[') and we
+		 * can act upon it there.
+		 */
 		
 		if (d->desc[i] == ' ') {
 			j = i;
 			while (j < d->descsz && d->desc[j] == ' ')
 				j++;
 			if (j < d->descsz &&
-			    (d->desc[j] == '\n' || d->desc[j] == '[')) {
-				stripspace = d->desc[j] == '[' ? 2 : 0;
+			    (d->desc[j] == '\n' || 
+			     d->desc[j] == '<' || 
+			     d->desc[j] == '[')) {
+				stripspace = d->desc[j] != '\n' ? 
+					(j - i + 1) : 0;
 				i = j;
 				continue;
 			} 
