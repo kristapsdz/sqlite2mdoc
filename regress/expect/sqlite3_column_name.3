@@ -28,10 +28,10 @@ The second parameter is the column number.
 The leftmost column is number 0.
 .Pp
 The returned string pointer is valid until either the prepared statement
-is destroyed by 
+is destroyed by
 .Fn sqlite3_finalize
 or until the statement is automatically reprepared by the first call
-to 
+to
 .Fn sqlite3_step
 for a particular run or until the next call to sqlite3_column_name()
 or sqlite3_column_name16() on the same column.

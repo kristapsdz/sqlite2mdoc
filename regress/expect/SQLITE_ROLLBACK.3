@@ -11,13 +11,13 @@
 .Fd #define SQLITE_FAIL
 .Fd #define SQLITE_REPLACE
 .Sh DESCRIPTION
-These constants are returned by 
+These constants are returned by
 .Fn sqlite3_vtab_on_conflict
 to inform a virtual table implementation what the ON CONFLICT
 mode is for the SQL statement being evaluated.
 .Pp
 Note that the SQLITE_IGNORE constant is also used as a
-potential return value from the 
+potential return value from the
 .Fn sqlite3_set_authorizer
 callback and that SQLITE_ABORT is also a result code.
 .Sh IMPLEMENTATION NOTES

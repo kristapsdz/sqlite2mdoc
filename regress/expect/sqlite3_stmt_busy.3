@@ -18,7 +18,7 @@ The sqlite3_stmt_busy(S) interface returns false if S is a NULL pointer.
 If S is not a NULL pointer and is not a pointer to a valid prepared statement
 object, then the behavior is undefined and probably undesirable.
 .Pp
-This interface can be used in combination 
+This interface can be used in combination
 .Fn sqlite3_next_stmt
 to locate all prepared statements associated with a database connection
 that are in need of being reset.

@@ -108,7 +108,7 @@
 .Fa "sqlite3_uint64"
 .Fc
 .Sh DESCRIPTION
-In the SQL statement text input to 
+In the SQL statement text input to
 .Fn sqlite3_prepare_v2
 and its variants, literals may be replaced by a parameter
 that matches one of following templates:
@@ -132,7 +132,7 @@ or "SQL parameters") can be set using the sqlite3_bind_*() routines
 defined here.
 .Pp
 The first argument to the sqlite3_bind_*() routines is always a pointer
-to the sqlite3_stmt object returned from 
+to the sqlite3_stmt object returned from
 .Fn sqlite3_prepare_v2
 or its variants.
 .Pp
@@ -140,11 +140,11 @@ The second argument is the index of the SQL parameter to be set.
 The leftmost SQL parameter has an index of 1.
 When the same named SQL parameter is used more than once, second and
 subsequent occurrences have the same index as the first occurrence.
-The index for named parameters can be looked up using the 
+The index for named parameters can be looked up using the
 .Fn sqlite3_bind_parameter_index
 API if desired.
 The index for "?NNN" parameters is the value of NNN.
-The NNN value must be between 1 and the 
+The NNN value must be between 1 and the
 .Fn sqlite3_limit
 parameter SQLITE_LIMIT_VARIABLE_NUMBER
 (default value: 999).
@@ -213,15 +213,15 @@ added for SQLite 3.20.0.
 .Pp
 If any of the sqlite3_bind_*() routines are called with a NULL pointer
 for the prepared statement or with a prepared statement
-for which 
+for which
 .Fn sqlite3_step
-has been called more recently than 
+has been called more recently than
 .Fn sqlite3_reset ,
 then the call will return SQLITE_MISUSE.
 If any sqlite3_bind_() routine is passed a prepared statement
 that has been finalized, the result is undefined and probably harmful.
 .Pp
-Bindings are not cleared by the 
+Bindings are not cleared by the
 .Fn sqlite3_reset
 routine.
 Unbound parameters are interpreted as NULL.

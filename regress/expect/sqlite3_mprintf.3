@@ -38,16 +38,16 @@ from the standard C library.
 These routines understand most of the common formatting options from
 the standard library printf() plus some additional non-standard formats
 (%q, %Q, %w, and %z).
-See the 
+See the
 .Fn built-in printf
 documentation for details.
 .Pp
 The sqlite3_mprintf() and sqlite3_vmprintf() routines write their results
-into memory obtained from 
+into memory obtained from
 .Fn sqlite3_malloc64 .
-The strings returned by these two routines should be released by 
+The strings returned by these two routines should be released by
 .Fn sqlite3_free .
-Both routines return a NULL pointer if 
+Both routines return a NULL pointer if
 .Fn sqlite3_malloc64
 is unable to allocate enough memory to hold the resulting string.
 .Pp

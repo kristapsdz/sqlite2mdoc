@@ -12,10 +12,10 @@
 .Sh DESCRIPTION
 The sqlite3_str_finish(X) interface destroys the
 sqlite3_str object X and returns a pointer to a memory buffer obtained
-from 
+from
 .Fn sqlite3_malloc64
 that contains the constructed string.
-The calling application should pass the returned value to 
+The calling application should pass the returned value to
 .Fn sqlite3_free
 to avoid a memory leak.
 The sqlite3_str_finish(X) interface may return

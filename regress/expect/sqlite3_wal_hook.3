@@ -12,7 +12,7 @@
 .Fa "void*"
 .Fc
 .Sh DESCRIPTION
-The 
+The
 .Fn sqlite3_wal_hook
 function is used to register a callback that is invoked each time data
 is committed to a database in wal mode.
@@ -40,15 +40,15 @@ error code, the results are undefined.
 .Pp
 A single database handle may have at most a single write-ahead log
 callback registered at one time.
-Calling 
+Calling
 .Fn sqlite3_wal_hook
 replaces any previously registered write-ahead log callback.
-Note that the 
+Note that the
 .Fn sqlite3_wal_autocheckpoint
 interface and the wal_autocheckpoint pragma
-both invoke 
+both invoke
 .Fn sqlite3_wal_hook
-and will overwrite any prior 
+and will overwrite any prior
 .Fn sqlite3_wal_hook
 settings.
 .Sh IMPLEMENTATION NOTES

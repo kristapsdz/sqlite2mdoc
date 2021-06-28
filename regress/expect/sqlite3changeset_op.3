@@ -15,11 +15,11 @@
 .Fc
 .Sh DESCRIPTION
 The pIter argument passed to this function may either be an iterator
-passed to a conflict-handler by 
+passed to a conflict-handler by
 .Fn sqlite3changeset_apply ,
-or an iterator created by 
+or an iterator created by
 .Fn sqlite3changeset_start .
-In the latter case, the most recent call to 
+In the latter case, the most recent call to
 .Fn sqlite3changeset_next
 must have returned SQLITE_ROW.
 If this is not the case, this function returns SQLITE_MISUSE.
@@ -33,7 +33,7 @@ If pnCol is not NULL, then *pnCol is set to the number of columns in
 the table affected by the change.
 If pbIndirect is not NULL, then *pbIndirect is set to true (1) if the
 change is an indirect change, or false (0) otherwise.
-See the documentation for 
+See the documentation for
 .Fn sqlite3session_indirect
 for a description of direct and indirect changes.
 Finally, if pOp is not NULL, then *pOp is set to one of SQLITE_INSERT,

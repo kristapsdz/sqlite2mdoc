@@ -12,9 +12,9 @@ the implementation of a virtual tables.
 This structure consists mostly of methods for the module.
 .Pp
 A virtual table module is created by filling in a persistent instance
-of this structure and passing a pointer to that instance to 
+of this structure and passing a pointer to that instance to
 .Fn sqlite3_create_module
-or 
+or
 .Fn sqlite3_create_module_v2 .
 The registration remains valid until it is replaced by a different
 module or until the database connection closes.

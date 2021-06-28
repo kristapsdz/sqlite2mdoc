@@ -40,7 +40,7 @@ argument.
 The name of the collation is a UTF-8 string for sqlite3_create_collation()
 and sqlite3_create_collation_v2() and a UTF-16 string in native byte
 order for sqlite3_create_collation16().
-Collation names that compare equal according to 
+Collation names that compare equal according to
 .Fn sqlite3_strnicmp
 are considered to be the same name.
 .Pp
@@ -109,7 +109,7 @@ with the addition that the xDestroy callback is invoked on pArg when
 the collating function is deleted.
 Collating functions are deleted when they are overridden by later calls
 to the collation creation functions or when the database connection
-is closed using 
+is closed using
 .Fn sqlite3_close .
 The xDestroy callback is \fInot\fP called if the sqlite3_create_collation_v2()
 function fails.

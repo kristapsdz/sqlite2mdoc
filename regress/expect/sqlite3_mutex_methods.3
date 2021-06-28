@@ -26,7 +26,7 @@ using the SQLITE_CONFIG_GETMUTEX option.
 The xMutexInit method defined by this structure is invoked as part
 of system initialization by the sqlite3_initialize() function.
 The xMutexInit routine is called by SQLite exactly once for each effective
-call to 
+call to
 .Fn sqlite3_initialize .
 The xMutexEnd method defined by this structure is invoked as part of
 system shutdown by the sqlite3_shutdown() function.
@@ -77,7 +77,7 @@ a static mutex.
 However xMutexAlloc() may use SQLite memory allocation for a fast or
 recursive mutex.
 .Pp
-SQLite will invoke the xMutexEnd() method when 
+SQLite will invoke the xMutexEnd() method when
 .Fn sqlite3_shutdown
 is called, but only if the prior call to xMutexInit returned SQLITE_OK.
 If xMutexInit fails in any way, it is expected to clean up after itself

@@ -9,16 +9,16 @@
 .Sh DESCRIPTION
 An instance of this object represents an open BLOB on which incremental BLOB I/O
 can be performed.
-Objects of this type are created by 
+Objects of this type are created by
 .Fn sqlite3_blob_open
-and destroyed by 
+and destroyed by
 .Fn sqlite3_blob_close .
-The 
+The
 .Fn sqlite3_blob_read
-and 
+and
 .Fn sqlite3_blob_write
 interfaces can be used to read or write small subsections of the BLOB.
-The 
+The
 .Fn sqlite3_blob_bytes
 interface returns the size of the BLOB in bytes.
 .Sh IMPLEMENTATION NOTES

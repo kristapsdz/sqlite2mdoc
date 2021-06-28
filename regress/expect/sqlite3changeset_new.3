@@ -13,11 +13,11 @@
 .Fc
 .Sh DESCRIPTION
 The pIter argument passed to this function may either be an iterator
-passed to a conflict-handler by 
+passed to a conflict-handler by
 .Fn sqlite3changeset_apply ,
-or an iterator created by 
+or an iterator created by
 .Fn sqlite3changeset_start .
-In the latter case, the most recent call to 
+In the latter case, the most recent call to
 .Fn sqlite3changeset_next
 must have returned SQLITE_ROW.
 Furthermore, it may only be called if the type of change that the iterator

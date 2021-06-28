@@ -112,21 +112,21 @@ Memory allocation errors were detected, but they were reported back
 as SQLITE_CANTOPEN or SQLITE_IOERR rather
 than SQLITE_NOMEM.
 .Pp
-The pointer arguments to 
+The pointer arguments to
 .Fn sqlite3_free
-and 
+and
 .Fn sqlite3_realloc
 must be either NULL or else pointers obtained from a prior invocation
-of 
+of
 .Fn sqlite3_malloc
-or 
+or
 .Fn sqlite3_realloc
 that have not yet been released.
 .Pp
 The application must not read or write any part of a block of memory
-after it has been released using 
+after it has been released using
 .Fn sqlite3_free
-or 
+or
 .Fn sqlite3_realloc .
 .Sh IMPLEMENTATION NOTES
 These declarations were extracted from the

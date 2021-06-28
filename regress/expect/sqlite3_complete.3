@@ -35,18 +35,18 @@ If a memory allocation fails, then SQLITE_NOMEM is returned.
 These routines do not parse the SQL statements thus will not detect
 syntactically incorrect SQL.
 .Pp
-If SQLite has not been initialized using 
+If SQLite has not been initialized using
 .Fn sqlite3_initialize
 prior to invoking sqlite3_complete16() then sqlite3_initialize() is
 invoked automatically by sqlite3_complete16().
 If that initialization fails, then the return value from sqlite3_complete16()
 will be non-zero regardless of whether or not the input SQL is complete.
 .Pp
-The input to 
+The input to
 .Fn sqlite3_complete
 must be a zero-terminated UTF-8 string.
 .Pp
-The input to 
+The input to
 .Fn sqlite3_complete16
 must be a zero-terminated UTF-16 string in native byte order.
 .Sh IMPLEMENTATION NOTES

@@ -34,14 +34,14 @@ If any other error occurs while flushing dirty pages to disk (for example
 an IO error or out-of-memory condition), then processing is abandoned
 and an SQLite error code is returned to the caller immediately.
 .Pp
-Otherwise, if no error occurs, 
+Otherwise, if no error occurs,
 .Fn sqlite3_db_cacheflush
 returns SQLITE_OK.
 .Pp
 This function does not set the database handle error code or message
-returned by the 
+returned by the
 .Fn sqlite3_errcode
-and 
+and
 .Fn sqlite3_errmsg
 functions.
 .Sh IMPLEMENTATION NOTES

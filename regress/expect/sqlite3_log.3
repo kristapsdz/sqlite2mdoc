@@ -12,13 +12,13 @@
 .Fa "..."
 .Fc
 .Sh DESCRIPTION
-The 
+The
 .Fn sqlite3_log
 interface writes a message into the error log established
-by the SQLITE_CONFIG_LOG option to 
+by the SQLITE_CONFIG_LOG option to
 .Fn sqlite3_config .
 If logging is enabled, the zFormat string and subsequent arguments
-are used with 
+are used with
 .Fn sqlite3_snprintf
 to generate the final output string.
 .Pp

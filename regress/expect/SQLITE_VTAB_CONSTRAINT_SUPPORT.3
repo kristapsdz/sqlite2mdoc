@@ -7,7 +7,7 @@
 .In sqlite3.h
 .Fd #define SQLITE_VTAB_CONSTRAINT_SUPPORT
 .Sh DESCRIPTION
-These macros define the various options to the 
+These macros define the various options to the
 .Fn sqlite3_vtab_config
 interface that virtual table implementations can use to
 customize and optimize their behavior.
@@ -16,7 +16,7 @@ customize and optimize their behavior.
 Calls of the form sqlite3_vtab_config(db,SQLITE_VTAB_CONSTRAINT_SUPPORT,X)
 are supported, where X is an integer.
 If X is zero, then the virtual table whose xCreate
-or xConnect method invoked 
+or xConnect method invoked
 .Fn sqlite3_vtab_config
 does not support constraints.
 In this configuration (which is the default) if a call to the xUpdate
@@ -38,7 +38,7 @@ CONFLICT mode had been ABORT.
 .Pp
 Virtual table implementations that are required to handle OR REPLACE
 must do so within the xUpdate method.
-If a call to the 
+If a call to the
 .Fn sqlite3_vtab_on_conflict
 function indicates that the current ON CONFLICT policy is REPLACE,
 the virtual table implementation should silently replace the appropriate

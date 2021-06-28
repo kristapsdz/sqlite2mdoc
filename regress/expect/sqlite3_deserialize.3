@@ -36,7 +36,7 @@ database is currently in a read transaction or is involved in a backup
 operation.
 .Pp
 If sqlite3_deserialize(D,S,P,N,M,F) fails for any reason and if the
-SQLITE_DESERIALIZE_FREEONCLOSE bit is set in argument F, then 
+SQLITE_DESERIALIZE_FREEONCLOSE bit is set in argument F, then
 .Fn sqlite3_free
 is invoked on argument P prior to returning.
 .Pp

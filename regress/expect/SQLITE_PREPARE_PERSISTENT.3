@@ -12,9 +12,9 @@
 .Fd #define SQLITE_PREPARE_NO_VTAB
 .Sh DESCRIPTION
 These constants define various flags that can be passed into "prepFlags"
-parameter of the 
+parameter of the
 .Fn sqlite3_prepare_v3
-and 
+and
 .Fn sqlite3_prepare16_v3
 interfaces.
 .Pp
@@ -24,12 +24,12 @@ New flags may be added in future releases of SQLite.
 The SQLITE_PREPARE_PERSISTENT flag is a hint to the query planner that
 the prepared statement will be retained for a long time and probably
 reused many times.
-Without this flag, 
+Without this flag,
 .Fn sqlite3_prepare_v3
-and 
+and
 .Fn sqlite3_prepare16_v3
 assume that the prepared statement will be used just once or at most
-a few times and then destroyed using 
+a few times and then destroyed using
 .Fn sqlite3_finalize
 relatively soon.
 The current implementation acts on this hint by avoiding the use of
@@ -39,10 +39,10 @@ Future versions of SQLite may act on this hint differently.
 .It SQLITE_PREPARE_NORMALIZE
 The SQLITE_PREPARE_NORMALIZE flag is a no-op.
 This flag used to be required for any prepared statement that wanted
-to use the 
+to use the
 .Fn sqlite3_normalized_sql
 interface.
-However, the 
+However, the
 .Fn sqlite3_normalized_sql
 interface is now available to all prepared statements, regardless of
 whether or not they use this flag.

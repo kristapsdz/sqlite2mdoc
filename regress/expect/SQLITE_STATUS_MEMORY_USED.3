@@ -26,14 +26,14 @@
 .Fd #define SQLITE_STATUS_MALLOC_COUNT
 .Sh DESCRIPTION
 These integer constants designate various run-time status parameters
-that can be returned by 
+that can be returned by
 .Fn sqlite3_status .
 .Bl -tag -width Ds
 .It SQLITE_STATUS_MEMORY_USED
-This parameter is the current amount of memory checked out using 
+This parameter is the current amount of memory checked out using
 .Fn sqlite3_malloc ,
 either directly or indirectly.
-The figure includes calls made to 
+The figure includes calls made to
 .Fn sqlite3_malloc
 by the application and internal memory usage by the SQLite library.
 Auxiliary page-cache memory controlled by SQLITE_CONFIG_PAGECACHE
@@ -42,12 +42,12 @@ The amount returned is the sum of the allocation sizes as reported
 by the xSize method in sqlite3_mem_methods.
 .It SQLITE_STATUS_MALLOC_SIZE
 This parameter records the largest memory allocation request handed
-to 
+to
 .Fn sqlite3_malloc
-or 
+or
 .Fn sqlite3_realloc
 (or their internal equivalents).
-Only the value returned in the *pHighwater parameter to 
+Only the value returned in the *pHighwater parameter to
 .Fn sqlite3_status
 is of interest.
 The value written into the *pCurrent parameter is undefined.
@@ -61,7 +61,7 @@ The value returned is in pages, not in bytes.
 .It SQLITE_STATUS_PAGECACHE_OVERFLOW
 This parameter returns the number of bytes of page cache allocation
 which could not be satisfied by the SQLITE_CONFIG_PAGECACHE
-buffer and where forced to overflow to 
+buffer and where forced to overflow to
 .Fn sqlite3_malloc .
 The returned value includes allocations that overflowed because they
 where too large (they were larger than the "sz" parameter to SQLITE_CONFIG_PAGECACHE)
@@ -70,7 +70,7 @@ cache.
 .It SQLITE_STATUS_PAGECACHE_SIZE
 This parameter records the largest memory allocation request handed
 to pagecache memory allocator.
-Only the value returned in the *pHighwater parameter to 
+Only the value returned in the *pHighwater parameter to
 .Fn sqlite3_status
 is of interest.
 The value written into the *pCurrent parameter is undefined.

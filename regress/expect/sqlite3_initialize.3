@@ -63,10 +63,10 @@ a mutex) it returns an error code other than SQLITE_OK.
 The sqlite3_initialize() routine is called internally by many other
 SQLite interfaces so that an application usually does not need to invoke
 sqlite3_initialize() directly.
-For example, 
+For example,
 .Fn sqlite3_open
 calls sqlite3_initialize() so the SQLite library will be automatically
-initialized when 
+initialized when
 .Fn sqlite3_open
 is called if it has not be initialized already.
 However, if SQLite is compiled with the SQLITE_OMIT_AUTOINIT
@@ -87,7 +87,7 @@ The sqlite3_os_end() routine undoes the effect of sqlite3_os_init().
 Typical tasks performed by these routines include allocation or deallocation
 of static resources, initialization of global variables, setting up
 a default sqlite3_vfs module, or setting up a default configuration
-using 
+using
 .Fn sqlite3_config .
 The application should never invoke either sqlite3_os_init() or sqlite3_os_end()
 directly.

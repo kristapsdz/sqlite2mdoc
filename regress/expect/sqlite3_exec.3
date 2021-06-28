@@ -14,10 +14,10 @@
 .Fa "char **errmsg"
 .Fc
 .Sh DESCRIPTION
-The sqlite3_exec() interface is a convenience wrapper around 
+The sqlite3_exec() interface is a convenience wrapper around
 .Fn sqlite3_prepare_v2 ,
 .Fn sqlite3_step ,
-and 
+and
 .Fn sqlite3_finalize ,
 that allows an application to run multiple statements of SQL without
 having to use a lot of C code.
@@ -37,10 +37,10 @@ If an error occurs while evaluating the SQL statements passed into
 sqlite3_exec(), then execution of the current statement stops and subsequent
 statements are skipped.
 If the 5th parameter to sqlite3_exec() is not NULL then any error message
-is written into memory obtained from 
+is written into memory obtained from
 .Fn sqlite3_malloc
 and passed back through the 5th parameter.
-To avoid memory leaks, the application should invoke 
+To avoid memory leaks, the application should invoke
 .Fn sqlite3_free
 on error message strings returned through the 5th parameter of sqlite3_exec()
 after the error message string is no longer needed.
@@ -55,14 +55,14 @@ without running any subsequent SQL statements.
 The 2nd argument to the sqlite3_exec() callback function is the number
 of columns in the result.
 The 3rd argument to the sqlite3_exec() callback is an array of pointers
-to strings obtained as if from 
+to strings obtained as if from
 .Fn sqlite3_column_text ,
 one for each column.
 If an element of a result row is NULL then the corresponding string
 pointer for the sqlite3_exec() callback is a NULL pointer.
 The 4th argument to the sqlite3_exec() callback is an array of pointers
 to strings where each entry represents the name of corresponding result
-column as obtained from 
+column as obtained from
 .Fn sqlite3_column_name .
 If the 2nd parameter to sqlite3_exec() is a NULL pointer, a pointer
 to an empty string, or a pointer that contains only whitespace and/or

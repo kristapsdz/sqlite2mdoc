@@ -61,10 +61,10 @@ be successful even if it is subsequently rolled back.
 This function is accessible to SQL statements via the last_insert_rowid() SQL function.
 .Pp
 If a separate thread performs a new INSERT on the same database
-connection while the 
+connection while the
 .Fn sqlite3_last_insert_rowid
 function is running and thus changes the last insert rowid, then
-the value returned by 
+the value returned by
 .Fn sqlite3_last_insert_rowid
 is unpredictable and might not equal either the old or the new last
 insert rowid.

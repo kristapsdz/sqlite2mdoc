@@ -40,15 +40,15 @@ iterator created by this function:
 .El
 .Pp
 It is the responsibility of the caller to eventually destroy the iterator
-by passing it to 
+by passing it to
 .Fn sqlite3changeset_finalize .
 The buffer containing the changeset (pChangeset) must remain valid
 until after the iterator is destroyed.
 .Pp
-Assuming the changeset blob was created by one of the 
+Assuming the changeset blob was created by one of the
 .Fn sqlite3session_changeset ,
 .Fn sqlite3changeset_concat
-or 
+or
 .Fn sqlite3changeset_invert
 functions, all changes within the changeset that apply to a single
 table are grouped together.

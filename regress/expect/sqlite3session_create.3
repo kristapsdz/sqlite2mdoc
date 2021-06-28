@@ -22,7 +22,7 @@ It is possible to create multiple session objects attached to a single
 database handle.
 .Pp
 Session objects created using this function should be deleted using
-the 
+the
 .Fn sqlite3session_delete
 function before the database handle that they are attached to is itself
 closed.
@@ -31,7 +31,7 @@ then the results of calling any session module function, including
 .Fn sqlite3session_delete
 on the session object are undefined.
 .Pp
-Because the session module uses the 
+Because the session module uses the
 .Fn sqlite3_preupdate_hook
 API, it is not possible for an application to register a pre-update
 hook on a database handle that has one or more session objects attached.

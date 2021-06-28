@@ -39,10 +39,10 @@ or SQLITE_UTF16LE, indicating the most desirable form
 of the collation sequence function required.
 The fourth parameter is the name of the required collation sequence.
 .Pp
-The callback function should register the desired collation using 
+The callback function should register the desired collation using
 .Fn sqlite3_create_collation ,
 .Fn sqlite3_create_collation16 ,
-or 
+or
 .Fn sqlite3_create_collation_v2 .
 .Sh IMPLEMENTATION NOTES
 These declarations were extracted from the

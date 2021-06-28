@@ -102,9 +102,9 @@ If zDb is not NULL (or a zero length string) and is not the name of
 any attached database, SQLITE_ERROR is returned to the caller.
 .Pp
 Unless it returns SQLITE_MISUSE, the sqlite3_wal_checkpoint_v2() interface
-sets the error information that is queried by 
+sets the error information that is queried by
 .Fn sqlite3_errcode
-and 
+and
 .Fn sqlite3_errmsg .
 The PRAGMA wal_checkpoint command can be used
 to invoke this interface from SQL.

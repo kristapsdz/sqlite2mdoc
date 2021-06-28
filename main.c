@@ -1136,7 +1136,7 @@ static void
 emit(struct defn *d)
 {
 	struct decl	*first;
-	size_t		 sz, i, j, col, last, ns, fnsz;
+	size_t		 sz, i, j, col, last, ns, fnsz, stripspace;
 	FILE		*f;
 	char		*cp;
 	const char	*res, *lastres, *args, *str, *end, *fn;
@@ -1438,8 +1438,23 @@ emit(struct defn *d)
 	 * mdoc(7) and try to break lines up.
 	 */
 
-	col = 0;
+	col = stripspace = 0;
+
 	for (i = 0; i < d->descsz; ) {
+		/*
+		 * The "stripspace" variable is set to 2 if we've
+		 * stripped white-space off before an anticipated macro.
+		 * Without it, if the macro ends up *not* being a macro,
+		 * we wouldn't flush the line and thus end up losing a
+		 * space.  This lets the code that flushes the line know
+		 * that we've stripped spaces and adds them back in.
+		 */
+
+		if (stripspace > 0)
+			stripspace--;
+
+		/* Ignore NUL byte, just in case. */
+
 		if (d->desc[i] == '\0') {
 			i++;
 			continue;
@@ -1458,11 +1473,12 @@ emit(struct defn *d)
 				i++;
 			for (tag = 0; tag < TAG__MAX; tag++) {
 				sz = strlen(tags[tag].html);
-				if (0 == strncasecmp(&d->desc[i], tags[tag].html, sz))
+				if (strncasecmp(&d->desc[i],
+				    tags[tag].html, sz) == 0)
 					break;
 			}
-			if (TAG__MAX == tag ||
-			    TAGINFO_INLINE & tags[tag].flags) {
+			if (tag == TAG__MAX ||
+			    (tags[tag].flags & TAGINFO_INLINE)) {
 				if (col > 0)
 					fputs("\n", f);
 				fputs(".Pp\n", f);
@@ -1478,8 +1494,8 @@ emit(struct defn *d)
 		 * dumbest possible heuristic.
 		 */
 
-		if (' ' == d->desc[i] && i &&
-		    '.' == d->desc[i - 1]) {
+		if (d->desc[i] == ' ' && 
+		    i > 0 && d->desc[i - 1] == '.') {
 			for (j = i - 1; j > 0; j--)
 				if (isspace((unsigned char)d->desc[j])) {
 					j++;
@@ -1488,27 +1504,28 @@ emit(struct defn *d)
 			if (newsentence(j, i, d->desc)) {
 				while (' ' == d->desc[i])
 					i++;
-				fputs("\n", f);
+				fputc('\n', f);
 				col = 0;
 				continue;
 			}
 		}
+
 		/*
 		 * After 65 characters, force a break when we encounter
 		 * white-space to keep our lines more or less tidy.
 		 */
 
-		if (col > 65 && ' ' == d->desc[i]) {
-			while (' ' == d->desc[i]) 
+		if (col > 65 && d->desc[i] == ' ') {
+			while (d->desc[i] == ' ' )
 				i++;
-			fputs("\n", f);
+			fputc('\n', f);
 			col = 0;
 			continue;
 		}
 
 		/* Parse HTML tags and links. */
 
-		if ('<' == d->desc[i]) {
+		if (d->desc[i] == '<') {
 			for (tag = 0; tag < TAG__MAX; tag++) {
 				sz = strlen(tags[tag].html);
 				assert(sz > 0);
@@ -1536,6 +1553,7 @@ emit(struct defn *d)
 				 * end of clause `El' anyway.
 				 * Skip the trailing space.
 				 */
+
 				if (TAGINFO_NOOP & tags[tag].flags) {
 					while (isspace((unsigned char)d->desc[i]))
 						i++;
@@ -1552,10 +1570,12 @@ emit(struct defn *d)
 				 * following that (or we might do
 				 * nothing at all).
 				 */
+
 				if (col > 0) {
 					fputs("\n", f);
 					col = 0;
 				}
+
 				fputs(tags[tag].mdoc, f);
 				if ( ! (TAGINFO_NOBR & tags[tag].flags)) {
 					fputs("\n", f);
@@ -1573,6 +1593,7 @@ emit(struct defn *d)
 		} else if ('[' == d->desc[i] && 
 			   ']' != d->desc[i + 1]) {
 			/* Do we start at the bracket or bar? */
+
 			for (sz = i + 1; sz < d->descsz; sz++) 
 				if ('|' == d->desc[sz] ||
 				    ']' == d->desc[sz])
@@ -1589,7 +1610,9 @@ emit(struct defn *d)
 			 * Look for a trailing "()", using "j" as a
 			 * sentinel in case it was found.  This lets us
 			 * print out a "Fn xxxx" instead of having the
-			 * function be ugly.
+			 * function be ugly.  If we don't have a Fn and
+			 * we'd stripped space before this, remember to
+			 * add the space back in.
 			 */
 
 			j = 0;
@@ -1603,10 +1626,17 @@ emit(struct defn *d)
 					fputs(".Fn ", f);
 					j = sz - 2;
 					assert(j > 0);
+				} else if (stripspace) {
+					fputc(' ', f);
+					col++;
 				}
-
-			} else
+			} else {
+				if (stripspace) {
+					fputc(' ', f);
+					col++;
+				}
 				i = sz + 1;
+			}
 
 			while (isspace((unsigned char)d->desc[i]))
 				i++;
@@ -1667,10 +1697,12 @@ emit(struct defn *d)
 			j = i;
 			while (j < d->descsz && d->desc[j] == ' ')
 				j++;
-			if (j < d->descsz && d->desc[j] == '\n') {
+			if (j < d->descsz &&
+			    (d->desc[j] == '\n' || d->desc[j] == '[')) {
+				stripspace = d->desc[j] == '[' ? 2 : 0;
 				i = j;
 				continue;
-			}
+			} 
 		}
 
 		assert(d->desc[i] != '\n');

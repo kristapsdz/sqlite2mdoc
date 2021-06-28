@@ -89,35 +89,35 @@ These routines return information about a single column of the current
 result row of a query.
 In every case the first argument is a pointer to the prepared statement
 that is being evaluated (the sqlite3_stmt* that was returned
-from 
+from
 .Fn sqlite3_prepare_v2
 or one of its variants) and the second argument is the index of the
 column for which information should be returned.
 The leftmost column of the result set has the index 0.
-The number of columns in the result can be determined using 
+The number of columns in the result can be determined using
 .Fn sqlite3_column_count .
 If the SQL statement does not currently point to a valid row, or if
 the column index is out of range, the result is undefined.
-These routines may only be called when the most recent call to 
+These routines may only be called when the most recent call to
 .Fn sqlite3_step
-has returned SQLITE_ROW and neither 
+has returned SQLITE_ROW and neither
 .Fn sqlite3_reset
-nor 
+nor
 .Fn sqlite3_finalize
 have been called subsequently.
-If any of these routines are called after 
+If any of these routines are called after
 .Fn sqlite3_reset
-or 
+or
 .Fn sqlite3_finalize
-or after 
+or after
 .Fn sqlite3_step
 has returned something other than SQLITE_ROW, the results
 are undefined.
-If 
+If
 .Fn sqlite3_step
-or 
+or
 .Fn sqlite3_reset
-or 
+or
 .Fn sqlite3_finalize
 are called from a different thread while any of these routines are
 pending, then the results are undefined.
@@ -151,7 +151,7 @@ If the result is a BLOB or UTF-8 string then the sqlite3_column_bytes()
 routine returns the number of bytes in that BLOB or string.
 If the result is a UTF-16 string, then sqlite3_column_bytes() converts
 the string to UTF-8 and then returns the number of bytes.
-If the result is a numeric value then sqlite3_column_bytes() uses 
+If the result is a numeric value then sqlite3_column_bytes() uses
 .Fn sqlite3_snprintf
 to convert that value to a UTF-8 string and returns the number of bytes
 in that string.
@@ -167,14 +167,14 @@ to convert that value to a UTF-16 string and returns the number of
 bytes in that string.
 If the result is NULL, then sqlite3_column_bytes16() returns zero.
 .Pp
-The values returned by 
+The values returned by
 .Fn sqlite3_column_bytes
-and 
+and
 .Fn sqlite3_column_bytes16
 do not include the zero terminators at the end of the string.
-For clarity: the values returned by 
+For clarity: the values returned by
 .Fn sqlite3_column_bytes
-and 
+and
 .Fn sqlite3_column_bytes16
 are the number of bytes in the string, not the number of characters.
 .Pp
@@ -183,21 +183,21 @@ even empty strings, are always zero-terminated.
 The return value from sqlite3_column_blob() for a zero-length BLOB
 is a NULL pointer.
 .Pp
-\fBWarning:\fP The object returned by 
+\fBWarning:\fP The object returned by
 .Fn sqlite3_column_value
 is an unprotected sqlite3_value object.
 In a multithreaded environment, an unprotected sqlite3_value object
-may only be used safely with 
+may only be used safely with
 .Fn sqlite3_bind_value
-and 
+and
 .Fn sqlite3_result_value .
 If the unprotected sqlite3_value object returned
-by 
+by
 .Fn sqlite3_column_value
-is used in any other way, including calls to routines like 
+is used in any other way, including calls to routines like
 .Fn sqlite3_value_int ,
 .Fn sqlite3_value_text ,
-or 
+or
 .Fn sqlite3_value_bytes ,
 the behavior is not threadsafe.
 Hence, the sqlite3_column_value() interface is normally only useful
@@ -206,7 +206,7 @@ or virtual tables, not within top-level application code.
 .Pp
 The these routines may attempt to convert the datatype of the result.
 For example, if the internal representation is FLOAT and a text result
-is requested, 
+is requested,
 .Fn sqlite3_snprintf
 is used internally to perform the conversion automatically.
 The following table details the conversions that are applied:
@@ -279,19 +279,19 @@ with calls to sqlite3_column_bytes16(), and do not mix calls to sqlite3_column_t
 with calls to sqlite3_column_bytes().
 .Pp
 The pointers returned are valid until a type conversion occurs as described
-above, or until 
+above, or until
 .Fn sqlite3_step
-or 
+or
 .Fn sqlite3_reset
-or 
+or
 .Fn sqlite3_finalize
 is called.
 The memory space used to hold strings and BLOBs is freed automatically.
-Do not pass the pointers returned from 
+Do not pass the pointers returned from
 .Fn sqlite3_column_blob ,
 .Fn sqlite3_column_text ,
 etc.
-into 
+into
 .Fn sqlite3_free .
 As long as the input parameters are correct, these routines will only
 fail if an out-of-memory error occurs during a format conversion.
@@ -313,7 +313,7 @@ sqlite3_column_bytes16()
 If an out-of-memory error occurs, then the return value from these
 routines is the same as if the column had contained an SQL NULL value.
 Valid SQL NULL returns can be distinguished from out-of-memory errors
-by invoking the 
+by invoking the
 .Fn sqlite3_errcode
 immediately after the suspect return value is obtained and before any
 other SQLite interface is called on the same database connection.

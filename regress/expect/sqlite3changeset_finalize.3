@@ -10,21 +10,21 @@
 .Fa "sqlite3_changeset_iter *pIter"
 .Fc
 .Sh DESCRIPTION
-This function is used to finalize an iterator allocated with 
+This function is used to finalize an iterator allocated with
 .Fn sqlite3changeset_start .
 This function should only be called on iterators created using the
 .Fn sqlite3changeset_start
 function.
 If an application calls this function with an iterator passed to a
-conflict-handler by 
+conflict-handler by
 .Fn sqlite3changeset_apply ,
 SQLITE_MISUSE is immediately returned and the call has
 no effect.
 .Pp
 If an error was encountered within a call to an sqlite3changeset_xxx()
-function (for example an SQLITE_CORRUPT in 
+function (for example an SQLITE_CORRUPT in
 .Fn sqlite3changeset_next
-or an SQLITE_NOMEM in 
+or an SQLITE_NOMEM in
 .Fn sqlite3changeset_new )
 then an error code corresponding to that error is returned by this
 function.

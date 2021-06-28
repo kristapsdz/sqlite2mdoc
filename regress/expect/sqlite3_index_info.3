@@ -95,7 +95,7 @@ structure for SQLite version 3.8.2 (dateof:3.8.2).
 If a virtual table extension is used with an SQLite version earlier
 than 3.8.2, the results of attempting to read or write the estimatedRows
 field are undefined (but are likely to included crashing the application).
-The estimatedRows field should therefore only be used if 
+The estimatedRows field should therefore only be used if
 .Fn sqlite3_libversion_number
 returns a value greater than or equal to 3008002.
 Similarly, the idxFlags field was added for version 3.9.0

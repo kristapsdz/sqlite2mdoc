@@ -20,7 +20,7 @@
 .Fd #define SQLITE_STMTSTATUS_MEMUSED
 .Sh DESCRIPTION
 These preprocessor macros define integer codes that name counter values
-associated with the 
+associated with the
 .Fn sqlite3_stmt_status
 interface.
 The meanings of the various counters are as follows:
@@ -54,11 +54,11 @@ that might affect the query plan.
 .It SQLITE_STMTSTATUS_RUN
 This is the number of times that the prepared statement has been run.
 A single "run" for the purposes of this counter is one or more calls
-to 
+to
 .Fn sqlite3_step
-followed by a call to 
+followed by a call to
 .Fn sqlite3_reset .
-The counter is incremented on the first 
+The counter is incremented on the first
 .Fn sqlite3_step
 call of each cycle.
 .It SQLITE_STMTSTATUS_MEMUSED

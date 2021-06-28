@@ -40,19 +40,19 @@ These interfaces are only available if SQLite is compiled using the
 SQLITE_ENABLE_PREUPDATE_HOOK compile-time
 option.
 .Pp
-The 
+The
 .Fn sqlite3_preupdate_hook
 interface registers a callback function that is invoked prior to each
 INSERT, UPDATE, and DELETE operation on a database
 table.
 At most one preupdate hook may be registered at a time on a single
-database connection; each call to 
+database connection; each call to
 .Fn sqlite3_preupdate_hook
 overrides the previous setting.
-The preupdate hook is disabled by invoking 
+The preupdate hook is disabled by invoking
 .Fn sqlite3_preupdate_hook
 with a NULL pointer as the second parameter.
-The third parameter to 
+The third parameter to
 .Fn sqlite3_preupdate_hook
 is passed through as the first parameter to callbacks.
 .Pp
@@ -85,11 +85,11 @@ The value of the seventh parameter passed to the callback function
 is not defined for operations on WITHOUT ROWID tables, or for INSERT
 operations on rowid tables.
 .Pp
-The 
+The
 .Fn sqlite3_preupdate_old ,
 .Fn sqlite3_preupdate_new ,
 .Fn sqlite3_preupdate_count ,
-and 
+and
 .Fn sqlite3_preupdate_depth
 interfaces provide additional information about a preupdate event.
 These routines may only be called from within a preupdate callback.

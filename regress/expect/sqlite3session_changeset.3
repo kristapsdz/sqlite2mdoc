@@ -46,11 +46,11 @@ so that one or more of its PRIMARY KEY columns are set to NULL, the
 resulting changeset contains a DELETE change only.
 .Pp
 The contents of a changeset may be traversed using an iterator created
-using the 
+using the
 .Fn sqlite3changeset_start
 API.
 A changeset may be applied to a database with a compatible schema using
-the 
+the
 .Fn sqlite3changeset_apply
 API.
 .Pp
@@ -66,7 +66,7 @@ is undefined.
 .Pp
 Following a successful call to this function, it is the responsibility
 of the caller to eventually free the buffer that *ppChangeset points
-to using 
+to using
 .Fn sqlite3_free .
 .Ss Changeset Generation
 Once a table has been attached to a session object, the session object
@@ -117,7 +117,7 @@ Or if a row is deleted and then later a row with the same primary key
 values inserted while a session object is active, the resulting changeset
 will contain an UPDATE change instead of a DELETE and an INSERT.
 .Pp
-When a session object is disabled (see the 
+When a session object is disabled (see the
 .Fn sqlite3session_enable
 API), it does not accumulate records when rows are inserted, updated
 or deleted.

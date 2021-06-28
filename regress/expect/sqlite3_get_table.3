@@ -41,12 +41,12 @@ the names of the columns.
 The remaining entries all point to query results.
 NULL values result in NULL pointers.
 All other values are in their UTF-8 zero-terminated string representation
-as returned by 
+as returned by
 .Fn sqlite3_column_text .
 A result table might consist of one or more memory allocations.
-It is not safe to pass a result table directly to 
+It is not safe to pass a result table directly to
 .Fn sqlite3_free .
-A result table should be deallocated using 
+A result table should be deallocated using
 .Fn sqlite3_free_table .
 As an example of the result table format, suppose a query result is
 as follows:
@@ -78,13 +78,13 @@ and returns a result table to the pointer given in its 3rd parameter.
 After the application has finished with the result from sqlite3_get_table(),
 it must pass the result table pointer to sqlite3_free_table() in order
 to release the memory that was malloced.
-Because of the way the 
+Because of the way the
 .Fn sqlite3_malloc
 happens within sqlite3_get_table(), the calling function must not try
-to call 
+to call
 .Fn sqlite3_free
 directly.
-Only 
+Only
 .Fn sqlite3_free_table
 is able to release the memory properly and safely.
 .Pp
@@ -94,11 +94,11 @@ The sqlite3_get_table() routine does not have access to any internal
 data structures of SQLite.
 It uses only the public interface defined here.
 As a consequence, errors that occur in the wrapper layer outside of
-the internal 
+the internal
 .Fn sqlite3_exec
-call are not reflected in subsequent calls to 
+call are not reflected in subsequent calls to
 .Fn sqlite3_errcode
-or 
+or
 .Fn sqlite3_errmsg .
 .Sh IMPLEMENTATION NOTES
 These declarations were extracted from the

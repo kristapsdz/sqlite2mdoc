@@ -17,7 +17,7 @@ either starts a new read transaction or upgrades an existing one for
 schema S of database connection D such that the
 read transaction refers to historical snapshot P, rather than
 the most recent change to the database.
-The 
+The
 .Fn sqlite3_snapshot_open
 interface returns SQLITE_OK on success or an appropriate error code
 if it fails.
@@ -53,7 +53,7 @@ database connection.
 (Hint: Run "PRAGMA application_id" against a newly
 opened database connection in order to make it ready to use snapshots.)
 .Pp
-The 
+The
 .Fn sqlite3_snapshot_open
 interface is only available when the SQLITE_ENABLE_SNAPSHOT
 compile-time option is used.

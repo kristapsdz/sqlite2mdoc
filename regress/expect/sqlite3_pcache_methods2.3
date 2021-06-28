@@ -26,11 +26,11 @@ The built-in page cache is recommended for most uses.
 .Pp
 The contents of the sqlite3_pcache_methods2 structure are copied to
 an internal buffer by SQLite within the call to sqlite3_config.
-Hence the application may discard the parameter after the call to 
+Hence the application may discard the parameter after the call to
 .Fn sqlite3_config
 returns.
 .Pp
-The xInit() method is called once for each effective call to 
+The xInit() method is called once for each effective call to
 .Fn sqlite3_initialize
 (usually only once during the lifetime of the process).
 The xInit() method is passed a copy of the sqlite3_pcache_methods2.pArg
@@ -40,7 +40,7 @@ required by the custom page cache implementation.
 If the xInit() method is NULL, then the built-in default page cache
 is used instead of the application defined page cache.
 .Pp
-The xShutdown() method is called by 
+The xShutdown() method is called by
 .Fn sqlite3_shutdown .
 It can be used to clean up any outstanding resources before process
 shutdown, if required.
@@ -48,7 +48,7 @@ The xShutdown() method may be NULL.
 .Pp
 SQLite automatically serializes calls to the xInit method, so the xInit
 method need not be threadsafe.
-The xShutdown method is only called from 
+The xShutdown method is only called from
 .Fn sqlite3_shutdown
 so it does not need to be threadsafe either.
 All other methods must be threadsafe in multithreaded applications.

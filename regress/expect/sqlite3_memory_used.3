@@ -16,36 +16,36 @@
 .Fc
 .Sh DESCRIPTION
 SQLite provides these two interfaces for reporting on the status of
-the 
+the
 .Fn sqlite3_malloc ,
 .Fn sqlite3_free ,
-and 
+and
 .Fn sqlite3_realloc
 routines, which form the built-in memory allocation subsystem.
 .Pp
-The 
+The
 .Fn sqlite3_memory_used
 routine returns the number of bytes of memory currently outstanding
 (malloced but not freed).
-The 
+The
 .Fn sqlite3_memory_highwater
-routine returns the maximum value of 
+routine returns the maximum value of
 .Fn sqlite3_memory_used
 since the high-water mark was last reset.
-The values returned by 
+The values returned by
 .Fn sqlite3_memory_used
-and 
+and
 .Fn sqlite3_memory_highwater
-include any overhead added by SQLite in its implementation of 
+include any overhead added by SQLite in its implementation of
 .Fn sqlite3_malloc ,
 but not overhead added by the any underlying system library routines
-that 
+that
 .Fn sqlite3_malloc
 may call.
 .Pp
-The memory high-water mark is reset to the current value of 
+The memory high-water mark is reset to the current value of
 .Fn sqlite3_memory_used
-if and only if the parameter to 
+if and only if the parameter to
 .Fn sqlite3_memory_highwater
 is true.
 The value returned by sqlite3_memory_highwater(1)

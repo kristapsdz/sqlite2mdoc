@@ -38,16 +38,16 @@
 .Fd #define SQLITE_DBCONFIG_MAX
 .Sh DESCRIPTION
 These constants are the available integer configuration options that
-can be passed as the second argument to the 
+can be passed as the second argument to the
 .Fn sqlite3_db_config
 interface.
 .Pp
 New configuration options may be added in future releases of SQLite.
 Existing configuration options might be discontinued.
-Applications should check the return code from 
+Applications should check the return code from
 .Fn sqlite3_db_config
 to make sure that the call worked.
-The 
+The
 .Fn sqlite3_db_config
 interface will return a non-zero error code if a discontinued
 or unsupported configuration option is invoked.
@@ -55,12 +55,12 @@ or unsupported configuration option is invoked.
 .It SQLITE_DBCONFIG_LOOKASIDE
 This option takes three additional arguments that determine the lookaside memory allocator
 configuration for the database connection.
-The first argument (the third parameter to 
+The first argument (the third parameter to
 .Fn sqlite3_db_config
 is a pointer to a memory buffer to use for lookaside memory.
 The first argument after the SQLITE_DBCONFIG_LOOKASIDE verb may be
 NULL in which case SQLite will allocate the lookaside buffer itself
-using 
+using
 .Fn sqlite3_malloc .
 The second argument is the size of each lookaside buffer slot.
 The third argument is the number of slots.
@@ -98,7 +98,7 @@ this call.
 The second parameter may be a NULL pointer, in which case the trigger
 setting is not reported back.
 .It SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER
-This option is used to enable or disable the 
+This option is used to enable or disable the
 .Fn fts3_tokenizer
 function which is part of the FTS3 full-text search engine extension.
 There should be two additional arguments.
@@ -111,16 +111,16 @@ this call.
 The second parameter may be a NULL pointer, in which case the new setting
 is not reported back.
 .It SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION
-This option is used to enable or disable the 
+This option is used to enable or disable the
 .Fn sqlite3_load_extension
-interface independently of the 
+interface independently of the
 .Fn load_extension
 SQL function.
-The 
+The
 .Fn sqlite3_enable_load_extension
-API enables or disables both the C-API 
+API enables or disables both the C-API
 .Fn sqlite3_load_extension
-and the SQL function 
+and the SQL function
 .Fn load_extension .
 There should be two additional arguments.
 When the first argument to this interface is 1, then only the C-API
@@ -130,7 +130,7 @@ the SQL function are disabled.
 If the first argument is -1, then no changes are made to state of either
 the C-API or the SQL function.
 The second parameter is a pointer to an integer into which is written
-0 or 1 to indicate whether 
+0 or 1 to indicate whether
 .Fn sqlite3_load_extension
 interface is disabled or enabled following this call.
 The second parameter may be a NULL pointer, in which case the new setting

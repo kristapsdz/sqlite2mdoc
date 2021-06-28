@@ -14,7 +14,7 @@
 So as not to open security holes in older applications that are unprepared
 to deal with extension loading, and as a means of
 disabling extension loading while evaluating user-entered
-SQL, the following API is provided to turn the 
+SQL, the following API is provided to turn the
 .Fn sqlite3_load_extension
 mechanism on and off.
 .Pp
@@ -23,16 +23,16 @@ Call the sqlite3_enable_load_extension() routine with onoff==1 to turn
 extension loading on and call it with onoff==0 to turn it back off
 again.
 .Pp
-This interface enables or disables both the C-API 
+This interface enables or disables both the C-API
 .Fn sqlite3_load_extension
-and the SQL function 
+and the SQL function
 .Fn load_extension .
 Use sqlite3_db_config(db,SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION,..)
 to enable or disable only the C-API.
 .Pp
 \fBSecurity warning:\fP It is recommended that extension loading be disabled
 using the SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION
-method rather than this interface, so the 
+method rather than this interface, so the
 .Fn load_extension
 SQL function remains disabled.
 This will prevent SQL injections from giving attackers access to extension

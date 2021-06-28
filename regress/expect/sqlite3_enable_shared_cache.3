@@ -22,10 +22,10 @@ In prior versions of SQLite, sharing was enabled or disabled for each
 thread separately.
 .Pp
 The cache sharing mode set by this interface effects all subsequent
-calls to 
+calls to
 .Fn sqlite3_open ,
 .Fn sqlite3_open_v2 ,
-and 
+and
 .Fn sqlite3_open16 .
 Existing database connections continue use the sharing mode that was
 in effect at the time they were opened.
@@ -41,7 +41,7 @@ Applications that care about shared cache setting should set it explicitly.
 Note: This method is disabled on MacOS X 10.7 and iOS version 5.0 and
 will always return SQLITE_MISUSE.
 On those systems, shared cache mode should be enabled per-database
-connection via 
+connection via
 .Fn sqlite3_open_v2
 with SQLITE_OPEN_SHAREDCACHE.
 .Pp

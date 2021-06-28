@@ -24,7 +24,7 @@ is returned and the transaction rolled back.
 Calling this function with an argument that is not a NULL pointer or
 an open blob handle results in undefined behaviour.
 Calling this routine with a null pointer (such as would be returned
-by a failed call to 
+by a failed call to
 .Fn sqlite3_blob_open )
 is a harmless no-op.
 Otherwise, if this function is passed a valid open blob handle, the

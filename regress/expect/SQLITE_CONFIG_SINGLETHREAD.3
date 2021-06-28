@@ -62,16 +62,16 @@
 .Fd #define SQLITE_CONFIG_MEMDB_MAXSIZE
 .Sh DESCRIPTION
 These constants are the available integer configuration options that
-can be passed as the first argument to the 
+can be passed as the first argument to the
 .Fn sqlite3_config
 interface.
 .Pp
 New configuration options may be added in future releases of SQLite.
 Existing configuration options might be discontinued.
-Applications should check the return code from 
+Applications should check the return code from
 .Fn sqlite3_config
 to make sure that the call worked.
-The 
+The
 .Fn sqlite3_config
 interface will return a non-zero error code if a discontinued
 or unsupported configuration option is invoked.
@@ -83,7 +83,7 @@ In other words, it disables all mutexing and puts SQLite into a mode
 where it can only be used by a single thread.
 If SQLite is compiled with the SQLITE_THREADSAFE=0
 compile-time option then it is not possible to change the threading mode
-from its default value of Single-thread and so 
+from its default value of Single-thread and so
 .Fn sqlite3_config
 will return SQLITE_ERROR if called with the SQLITE_CONFIG_SINGLETHREAD
 configuration option.
@@ -99,7 +99,7 @@ a multi-threaded environment as long as no two threads attempt to use
 the same database connection at the same time.
 If SQLite is compiled with the SQLITE_THREADSAFE=0
 compile-time option then it is not possible to set the Multi-thread
-threading mode and 
+threading mode and
 .Fn sqlite3_config
 will return SQLITE_ERROR if called with the SQLITE_CONFIG_MULTITHREAD
 configuration option.
@@ -117,7 +117,7 @@ same prepared statement in different threads at the
 same time.
 If SQLite is compiled with the SQLITE_THREADSAFE=0
 compile-time option then it is not possible to set the Serialized threading mode
-and 
+and
 .Fn sqlite3_config
 will return SQLITE_ERROR if called with the SQLITE_CONFIG_SERIALIZED
 configuration option.
@@ -128,7 +128,7 @@ structure.
 The argument specifies alternative low-level memory allocation routines
 to be used in place of the memory allocation routines built into SQLite.
 SQLite makes its own private copy of the content of the sqlite3_mem_methods
-structure before the 
+structure before the
 .Fn sqlite3_config
 call returns.
 .It SQLITE_CONFIG_GETMALLOC
@@ -190,17 +190,17 @@ The pMem argument must be either a NULL pointer or a pointer to an
 8-byte aligned block of memory of at least sz*N bytes, otherwise subsequent
 behavior is undefined.
 When pMem is not NULL, SQLite will strive to use the memory provided
-to satisfy page cache needs, falling back to 
+to satisfy page cache needs, falling back to
 .Fn sqlite3_malloc
 if a page cache line is larger than sz bytes or if all of the pMem
 buffer is exhausted.
 If pMem is NULL and N is non-zero, then each database connection does
-an initial bulk allocation for page cache memory from 
+an initial bulk allocation for page cache memory from
 .Fn sqlite3_malloc
 sufficient for N cache lines if N is positive or of -1024*N bytes if
 N is negative, .
 If additional page cache memory is needed beyond what is provided by
-the initial allocation, then SQLite goes to 
+the initial allocation, then SQLite goes to
 .Fn sqlite3_malloc
 separately for each additional cache line.
 .It SQLITE_CONFIG_HEAP
@@ -229,12 +229,12 @@ to an instance of the sqlite3_mutex_methods structure.
 The argument specifies alternative low-level mutex routines to be used
 in place the mutex routines built into SQLite.
 SQLite makes a copy of the content of the sqlite3_mutex_methods
-structure before the call to 
+structure before the call to
 .Fn sqlite3_config
 returns.
 If SQLite is compiled with the SQLITE_THREADSAFE=0
 compile-time option then the entire mutexing subsystem is omitted from
-the build and hence calls to 
+the build and hence calls to
 .Fn sqlite3_config
 with the SQLITE_CONFIG_MUTEX configuration option will return SQLITE_ERROR.
 .It SQLITE_CONFIG_GETMUTEX
@@ -248,7 +248,7 @@ with a wrapper used to track mutex usage for performance profiling
 or testing, for example.
 If SQLite is compiled with the SQLITE_THREADSAFE=0
 compile-time option then the entire mutexing subsystem is omitted from
-the build and hence calls to 
+the build and hence calls to
 .Fn sqlite3_config
 with the SQLITE_CONFIG_GETMUTEX configuration option will return SQLITE_ERROR.
 .It SQLITE_CONFIG_LOOKASIDE
@@ -257,7 +257,7 @@ the default size of lookaside memory on each database connection.
 The first argument is the size of each lookaside buffer slot and the
 second is the number of slots allocated to each database connection.
 SQLITE_CONFIG_LOOKASIDE sets the \fIdefault\fP lookaside size.
-The SQLITE_DBCONFIG_LOOKASIDE option to 
+The SQLITE_DBCONFIG_LOOKASIDE option to
 .Fn sqlite3_db_config
 can be used to change the lookaside configuration on individual connections.
 .It SQLITE_CONFIG_PCACHE2
@@ -276,21 +276,21 @@ error log.
 (The SQLITE_CONFIG_LOG option takes two arguments: a pointer to a function
 with a call signature of void(*)(void*,int,const char*), and a pointer
 to void.
-If the function pointer is not NULL, it is invoked by 
+If the function pointer is not NULL, it is invoked by
 .Fn sqlite3_log
 to process each logging event.
-If the function pointer is NULL, the 
+If the function pointer is NULL, the
 .Fn sqlite3_log
 interface becomes a no-op.
 The void pointer that is the second argument to SQLITE_CONFIG_LOG is
 passed through as the first parameter to the application-defined logger
 function whenever that function is invoked.
 The second parameter to the logger function is a copy of the first
-parameter to the corresponding 
+parameter to the corresponding
 .Fn sqlite3_log
 call and is intended to be a result code or an extended result code.
 The third parameter passed to the logger is log message after formatting
-via 
+via
 .Fn sqlite3_snprintf .
 The SQLite logging interface is not reentrant; the logger function
 supplied by the application must not invoke any SQLite interface.
@@ -300,7 +300,7 @@ must be threadsafe.
 The SQLITE_CONFIG_URI option takes a single argument of type int.
 If non-zero, then URI handling is globally enabled.
 If the parameter is zero, then URI handling is globally disabled.
-If URI handling is globally enabled, all filenames passed to 
+If URI handling is globally enabled, all filenames passed to
 .Fn sqlite3_open ,
 .Fn sqlite3_open_v2 ,
 .Fn sqlite3_open16
@@ -413,7 +413,7 @@ compile-time option.
 .It SQLITE_CONFIG_MEMDB_MAXSIZE 
 The SQLITE_CONFIG_MEMDB_MAXSIZE option accepts a single parameter sqlite3_int64
 parameter which is the default maximum size for an in-memory database
-created using 
+created using
 .Fn sqlite3_deserialize .
 This default maximum size can be adjusted up or down for individual
 databases using the SQLITE_FCNTL_SIZE_LIMIT

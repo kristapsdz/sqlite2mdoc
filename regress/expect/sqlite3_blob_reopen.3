@@ -20,20 +20,20 @@ the same.
 Moving an existing BLOB handle to a new row is faster than
 closing the existing handle and opening a new one.
 .Pp
-The new row must meet the same criteria as for 
+The new row must meet the same criteria as for
 .Fn sqlite3_blob_open
 - it must exist and there must be either a blob or text value stored
 in the nominated column.
 If the new row is not present in the table, or if it does not contain
 a blob or text value, or if another error occurs, an SQLite error code
 is returned and the blob handle is considered aborted.
-All subsequent calls to 
+All subsequent calls to
 .Fn sqlite3_blob_read ,
 .Fn sqlite3_blob_write
-or 
+or
 .Fn sqlite3_blob_reopen
 on an aborted blob handle immediately return SQLITE_ABORT.
-Calling 
+Calling
 .Fn sqlite3_blob_bytes
 on an aborted blob handle always returns zero.
 .Pp

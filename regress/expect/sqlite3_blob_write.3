@@ -19,17 +19,17 @@ N bytes of data are copied from the buffer Z into the open BLOB, starting
 at offset iOffset.
 .Pp
 On success, sqlite3_blob_write() returns SQLITE_OK.
-Otherwise, an  error code or an extended error code
+Otherwise, an error code or an extended error code
 is returned.
 Unless SQLITE_MISUSE is returned, this function sets the database connection
-error code and message accessible via 
+error code and message accessible via
 .Fn sqlite3_errcode
-and 
+and
 .Fn sqlite3_errmsg
 and related functions.
 .Pp
 If the BLOB handle passed as the first argument was not
-opened for writing (the flags parameter to 
+opened for writing (the flags parameter to
 .Fn sqlite3_blob_open
 was zero), this function returns SQLITE_READONLY.
 .Pp
@@ -38,7 +38,7 @@ to increase the size of a BLOB using this API.
 If offset iOffset is less than N bytes from the end of the BLOB, SQLITE_ERROR
 is returned and no data is written.
 The size of the BLOB (and hence the maximum value of N+iOffset) can
-be determined using the 
+be determined using the
 .Fn sqlite3_blob_bytes
 interface.
 If N or iOffset are less than zero SQLITE_ERROR is returned
@@ -52,9 +52,9 @@ of course those changes might have been overwritten by the statement
 that expired the BLOB handle or by other independent statements.
 .Pp
 This routine only works on a BLOB handle which has been
-created by a prior successful call to 
+created by a prior successful call to
 .Fn sqlite3_blob_open
-and which has not been closed by 
+and which has not been closed by
 .Fn sqlite3_blob_close .
 Passing any other pointer in to this routine results in undefined and
 probably undesirable behavior.

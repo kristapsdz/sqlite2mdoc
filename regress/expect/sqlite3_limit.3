@@ -27,7 +27,7 @@ set at compile-time by a C preprocessor macro called SQLITE_MAX_<i>NAME</i>.
 a limit above its hard upper bound are silently truncated to the hard
 upper bound.
 .Pp
-Regardless of whether or not the limit was changed, the 
+Regardless of whether or not the limit was changed, the
 .Fn sqlite3_limit
 interface returns the prior value of the limit.
 Hence, to find the current value of a limit without changing it, simply
@@ -42,7 +42,7 @@ applications downloaded off the Internet.
 The internal databases can be given the large, default limits.
 Databases managed by external sources can be given much smaller limits
 designed to prevent a denial of service attack.
-Developers might also want to use the 
+Developers might also want to use the
 .Fn sqlite3_set_authorizer
 interface to further control untrusted SQL.
 The size of the database created by an untrusted script can be contained

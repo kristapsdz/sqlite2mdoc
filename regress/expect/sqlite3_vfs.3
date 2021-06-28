@@ -35,12 +35,12 @@ mxPathname is the maximum length of a pathname in this VFS.
 .Pp
 Registered sqlite3_vfs objects are kept on a linked list formed by
 the pNext pointer.
-The 
+The
 .Fn sqlite3_vfs_register
-and 
+and
 .Fn sqlite3_vfs_unregister
 interfaces manage this list in a thread-safe way.
-The 
+The
 .Fn sqlite3_vfs_find
 interface searches the list.
 Neither the application code nor the VFS implementation should use
@@ -73,11 +73,11 @@ Whenever the xFilename parameter is NULL it will also be the case that
 the flags parameter will include SQLITE_OPEN_DELETEONCLOSE.
 .Pp
 The flags argument to xOpen() includes all bits set in the flags argument
-to 
+to
 .Fn sqlite3_open_v2 .
-Or if 
+Or if
 .Fn sqlite3_open
-or 
+or
 .Fn sqlite3_open16
 is used, then flags includes at least SQLITE_OPEN_READWRITE
 | SQLITE_OPEN_CREATE.

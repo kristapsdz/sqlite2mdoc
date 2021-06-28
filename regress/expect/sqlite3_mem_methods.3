@@ -13,7 +13,7 @@ An instance of this object defines the interface between SQLite and
 low-level memory allocation routines.
 .Pp
 This object is used in only one place in the SQLite interface.
-A pointer to an instance of this object is the argument to 
+A pointer to an instance of this object is the argument to
 .Fn sqlite3_config
 when the configuration option is SQLITE_CONFIG_MALLOC
 or SQLITE_CONFIG_GETMALLOC.
@@ -46,9 +46,9 @@ allocation given a particular requested size.
 Most memory allocators round up memory allocations at least to the
 next multiple of 8.
 Some allocators round up to a larger multiple or to a power of 2.
-Every memory allocation request coming in through 
+Every memory allocation request coming in through
 .Fn sqlite3_malloc
-or 
+or
 .Fn sqlite3_realloc
 first calls xRoundup.
 If xRoundup returns 0, that causes the corresponding memory allocation
@@ -57,7 +57,7 @@ to fail.
 The xInit method initializes the memory allocator.
 For example, it might allocate any require mutexes or initialize internal
 data structures.
-The xShutdown method is invoked (indirectly) by 
+The xShutdown method is invoked (indirectly) by
 .Fn sqlite3_shutdown
 and should deallocate any resources acquired by xInit.
 The pAppData pointer is used as the only parameter to xInit and xShutdown.
@@ -65,7 +65,7 @@ The pAppData pointer is used as the only parameter to xInit and xShutdown.
 SQLite holds the SQLITE_MUTEX_STATIC_MASTER
 mutex when it invokes the xInit method, so the xInit method need not
 be threadsafe.
-The xShutdown method is only called from 
+The xShutdown method is only called from
 .Fn sqlite3_shutdown
 so it does not need to be threadsafe either.
 For all other methods, SQLite holds the SQLITE_MUTEX_STATIC_MEM

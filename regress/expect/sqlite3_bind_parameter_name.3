@@ -26,10 +26,10 @@ The first host parameter has an index of 1, not 0.
 If the value N is out of range or if the N-th parameter is nameless,
 then NULL is returned.
 The returned string is always in UTF-8 encoding even if the named parameter
-was originally specified as UTF-16 in 
+was originally specified as UTF-16 in
 .Fn sqlite3_prepare16 ,
 .Fn sqlite3_prepare16_v2 ,
-or 
+or
 .Fn sqlite3_prepare16_v3 .
 .Sh IMPLEMENTATION NOTES
 These declarations were extracted from the

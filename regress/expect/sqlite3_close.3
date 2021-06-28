@@ -49,10 +49,10 @@ the transaction is automatically rolled back.
 .Pp
 The C parameter to sqlite3_close(C) and sqlite3_close_v2(C)
 must be either a NULL pointer or an sqlite3 object pointer obtained
-from 
+from
 .Fn sqlite3_open ,
 .Fn sqlite3_open16 ,
-or 
+or
 .Fn sqlite3_open_v2 ,
 and not previously closed.
 Calling sqlite3_close() or sqlite3_close_v2() with a NULL pointer argument

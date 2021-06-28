@@ -18,7 +18,7 @@ Some interfaces require a protected sqlite3_value.
 Other interfaces will accept either a protected or an unprotected sqlite3_value.
 Every interface that accepts sqlite3_value arguments specifies whether
 or not it requires a protected sqlite3_value.
-The 
+The
 .Fn sqlite3_value_dup
 interface can be used to construct a new protected sqlite3_value from
 an unprotected sqlite3_value.
@@ -28,7 +28,7 @@ is held.
 An internal mutex is held for a protected sqlite3_value object but
 no mutex is held for an unprotected sqlite3_value object.
 If SQLite is compiled to be single-threaded (with SQLITE_THREADSAFE=0
-and with 
+and with
 .Fn sqlite3_threadsafe
 returning 0) or if SQLite is run in one of reduced mutex modes SQLITE_CONFIG_SINGLETHREAD
 or SQLITE_CONFIG_MULTITHREAD then there is
@@ -41,13 +41,13 @@ objects even when not strictly required.
 The sqlite3_value objects that are passed as parameters into the implementation
 of application-defined SQL functions
 are protected.
-The sqlite3_value object returned by 
+The sqlite3_value object returned by
 .Fn sqlite3_column_value
 is unprotected.
 Unprotected sqlite3_value objects may only be used as arguments to
 .Fn sqlite3_result_value ,
 .Fn sqlite3_bind_value ,
-and 
+and
 .Fn sqlite3_value_dup .
 The sqlite3_value_type() family of interfaces require
 protected sqlite3_value objects.

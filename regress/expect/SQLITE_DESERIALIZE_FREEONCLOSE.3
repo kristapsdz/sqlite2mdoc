@@ -16,7 +16,7 @@ to the sqlite3_deserialize(D,S,P,N,M,F)
 interface.
 .Pp
 The SQLITE_DESERIALIZE_FREEONCLOSE means that the database serialization
-in the P argument is held in memory obtained from 
+in the P argument is held in memory obtained from
 .Fn sqlite3_malloc64
 and that SQLite should take ownership of this memory and automatically
 free it when it has finished using it.
@@ -24,7 +24,7 @@ Without this flag, the caller is responsible for freeing any dynamically
 allocated memory.
 .Pp
 The SQLITE_DESERIALIZE_RESIZEABLE flag means that SQLite is allowed
-to grow the size of the database using calls to 
+to grow the size of the database using calls to
 .Fn sqlite3_realloc64 .
 This flag should only be used if SQLITE_DESERIALIZE_FREEONCLOSE is
 also used.
