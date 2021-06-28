@@ -49,7 +49,7 @@ It is not safe to pass a result table directly to
 A result table should be deallocated using 
 .Fn sqlite3_free_table .
 As an example of the result table format, suppose a query result is
-as follows: 
+as follows:
 .Bd -ragged
 .Bd -literal
 Name        | Age ----------------------- Alice       | 43 Bob    
@@ -61,7 +61,7 @@ Name        | Age ----------------------- Alice       | 43 Bob
 There are two column (M==2) and three rows (N==3).
 Thus the result table has 8 entries.
 Suppose the result table is stored in an array names azResult.
-Then azResult holds this content: 
+Then azResult holds this content:
 .Bd -ragged
 .Bd -literal
 azResult[0] = "Name"; azResult[1] = "Age"; azResult[2] = "Alice"; azResult[3]

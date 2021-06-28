@@ -1440,7 +1440,7 @@ emit(struct defn *d)
 
 	col = 0;
 	for (i = 0; i < d->descsz; ) {
-		if ('\0' == d->desc[i]) {
+		if (d->desc[i] == '\0') {
 			i++;
 			continue;
 		}
@@ -1453,7 +1453,7 @@ emit(struct defn *d)
 		 * as this would mean, for instance, a `Pp'-`Bd' pair.
 		 */
 
-		if ('\n' == d->desc[i]) {
+		if (d->desc[i] == '\n') {
 			while (isspace((unsigned char)d->desc[i]))
 				i++;
 			for (tag = 0; tag < TAG__MAX; tag++) {
@@ -1653,10 +1653,24 @@ emit(struct defn *d)
 			continue;
 		}
 
-		if (' ' == d->desc[i] && 0 == col) {
-			while (' ' == d->desc[i])
+		/* Strip leading spaces from output. */
+
+		if (d->desc[i] == ' ' && col == 0) {
+			while (d->desc[i] == ' ')
 				i++;
 			continue;
+		}
+
+		/* Strip trailing spaces from output. */
+		
+		if (d->desc[i] == ' ') {
+			j = i;
+			while (j < d->descsz && d->desc[j] == ' ')
+				j++;
+			if (j < d->descsz && d->desc[j] == '\n') {
+				i = j;
+				continue;
+			}
 		}
 
 		assert(d->desc[i] != '\n');
@@ -1757,7 +1771,6 @@ emit(struct defn *d)
 
 #if HAVE_PLEDGE
 /*
- * Only used for OpenBSD 5.9 and above.
  * We pledge(2) stdio if we're receiving from stdin and writing to
  * stdout, otherwise we need file-creation and writing.
  */

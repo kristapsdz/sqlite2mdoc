@@ -29,7 +29,7 @@ or an SQLITE_NOMEM in
 then an error code corresponding to that error is returned by this
 function.
 Otherwise, SQLITE_OK is returned.
-This is to allow the following pattern (pseudo-code): 
+This is to allow the following pattern (pseudo-code):
 .Bd -literal
 sqlite3changeset_start(); while( SQLITE_ROW==sqlite3changeset_next()
 ){ // Do something with change.

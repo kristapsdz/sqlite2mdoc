@@ -51,7 +51,7 @@ Any of these arguments may be NULL, in which case the corresponding
 element of metadata is omitted.
 .Bd -ragged
 .Pp
-   Parameter   Output Type    Description 
+   Parameter   Output Type    Description
    5th   const char*   Data type 
    6th   const char*   Name of default collation sequence 
    7th   int           True if column has a NOT NULL constraint 
@@ -72,7 +72,7 @@ is not a WITHOUT ROWID table and an INTEGER PRIMARY KEY
 column has been explicitly declared, then the output parameters are
 set for the explicitly declared column.
 If there is no INTEGER PRIMARY KEY column, then
-the outputs for the rowid are set as follows: 
+the outputs for the rowid are set as follows:
 .Bd -literal
 data type: "INTEGER" collation sequence: "BINARY" not null: 0 primary
 key: 1 auto increment: 0 

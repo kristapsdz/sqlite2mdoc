@@ -20,19 +20,19 @@ decisions into account, so that the same conflicts do not have to be
 resolved elsewhere in the network.
 .Pp
 For example, if both the local and remote changesets contain an INSERT
-of the same key on "CREATE TABLE t1(a PRIMARY KEY, b)": 
+of the same key on "CREATE TABLE t1(a PRIMARY KEY, b)":
 .Pp
 local:  INSERT INTO t1 VALUES(1, 'v1'); remote: INSERT INTO t1 VALUES(1,
-\&'v2'); 
+\&'v2');
 .Pp
 and the conflict resolution is REPLACE, then the INSERT change is removed
 from the local changeset (it was overridden).
 Or, if the conflict resolution was "OMIT", then the local changeset
-is modified to instead contain: 
+is modified to instead contain:
 .Pp
-UPDATE t1 SET b = 'v2' WHERE a=1; 
+UPDATE t1 SET b = 'v2' WHERE a=1;
 .Pp
-Changes within the local changeset are rebased as follows: 
+Changes within the local changeset are rebased as follows:
 .Bl -tag -width Ds
 .It Local INSERT
 This may only conflict with a remote INSERT.
@@ -66,7 +66,7 @@ If this means no columns would be updated, the change is omitted.
 .Pp
 A local change may be rebased against multiple remote changes simultaneously.
 If a single key is modified by multiple remote changesets, they are
-combined as follows before the local changeset is rebased: 
+combined as follows before the local changeset is rebased:
 .Bl -bullet
 .It
 If there has been one or more REPLACE resolutions on a key, it is rebased
@@ -85,7 +85,7 @@ are rebased for OMIT.
 In order to rebase a local changeset, the remote changeset must first
 be applied to the local database using sqlite3changeset_apply_v2()
 and the buffer of rebase information captured.
-Then: 
+Then:
 .Bl -enum
 .It
 An sqlite3_rebaser object is created by calling sqlite3rebaser_create().

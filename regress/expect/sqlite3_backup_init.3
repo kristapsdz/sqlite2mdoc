@@ -61,7 +61,7 @@ with the backup operation.
 There should be exactly one call to sqlite3_backup_finish() for each
 successful call to sqlite3_backup_init().
 .Pp
-\fBsqlite3_backup_init()\fP 
+\fBsqlite3_backup_init()\fP
 .Pp
 The D and N arguments to sqlite3_backup_init(D,N,S,M) are the database connection
 associated with the destination database and the database name, respectively.
@@ -95,7 +95,7 @@ The sqlite3_backup object may be used with the sqlite3_backup_step()
 and sqlite3_backup_finish() functions to perform the specified backup
 operation.
 .Pp
-\fBsqlite3_backup_step()\fP 
+\fBsqlite3_backup_step()\fP
 .Pp
 Function sqlite3_backup_step(B,N) will copy up to N pages between the
 source and destination databases specified by sqlite3_backup
@@ -161,7 +161,7 @@ If the source database is modified by the using the same database connection
 as is used by the backup operation, then the backup database is automatically
 updated at the same time.
 .Pp
-\fBsqlite3_backup_finish()\fP 
+\fBsqlite3_backup_finish()\fP
 .Pp
 When sqlite3_backup_step() has returned SQLITE_DONE, or
 when the application wishes to abandon the backup operation, the application
@@ -185,7 +185,7 @@ A return of SQLITE_BUSY or SQLITE_LOCKED from
 sqlite3_backup_step() is not a permanent error and does not affect
 the return value of sqlite3_backup_finish().
 .Pp
-\fBsqlite3_backup_remaining() and sqlite3_backup_pagecount()\fP 
+\fBsqlite3_backup_remaining() and sqlite3_backup_pagecount()\fP
 .Pp
 The sqlite3_backup_remaining() routine returns the number of pages
 still to be backed up at the conclusion of the most recent sqlite3_backup_step().
@@ -197,7 +197,7 @@ the source database or the number of pages remaining, those changes
 are not reflected in the output of sqlite3_backup_pagecount() and sqlite3_backup_remaining()
 until after the next sqlite3_backup_step().
 .Pp
-\fBConcurrent Usage of Database Handles\fP 
+\fBConcurrent Usage of Database Handles\fP
 .Pp
 The source database connection may be used by the
 application for other purposes while a backup operation is underway

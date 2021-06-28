@@ -30,7 +30,7 @@ Things are more complicated if the sqlite3_changes() function is executed
 while a trigger program is running.
 This may happen if the program uses the changes() SQL function,
 or if some other callback function invokes sqlite3_changes() directly.
-Essentially: 
+Essentially:
 .Bl -bullet
 .It
 Before entering a trigger program the value returned by sqlite3_changes()

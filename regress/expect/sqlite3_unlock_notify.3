@@ -66,7 +66,7 @@ an unlock-notify callback, a crash or deadlock may be the result.
 Unless deadlock is detected (see below), sqlite3_unlock_notify() always
 returns SQLITE_OK.
 .Pp
-\fBCallback Invocation Details\fP 
+\fBCallback Invocation Details\fP
 .Pp
 When an unlock-notify callback is registered, the application provides
 a single void* pointer that is passed to the callback when it is invoked.
@@ -86,7 +86,7 @@ by the blocked connections bundled together into an array.
 This gives the application an opportunity to prioritize any actions
 related to the set of unblocked database connections.
 .Pp
-\fBDeadlock Detection\fP 
+\fBDeadlock Detection\fP
 .Pp
 Assuming that after registering for an unlock-notify callback a database
 waits for the callback to be issued before taking any further action
@@ -112,7 +112,7 @@ callback on the conclusion of connection C's transaction, where connection
 C is waiting on connection A.
 Any number of levels of indirection are allowed.
 .Pp
-\fBThe "DROP TABLE" Exception\fP 
+\fBThe "DROP TABLE" Exception\fP
 .Pp
 When a call to 
 .Fn sqlite3_step

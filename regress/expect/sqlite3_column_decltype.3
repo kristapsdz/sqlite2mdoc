@@ -26,13 +26,13 @@ If the Nth column of the result set is an expression or subquery, then
 a NULL pointer is returned.
 The returned string is always UTF-8 encoded.
 .Pp
-For example, given the database schema: 
+For example, given the database schema:
 .Pp
-CREATE TABLE t1(c1 VARIANT); 
+CREATE TABLE t1(c1 VARIANT);
 .Pp
-and the following statement to be compiled: 
+and the following statement to be compiled:
 .Pp
-SELECT c1 + 1, c1 FROM t1; 
+SELECT c1 + 1, c1 FROM t1;
 .Pp
 this routine would return the string "VARIANT" for the second result
 column (i==1), and a NULL pointer for the first result column (i==0).

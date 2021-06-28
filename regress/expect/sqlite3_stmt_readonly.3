@@ -20,7 +20,7 @@ as a side effect.
 For example, if an application defines a function "eval()" that calls
 .Fn sqlite3_exec ,
 then the following SQL statement would change the database file through
-side-effects: 
+side-effects:
 .Bd -ragged
 .Bd -literal
 SELECT eval('DELETE FROM t1') FROM t2; 

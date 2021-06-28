@@ -83,7 +83,7 @@ object.
 .Pp
 .Ed
 .Pp
-\fBDetails:\fP 
+\fBDetails:\fP
 .Pp
 These routines return information about a single column of the current
 result row of a query.
@@ -209,10 +209,10 @@ For example, if the internal representation is FLOAT and a text result
 is requested, 
 .Fn sqlite3_snprintf
 is used internally to perform the conversion automatically.
-The following table details the conversions that are applied: 
+The following table details the conversions that are applied:
 .Bd -ragged
 .Pp
-   Internal Type   Requested Type    Conversion 
+   Internal Type   Requested Type    Conversion
     NULL      INTEGER     Result is 0 
     NULL       FLOAT      Result is 0.0 
     NULL        TEXT      Result is a NULL pointer 
@@ -236,7 +236,7 @@ Note that when type conversions occur, pointers returned by prior calls
 to sqlite3_column_blob(), sqlite3_column_text(), and/or sqlite3_column_text16()
 may be invalidated.
 Type conversions and pointer invalidations might occur in the following
-cases: 
+cases:
 .Bl -bullet
 .It
 The initial content is a BLOB and sqlite3_column_text() or sqlite3_column_text16()
@@ -260,7 +260,7 @@ sometimes they are not possible and in those cases prior pointers are
 invalidated.
 .Pp
 The safest policy is to invoke these routines in one of the following
-ways: 
+ways:
 .Bl -bullet
 .It
 sqlite3_column_text() followed by sqlite3_column_bytes()
@@ -296,7 +296,7 @@ into
 As long as the input parameters are correct, these routines will only
 fail if an out-of-memory error occurs during a format conversion.
 Only the following subset of interfaces are subject to out-of-memory
-errors: 
+errors:
 .Bl -bullet
 .It
 sqlite3_column_blob() 

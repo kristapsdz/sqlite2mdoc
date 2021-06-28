@@ -99,7 +99,7 @@
 .Fc
 .Sh DESCRIPTION
 The six streaming API xxx_strm() functions serve similar purposes to
-the corresponding non-streaming API functions: 
+the corresponding non-streaming API functions:
 .Pp
   Streaming function Non-streaming equivalent
   sqlite3changeset_apply_strm sqlite3changeset_apply
@@ -123,12 +123,12 @@ In order to avoid this problem, instead of a single large buffer, input
 is passed to a streaming API functions by way of a callback function
 that the sessions module invokes to incrementally request input data
 as it is required.
-In all cases, a pair of API function parameters such as 
+In all cases, a pair of API function parameters such as
 .Bd -literal
       int nChangeset,       void *pChangeset, 
 .Ed
 .Pp
-Is replaced by: 
+Is replaced by:
 .Bd -literal
       int (*xInput)(void *pIn, void *pData, int *pnData),       void
 *pIn, 
@@ -157,12 +157,12 @@ fail with the same error code as returned by xInput.
 Similarly, streaming API functions that return changesets (or patchsets)
 return them in chunks by way of a callback function instead of via
 a pointer to a single large buffer.
-In this case, a pair of parameters such as: 
+In this case, a pair of parameters such as:
 .Bd -literal
       int *pnChangeset,       void **ppChangeset, 
 .Ed
 .Pp
-Is replaced by: 
+Is replaced by:
 .Bd -literal
       int (*xOutput)(void *pOut, const void *pData, int nData),   
 void *pOut 
