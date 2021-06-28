@@ -98,6 +98,8 @@ enum	tag {
 	TAG_P_OPEN,
 	TAG_PRE_CLOSE,
 	TAG_PRE_OPEN,
+	TAG_SPAN_CLOSE,
+	TAG_SPAN_OPEN_ATTRS,
 	TAG_TABLE_CLOSE,
 	TAG_TABLE_OPEN,
 	TAG_TABLE_OPEN_ATTRS,
@@ -211,6 +213,8 @@ static	const struct taginfo tags[TAG__MAX] = {
 	{ "<p>", ".Pp", 0 }, /* TAG_P_OPEN */
 	{ "</pre>", ".Ed\n.Pp", 0 }, /* TAG_PRE_CLOSE */
 	{ "<pre>", ".Bd -literal", 0 }, /* TAG_PRE_OPEN */
+	{ "</span>", "", TAGINFO_INLINE }, /* TAG_SPAN_CLOSE */
+	{ "<span ", "", TAGINFO_INLINE | TAGINFO_ATTRS }, /* TAG_SPAN_OPEN_ATTRS */
 	{ "</table>", ".Pp", 0 }, /* TAG_TABLE_CLOSE */
 	{ "<table>", ".Pp", 0 }, /* TAG_TABLE_OPEN */
 	{ "<table ", ".Pp", TAGINFO_ATTRS }, /* TAG_TABLE_OPEN_ATTRS */
