@@ -71,9 +71,9 @@ regen_regress: all
 		cmp regress/expect/$$bn.tmp regress/expect/$$bn >/dev/null 2>&1 ; \
 		if [ $$? -ne 0 ] ; then \
 			diff -u regress/expect/$$bn regress/expect/$$bn.tmp ; \
+			mv -f regress/expect/$$bn.tmp regress/expect/$$bn ; \
 		fi ; \
 		set -e ; \
-		mv -f regress/expect/$$bn.tmp regress/expect/$$bn ; \
 	done
 	rm -rf regress/expect/tmp
 
