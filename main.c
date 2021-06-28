@@ -1098,10 +1098,10 @@ xrcmp(const void *p1, const void *p2)
 	const char	*s1 = lookup(*(const char **)(uintptr_t)p1),
 			*s2 = lookup(*(const char **)(uintptr_t)p2);
 
-	/* Stuff bad lookups at the end. */
-
-	if (s1 == NULL || s2 == NULL)
-		return -1;
+	if (s1 == NULL)
+		s1 = "";
+	if (s2 == NULL)
+		s2 = "";
 
 	return strcasecmp(s1, s2);
 }
