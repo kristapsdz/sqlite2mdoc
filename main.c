@@ -308,7 +308,7 @@ again:
 		cp++;
 		len--;
 	}
-	if ('\0' == *cp)
+	if (*cp == '\0')
 		return(1);
 
 	/* Whether we're a continuation clause. */
@@ -469,7 +469,7 @@ decl(struct parse *p, const char *cp, size_t len)
 	assert(NULL != d);
 
 	/* Check closure. */
-	if ('\0' == *cp) {
+	if (*cp == '\0') {
 		p->phase = PHASE_INIT;
 		/* Check multiline status. */
 		if (d->multiline) {
@@ -501,7 +501,7 @@ decl(struct parse *p, const char *cp, size_t len)
 	 * function declaration), but that's ok.
 	 */
 
-	if ('#' == *cp) {
+	if (*cp == '#') {
 		len--;
 		cp++;
 		while (isspace((unsigned char)*cp)) {
@@ -516,8 +516,8 @@ decl(struct parse *p, const char *cp, size_t len)
 	/* Skip one-liner comments. */
 
 	if (len > 4 &&
-	    '/' == cp[0] && '*' == cp[1] &&
-	    '*' == cp[len - 2] && '/' == cp[len - 1])
+	    cp[0] == '/' && cp[1] == '*' &&
+	    cp[len - 2] == '*' && cp[len - 1] == '/')
 		return;
 
 	decl_function(p, cp, len);
@@ -537,24 +537,35 @@ endphase(struct parse *p, const char *cp)
 {
 
 	if (*cp == '\0') {
-		warnx("%s:%zu: warn: unexpected end of "
+		/*
+		 * Error: empty line.
+		 */
+		warnx("%s:%zu: warn: unexpected empty line in "
 			"interface description", p->fn, p->ln);
 		p->phase = PHASE_INIT;
 		return 1;
 	} else if (strcmp(cp, "*/") == 0) {
+		/*
+		 * End of the interface description.
+		 */
 		p->phase = PHASE_DECL;
 		return 1;
-	} else if (!('*' == cp[0] && '*' == cp[1])) {
+	} else if (!(cp[0] == '*' && cp[1] == '*')) {
+		/*
+		 * Error: bad syntax, not end or continuation.
+		 */
 		if (cp[0] == '*' && cp[1] == '\0') {
 			if (verbose)
-				warnx("%s:%zu: warn: workaround "
-					"for standalone asterisk",
+				warnx("%s:%zu: warn: ignoring "
+					"standalone asterisk "
+					"in interface description",
 					p->fn, p->ln);
 			return 0;
 		} else if (cp[0] == '*' && cp[1] == ' ') {
 			if (verbose)
-				warnx("%s:%zu: warn: workaround "
-					"for leading single asterisk",
+				warnx("%s:%zu: warn: ignoring "
+					"leading single asterisk "
+					"in interface description",
 					p->fn, p->ln);
 			return 0;
 		}
@@ -563,6 +574,8 @@ endphase(struct parse *p, const char *cp)
 		p->phase = PHASE_INIT;
 		return 1;
 	}
+
+	/* If here, at a continuation ('**'). */
 
 	return 0;
 }
@@ -736,7 +749,7 @@ init(struct parse *p, const char *cp)
 	cp += 9;
 	while (isspace((unsigned char)*cp))
 		cp++;
-	if ('\0' == *cp) {
+	if (*cp == '\0') {
 		warnx("%s:%zu: warn: unexpected end of "
 			"interface definition", p->fn, p->ln);
 		return;
@@ -789,10 +802,10 @@ grok_name(const struct decl *e,
 			if (BPOINT(cp))
 				break;
 			/* Function pointers... */
-			if ('(' == *cp)
+			if (*cp == '(')
 				cp++;
 			/* Pass over pointers. */
-			while ('*' == *cp)
+			while (*cp == '*')
 				cp++;
 			*start = cp;
 			*sz = 0;
@@ -870,8 +883,8 @@ postprocess(const char *prefix, struct defn *d)
 
 	for (i = 0; i < sz; i++) {
 		if (isalnum((unsigned char)d->fname[offs + i]) ||
-		    '_' == d->fname[offs + i] ||
-		    '-' == d->fname[offs + i])
+		    d->fname[offs + i] == '_' ||
+		    d->fname[offs + i] == '-')
 			continue;
 		d->fname[offs + i] = '_';
 	}
@@ -886,12 +899,12 @@ postprocess(const char *prefix, struct defn *d)
 			break;
 		sz = 0;
 		start = &d->keybuf[i];
-		if ('{' == d->keybuf[i]) {
+		if (d->keybuf[i] == '{') {
 			start = &d->keybuf[++i];
 			for ( ; i < d->keybufsz; i++, sz++)
-				if ('}' == d->keybuf[i])
+				if (d->keybuf[i] == '}')
 					break;
-			if ('}' == d->keybuf[i])
+			if (d->keybuf[i] == '}')
 				i++;
 		} else
 			for ( ; i < d->keybufsz; i++, sz++)
@@ -996,13 +1009,13 @@ postprocess(const char *prefix, struct defn *d)
 				i++;
 
 		/* Strip trailing whitespace. */
-		while (sz > 1 && ' ' == start[sz - 1])
+		while (sz > 1 && start[sz - 1] == ' ')
 			sz--;
 
 		/* Strip trailing parenthesis. */
 		if (sz > 2 &&
-		    '(' == start[sz - 2] &&
-	 	    ')' == start[sz - 1])
+		    start[sz - 2] == '(' &&
+	 	    start[sz - 1] == ')')
 			sz -= 2;
 
 		d->xrs = reallocarray(d->xrs,
@@ -1027,13 +1040,13 @@ postprocess(const char *prefix, struct defn *d)
 		if ('[' != d->desc[i])
 			continue;
 		i++;
-		if ('[' == d->desc[i])
+		if (d->desc[i] == '[')
 			continue;
 
 		start = &d->desc[i];
 		for (sz = 0; i < d->descsz; i++, sz++)
-			if (']' == d->desc[i] ||
-			    '|' == d->desc[i])
+			if (d->desc[i] == ']' ||
+			    d->desc[i] == '|')
 				break;
 
 		if (i == d->descsz)
@@ -1046,12 +1059,12 @@ postprocess(const char *prefix, struct defn *d)
 			      ']' != d->desc[i])
 				i++;
 
-		while (sz > 1 && ' ' == start[sz - 1])
+		while (sz > 1 && start[sz - 1] == ' ')
 			sz--;
 
 		if (sz > 2 &&
-		    '(' == start[sz - 2] &&
-		    ')' == start[sz - 1])
+		    start[sz - 2] == '(' &&
+		    start[sz - 1] == ')')
 			sz -= 2;
 
 		d->xrs = reallocarray(d->xrs,
@@ -1394,23 +1407,23 @@ emit(struct defn *d)
 	 */
 
 	for (i = 0; i < d->descsz; i++) {
-		if ('^' == d->desc[i] &&
-		    '(' == d->desc[i + 1]) {
+		if (d->desc[i] == '^' &&
+		    d->desc[i + 1] == '(') {
 			memmove(&d->desc[i],
 				&d->desc[i + 2],
 				d->descsz - i - 2);
 			d->descsz -= 2;
 			i--;
 			continue;
-		} else if (')' == d->desc[i] &&
-			   '^' == d->desc[i + 1]) {
+		} else if (d->desc[i] == ')' &&
+			   d->desc[i + 1] == '^') {
 			memmove(&d->desc[i],
 				&d->desc[i + 2],
 				d->descsz - i - 2);
 			d->descsz -= 2;
 			i--;
 			continue;
-		} else if ('^' == d->desc[i]) {
+		} else if (d->desc[i] == '^') {
 			memmove(&d->desc[i],
 				&d->desc[i + 1],
 				d->descsz - i - 1);
@@ -1422,8 +1435,8 @@ emit(struct defn *d)
 			continue;
 
 		for (j = i; j < d->descsz; j++)
-			if (']' == d->desc[j] &&
-			    ']' == d->desc[j + 1])
+			if (d->desc[j] == ']' &&
+			    d->desc[j + 1] == ']')
 				break;
 
 		if (j == d->descsz)
@@ -1509,7 +1522,7 @@ emit(struct defn *d)
 					break;
 				}
 			if (newsentence(j, i, d->desc)) {
-				while (' ' == d->desc[i])
+				while (d->desc[i] == ' ')
 					i++;
 				fputc('\n', f);
 				col = 0;
@@ -1611,13 +1624,13 @@ emit(struct defn *d)
 				col++;
 				stripspace--;
 			}
-		} else if ('[' == d->desc[i] &&
+		} else if (d->desc[i] == '[' &&
 			   ']' != d->desc[i + 1]) {
 			/* Do we start at the bracket or bar? */
 
 			for (sz = i + 1; sz < d->descsz; sz++)
-				if ('|' == d->desc[sz] ||
-				    ']' == d->desc[sz])
+				if (d->desc[sz] == '|' ||
+				    d->desc[sz] == ']')
 					break;
 
 			/* This is a degenerate case. */
@@ -1641,8 +1654,8 @@ emit(struct defn *d)
 			if ('|' != d->desc[sz]) {
 				i = i + 1;
 				if (sz > 2 &&
-				    ')' == d->desc[sz - 1] &&
-				    '(' == d->desc[sz - 2]) {
+				    d->desc[sz - 1] == ')' &&
+				    d->desc[sz - 2] == '(') {
 					if (col > 0)
 						fputc('\n', f);
 					fputs(".Fn ", f);
@@ -1694,7 +1707,7 @@ emit(struct defn *d)
 					fputc('\n', f);
 					col = 0;
 					break;
-				} else if (']' == d->desc[i]) {
+				} else if (d->desc[i] == ']') {
 					i++;
 					break;
 				}
