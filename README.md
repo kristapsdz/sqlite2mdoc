@@ -2,7 +2,7 @@
 
 This utility accepts an [SQLite](https://www.sqlite.org) header file
 `sqlite3.h` and produces a set of decently well-formed
-[mdoc(7)](https://man.openbsd.org/OpenBSD-current/man7/mdoc.7) files
+[mdoc(7)](https://man.openbsd.org/mdoc.7) files
 documenting the C API.
 These will be roughly equivalent to the [C-language Interface
 Specification for SQLite](https://www.sqlite.org/c3ref/intro.html).
@@ -10,9 +10,6 @@ Specification for SQLite](https://www.sqlite.org/c3ref/intro.html).
 You can also use it for any file(s) using the documentation standards of
 SQLite.
 See the [sqlite2mdoc.1](sqlite2mdoc.1) manpage for syntax details.
-
-This [GitHub](https://www.github.com) repository is a read-only mirror
-of the project's CVS repository.
 
 **Note**: this only works with sqlite3, *not* the original `sqlite.h`
 format.
