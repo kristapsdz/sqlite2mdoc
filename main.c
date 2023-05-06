@@ -48,7 +48,7 @@ enum	phase {
 };
 
 /*
- * What kind of declaration (preliminary analysis). 
+ * What kind of declaration (preliminary analysis).
  */
 enum	decltype {
 	DECLTYPE_CPP, /* pre-processor */
@@ -250,19 +250,19 @@ static	int nofile;
 static	int filename;
 
 static void
-decl_function_add(struct parse *p, char **etext, 
+decl_function_add(struct parse *p, char **etext,
 	size_t *etextsz, const char *cp, size_t len)
 {
 
 	if (' ' != (*etext)[*etextsz - 1]) {
 		*etext = realloc(*etext, *etextsz + 2);
-		if (NULL == *etext)
+		if (*etext == NULL)
 			err(1, NULL);
 		(*etextsz)++;
 		strlcat(*etext, " ", *etextsz + 1);
 	}
 	*etext = realloc(*etext, *etextsz + len + 1);
-	if (NULL == *etext)
+	if (*etext == NULL)
 		err(1, NULL);
 	memcpy(*etext + *etextsz, cp, len);
 	*etextsz += len;
@@ -275,7 +275,7 @@ decl_function_copy(struct parse *p, char **etext,
 {
 
 	*etext = malloc(len + 1);
-	if (NULL == *etext)
+	if (*etext == NULL)
 		err(1, NULL);
 	memcpy(*etext, cp, len);
 	*etextsz = len;
@@ -301,7 +301,7 @@ decl_function(struct parse *p, const char *cp, size_t len)
 
 	/*
 	 * Since C tokens are semicolon-separated, we may be invoked any
-	 * number of times per a single line. 
+	 * number of times per a single line.
 	 */
 again:
 	while (isspace((unsigned char)*cp)) {
@@ -320,9 +320,9 @@ again:
 		assert(NULL != e->text);
 		assert(e->textsz);
 	} else {
-		assert(0 == d->instruct);
+		assert(d->instruct == 0);
 		e = calloc(1, sizeof(struct decl));
-		if (NULL == e)
+		if (e == NULL)
 			err(1, NULL);
 		e->type = DECLTYPE_C;
 		TAILQ_INSERT_TAIL(&d->dcqhead, e, entries);
@@ -337,7 +337,7 @@ again:
 	rcp = strchr(cp, '}');
 
 	/* We're only a partial statement (i.e., no closure). */
-	if (NULL == ep && d->multiline) {
+	if (ep == NULL && d->multiline) {
 		assert(NULL != e->text);
 		assert(e->textsz > 0);
 		/* Is a struct starting or ending here? */
@@ -347,11 +347,11 @@ again:
 			d->instruct++;
 		decl_function_add(p, &e->text, &e->textsz, cp, len);
 		return(1);
-	} else if (NULL == ep && ! d->multiline) {
+	} else if (ep == NULL && ! d->multiline) {
 		d->multiline = 1;
 		/* Is a structure starting in this line? */
-		if (NULL != lcp && 
-		    (NULL == rcp || rcp < lcp))
+		if (NULL != lcp &&
+		    (rcp == NULL || rcp < lcp))
 			d->instruct++;
 		decl_function_copy(p, &e->text, &e->textsz, cp, len);
 		return(1);
@@ -367,15 +367,15 @@ again:
 	if (d->multiline) {
 		assert(NULL != e->text);
 		/* Don't stop the multi-line if we're in a struct. */
-		if (0 == d->instruct) {
-			if (NULL == lcp || lcp > cp)
+		if (d->instruct == 0) {
+			if (lcp == NULL || lcp > cp)
 				d->multiline = 0;
 		} else if (NULL != rcp && rcp < cp)
-			if (0 == --d->instruct)
+			if (--d->instruct == 0)
 				d->multiline = 0;
 		decl_function_add(p, &e->text, &e->textsz, ncp, nlen);
 	} else {
-		assert(NULL == e->text);
+		assert(e->text == NULL);
 		if (NULL != lcp && lcp < cp) {
 			d->multiline = 1;
 			d->instruct++;
@@ -404,7 +404,7 @@ decl_define(struct parse *p, const char *cp, size_t len)
 		cp++;
 		len--;
 	}
-	if (0 == len) {
+	if (len == 0) {
 		warnx("%s:%zu: empty pre-processor "
 			"constant", p->fn, p->ln);
 		return(1);
@@ -433,11 +433,11 @@ decl_define(struct parse *p, const char *cp, size_t len)
 		sz++;
 
 	e = calloc(1, sizeof(struct decl));
-	if (NULL == e) 
+	if (e == NULL)
 		err(1, NULL);
 	e->type = DECLTYPE_CPP;
 	e->text = calloc(1, sz + 1);
-	if (NULL == e->text)
+	if (e->text == NULL)
 		err(1, NULL);
 	strlcpy(e->text, cp, sz + 1);
 	e->textsz = sz;
@@ -482,19 +482,19 @@ decl(struct parse *p, const char *cp, size_t len)
 			d->multiline = d->instruct = 0;
 		}
 		return;
-	} 
+	}
 
-	d->fulldesc = realloc(d->fulldesc, 
+	d->fulldesc = realloc(d->fulldesc,
 		d->fulldescsz + oldlen + 2);
-	if (NULL == d->fulldesc)
+	if (d->fulldesc == NULL)
 		err(1, NULL);
-	if (0 == d->fulldescsz)
+	if (d->fulldescsz == 0)
 		d->fulldesc[0] = '\0';
 	d->fulldescsz += oldlen + 2;
 	strlcat(d->fulldesc, oldcp, d->fulldescsz);
 	strlcat(d->fulldesc, "\n", d->fulldescsz);
 	
-	/* 
+	/*
 	 * Catch preprocessor defines, but discard all other types of
 	 * preprocessor statements.
 	 * We might already be in the middle of a declaration (a
@@ -508,7 +508,7 @@ decl(struct parse *p, const char *cp, size_t len)
 			len--;
 			cp++;
 		}
-		if (0 == strncmp(cp, "define", 6))
+		if (strncmp(cp, "define", 6) == 0)
 			decl_define(p, cp + 6, len - 6);
 		return;
 	}
@@ -516,7 +516,7 @@ decl(struct parse *p, const char *cp, size_t len)
 	/* Skip one-liner comments. */
 
 	if (len > 4 &&
-	    '/' == cp[0] && '*' == cp[1] && 
+	    '/' == cp[0] && '*' == cp[1] &&
 	    '*' == cp[len - 2] && '/' == cp[len - 1])
 		return;
 
@@ -537,7 +537,7 @@ seealso(struct parse *p, const char *cp, size_t len)
 			"interface description", p->fn, p->ln);
 		p->phase = PHASE_INIT;
 		return;
-	} else if (0 == strcmp(cp, "*/")) {
+	} else if ( strcmp(cp, "*/") == 0) {
 		p->phase = PHASE_DECL;
 		return;
 	} else if ('*' != cp[0] || '*' != cp[1]) {
@@ -555,7 +555,7 @@ seealso(struct parse *p, const char *cp, size_t len)
 	}
 
 	/* Blank line: back to description part. */
-	if (0 == len) {
+	if (len == 0) {
 		p->phase = PHASE_DESC;
 		return;
 	}
@@ -588,7 +588,7 @@ desc(struct parse *p, const char *cp, size_t len)
 			"interface description", p->fn, p->ln);
 		p->phase = PHASE_INIT;
 		return;
-	} else if (0 == strcmp(cp, "*/")) {
+	} else if (strcmp(cp, "*/") == 0) {
 		/* End of comment area, start of declarations. */
 		p->phase = PHASE_DECL;
 		return;
@@ -612,11 +612,11 @@ desc(struct parse *p, const char *cp, size_t len)
 	assert(NULL != d);
 
 	/* Ignore leading blank lines. */
-	if (0 == len && NULL == d->desc)
+	if (len == 0 && d->desc == NULL)
 		return;
 
 	/* Collect SEE ALSO clauses. */
-	if (0 == strncasecmp(cp, "see also:", 9)) {
+	if (strncasecmp(cp, "see also:", 9) == 0) {
 		cp += 9;
 		len -= 9;
 		while (isspace((unsigned char)*cp)) {
@@ -633,29 +633,29 @@ desc(struct parse *p, const char *cp, size_t len)
 	}
 
 	/* White-space padding between lines. */
-	if (NULL != d->desc && 
+	if (NULL != d->desc &&
 	    ' ' != d->desc[d->descsz - 1] &&
 	    '\n' != d->desc[d->descsz - 1]) {
 		d->desc = realloc(d->desc, d->descsz + 2);
-		if (NULL == d->desc)
+		if (d->desc == NULL)
 			err(1, NULL);
 		d->descsz++;
 		strlcat(d->desc, " ", d->descsz + 1);
 	}
 
 	/* Either append the line of a newline, if blank. */
-	nsz = 0 == len ? 1 : len;
-	if (NULL == d->desc) {
+	nsz = len == 0 ? 1 : len;
+	if (d->desc == NULL) {
 		d->desc = calloc(1, nsz + 1);
-		if (NULL == d->desc)
+		if (d->desc == NULL)
 			err(1, NULL);
 	} else {
 		d->desc = realloc(d->desc, d->descsz + nsz + 1);
-		if (NULL == d->desc)
+		if (d->desc == NULL)
 			err(1, NULL);
 	}
 	d->descsz += nsz;
-	strlcat(d->desc, 0 == len ? "\n" : cp, d->descsz + 1);
+	strlcat(d->desc, len == 0 ? "\n" : cp, d->descsz + 1);
 }
 
 /*
@@ -671,7 +671,7 @@ keys(struct parse *p, const char *cp, size_t len)
 			"interface keywords", p->fn, p->ln);
 		p->phase = PHASE_INIT;
 		return;
-	} else if (0 == strcmp(cp, "*/")) {
+	} else if (strcmp(cp, "*/") == 0) {
 		/* End of comment area, start of declarations. */
 		p->phase = PHASE_DECL;
 		return;
@@ -694,10 +694,10 @@ keys(struct parse *p, const char *cp, size_t len)
 		len--;
 	}
 
-	if (0 == len) {
+	if (len == 0) {
 		p->phase = PHASE_DESC;
 		return;
-	} else if (strncmp(cp, "KEYWORDS:", 9)) 
+	} else if (strncmp(cp, "KEYWORDS:", 9))
 		return;
 
 	cp += 9;
@@ -706,7 +706,7 @@ keys(struct parse *p, const char *cp, size_t len)
 	d = TAILQ_LAST(&p->dqhead, defnq);
 	assert(NULL != d);
 	d->keybuf = realloc(d->keybuf, d->keybufsz + len + 1);
-	if (NULL == d->keybuf)
+	if (d->keybuf == NULL)
 		err(1, NULL);
 	memcpy(d->keybuf + d->keybufsz, cp, len);
 	d->keybufsz += len;
@@ -743,10 +743,10 @@ init(struct parse *p, const char *cp)
 
 	/* Add definition to list of existing ones. */
 	d = calloc(1, sizeof(struct defn));
-	if (NULL == d)
+	if (d == NULL)
 		err(1, NULL);
 	d->name = strdup(cp);
-	if (NULL == d->name)
+	if (d->name == NULL)
 		err(1, NULL);
 	d->fn = p->fn;
 	d->ln = p->ln;
@@ -770,7 +770,7 @@ init(struct parse *p, const char *cp)
  * For a function, it'd be the function name.
  */
 static void
-grok_name(const struct decl *e, 
+grok_name(const struct decl *e,
 	const char **start, size_t *sz)
 {
 	const char	*cp;
@@ -829,17 +829,17 @@ postprocess(const char *prefix, struct defn *d)
 		    DECLTYPE_C == first->type)
 			break;
 
-	if (NULL == first) {
+	if (first == NULL) {
 		warnx("%s:%zu: no entry to document", d->fn, d->ln);
 		return;
 	}
 
-	/* 
+	/*
 	 * Now compute the document name (`Dt').
 	 * We'll also use this for the filename.
 	 */
 	grok_name(first, &start, &sz);
-	if (NULL == start) {
+	if (start == NULL) {
 		warnx("%s:%zu: couldn't deduce "
 			"entry name", d->fn, d->ln);
 		return;
@@ -847,7 +847,7 @@ postprocess(const char *prefix, struct defn *d)
 
 	/* Document name needs all-caps. */
 	d->dt = malloc(sz + 1);
-	if (NULL == d->dt)
+	if (d->dt == NULL)
 		err(1, NULL);
 	memcpy(d->dt, start, sz);
 	d->dt[sz] = '\0';
@@ -859,12 +859,12 @@ postprocess(const char *prefix, struct defn *d)
 		asprintf(&d->fname, "%.*s.3", (int)sz, start);
 		offs = 0;
 	} else {
-		asprintf(&d->fname, "%s/%.*s.3", 
+		asprintf(&d->fname, "%s/%.*s.3",
 			prefix, (int)sz, start);
 		offs = strlen(prefix) + 1;
 	}
 
-	if (NULL == d->fname)
+	if (d->fname == NULL)
 		err(1, NULL);
 
 	for (i = 0; i < sz; i++) {
@@ -875,7 +875,7 @@ postprocess(const char *prefix, struct defn *d)
 		d->fname[offs + i] = '_';
 	}
 
-	/* 
+	/*
 	 * First, extract all keywords.
 	 */
 	for (i = 0; i < d->keybufsz; ) {
@@ -887,7 +887,7 @@ postprocess(const char *prefix, struct defn *d)
 		start = &d->keybuf[i];
 		if ('{' == d->keybuf[i]) {
 			start = &d->keybuf[++i];
-			for ( ; i < d->keybufsz; i++, sz++) 
+			for ( ; i < d->keybufsz; i++, sz++)
 				if ('}' == d->keybuf[i])
 					break;
 			if ('}' == d->keybuf[i])
@@ -896,14 +896,14 @@ postprocess(const char *prefix, struct defn *d)
 			for ( ; i < d->keybufsz; i++, sz++)
 				if (isspace((unsigned char)d->keybuf[i]))
 					break;
-		if (0 == sz)
+		if (sz == 0)
 			continue;
 		d->keys = reallocarray(d->keys,
 			d->keysz + 1, sizeof(char *));
-		if (NULL == d->keys) 
+		if (d->keys == NULL)
 			err(1, NULL);
 		d->keys[d->keysz] = malloc(sz + 1);
-		if (NULL == d->keys[d->keysz]) 
+		if (d->keys[d->keysz] == NULL)
 			err(1, NULL);
 		memcpy(d->keys[d->keysz], start, sz);
 		d->keys[d->keysz][sz] = '\0';
@@ -926,14 +926,14 @@ postprocess(const char *prefix, struct defn *d)
 		    DECLTYPE_C != first->type)
 			continue;
 		grok_name(first, &start, &sz);
-		if (NULL == start) 
+		if (start == NULL)
 			continue;
-		d->nms = reallocarray(d->nms, 
+		d->nms = reallocarray(d->nms,
 			d->nmsz + 1, sizeof(char *));
-		if (NULL == d->nms)
+		if (d->nms == NULL)
 			err(1, NULL);
 		d->nms[d->nmsz] = malloc(sz + 1);
-		if (NULL == d->nms[d->nmsz])
+		if (d->nms[d->nmsz] == NULL)
 			err(1, NULL);
 		memcpy(d->nms[d->nmsz], start, sz);
 		d->nms[d->nmsz][sz] = '\0';
@@ -945,7 +945,7 @@ postprocess(const char *prefix, struct defn *d)
 		(void)hsearch(ent, ENTER);
 	}
 
-	if (0 == d->nmsz) {
+	if (d->nmsz == 0) {
 		warnx("%s:%zu: couldn't deduce "
 			"any names", d->fn, d->ln);
 		return;
@@ -956,7 +956,7 @@ postprocess(const char *prefix, struct defn *d)
 	 * We'll add more to this list later.
 	 */
 	for (i = 0; i < d->seealsosz; i++) {
-		/* 
+		/*
 		 * Find next value starting with `['.
 		 * There's other stuff in there (whitespace or
 		 * free text leading up to these) that we're ok
@@ -967,7 +967,7 @@ postprocess(const char *prefix, struct defn *d)
 		if (i == d->seealsosz)
 			break;
 
-		/* 
+		/*
 		 * Now scan for the matching `]'.
 		 * We can also have a vertical bar if we're separating a
 		 * keyword and its shown name.
@@ -982,14 +982,14 @@ postprocess(const char *prefix, struct defn *d)
 		}
 		if (i == d->seealsosz)
 			break;
-		if (0 == sz)
+		if (sz == 0)
 			continue;
 
-		/* 
+		/*
 		 * Continue on to the end-of-reference, if we weren't
 		 * there to begin with.
 		 */
-		if (']' != d->seealso[i]) 
+		if (']' != d->seealso[i])
 			while (i < d->seealsosz &&
 			      ']' != d->seealso[i])
 				i++;
@@ -999,17 +999,17 @@ postprocess(const char *prefix, struct defn *d)
 			sz--;
 
 		/* Strip trailing parenthesis. */
-		if (sz > 2 && 
-		    '(' == start[sz - 2] && 
+		if (sz > 2 &&
+		    '(' == start[sz - 2] &&
 	 	    ')' == start[sz - 1])
 			sz -= 2;
 
 		d->xrs = reallocarray(d->xrs,
 			d->xrsz + 1, sizeof(char *));
-		if (NULL == d->xrs)
+		if (d->xrs == NULL)
 			err(1, NULL);
 		d->xrs[d->xrsz] = malloc(sz + 1);
-		if (NULL == d->xrs[d->xrsz])
+		if (d->xrs[d->xrsz] == NULL)
 			err(1, NULL);
 		memcpy(d->xrs[d->xrsz], start, sz);
 		d->xrs[d->xrsz][sz] = '\0';
@@ -1040,7 +1040,7 @@ postprocess(const char *prefix, struct defn *d)
 		else if (sz == 0)
 			continue;
 
-		if (']' != d->desc[i]) 
+		if (']' != d->desc[i])
 			while (i < d->descsz &&
 			      ']' != d->desc[i])
 				i++;
@@ -1048,17 +1048,17 @@ postprocess(const char *prefix, struct defn *d)
 		while (sz > 1 && ' ' == start[sz - 1])
 			sz--;
 
-		if (sz > 2 && 
+		if (sz > 2 &&
 		    '(' == start[sz - 2] &&
 		    ')' == start[sz - 1])
 			sz -= 2;
 
 		d->xrs = reallocarray(d->xrs,
 			d->xrsz + 1, sizeof(char *));
-		if (NULL == d->xrs)
+		if (d->xrs == NULL)
 			err(1, NULL);
 		d->xrs[d->xrsz] = malloc(sz + 1);
-		if (NULL == d->xrs[d->xrsz])
+		if (d->xrs[d->xrsz] == NULL)
 			err(1, NULL);
 		memcpy(d->xrs[d->xrsz], start, sz);
 		d->xrs[d->xrsz][sz] = '\0';
@@ -1126,9 +1126,9 @@ newsentence(size_t start, size_t finish, const char *buf)
 
 	/* Ignore "i.e." and "e.g.". */
 
-	if ((span >= 4 && 
+	if ((span >= 4 &&
 	     strncasecmp(&buf[finish - 4], "i.e.", 4) == 0) ||
-	    (span >= 4 && 
+	    (span >= 4 &&
 	     strncasecmp(&buf[finish - 4], "e.g.", 4) == 0))
 		return 0;
 
@@ -1176,7 +1176,7 @@ emit(struct defn *d)
 	/* Now print the name bits of each declaration. */
 
 	for (i = 0; i < d->nmsz; i++)
-		fprintf(f, ".Nm %s%s\n", d->nms[i], 
+		fprintf(f, ".Nm %s%s\n", d->nms[i],
 			i < d->nmsz - 1 ? " ," : "");
 
 	fprintf(f, ".Nd %s\n", d->name);
@@ -1201,7 +1201,7 @@ emit(struct defn *d)
 		for (i = 0; i < first->textsz; ) {
 			for (pre = 0; pre < PREPROC__MAX; pre++) {
 				sz = strlen(preprocs[pre]);
-				if (strncmp(preprocs[pre], 
+				if (strncmp(preprocs[pre],
 				    &first->text[i], sz))
 					continue;
 				i += sz;
@@ -1222,7 +1222,7 @@ emit(struct defn *d)
 
 		/* Are we a struct? */
 
-		if (first->textsz > 2 && 
+		if (first->textsz > 2 &&
 		    first->text[first->textsz - 2] == '}' &&
 		    (cp = strchr(&first->text[i], '{')) != NULL) {
 			*cp = '\0';
@@ -1249,7 +1249,7 @@ emit(struct defn *d)
 			continue;
 		}
 
-		/* 
+		/*
 		 * Current state:
 		 *  type_t *function      (args...)
 		 *  ^str                  ^args
@@ -1260,7 +1260,7 @@ emit(struct defn *d)
 		while (end > str && isspace((unsigned char)*end))
 			end--;
 
-		/* 
+		/*
 		 * Current state:
 		 *  type_t *function      (args...)
 		 *  ^str           ^end   ^args
@@ -1295,13 +1295,13 @@ emit(struct defn *d)
 		 * ^str ^end             ^args
 		 */
 
-		/* 
+		/*
 		 * If we can't find what came before, then the function
 		 * has no type, which is odd... let's just call it void.
 		 */
 
 		if (end > str) {
-			fprintf(f, ".Ft %.*s\n", 
+			fprintf(f, ".Ft %.*s\n",
 				(int)(end - str + 1), str);
 			fprintf(f, ".Fo %.*s\n", (int)fnsz, fn);
 		} else {
@@ -1321,8 +1321,8 @@ emit(struct defn *d)
 				str++;
 			fputs(".Fa \"", f);
 			ns = 0;
-			while (*str != '\0' && 
-			       (ns || *str != ',') && 
+			while (*str != '\0' &&
+			       (ns || *str != ',') &&
 			       (ns || *str != ')')) {
 				/*
 				 * Handle comments in the declarations.
@@ -1382,7 +1382,7 @@ emit(struct defn *d)
 
 	fputs(".Sh DESCRIPTION\n", f);
 
-	/* 
+	/*
 	 * Strip the crap out of the description.
 	 * "Crap" consists of things I don't understand that mess up
 	 * parsing of the HTML, for instance,
@@ -1393,7 +1393,7 @@ emit(struct defn *d)
 	 */
 
 	for (i = 0; i < d->descsz; i++) {
-		if ('^' == d->desc[i] && 
+		if ('^' == d->desc[i] &&
 		    '(' == d->desc[i + 1]) {
 			memmove(&d->desc[i],
 				&d->desc[i + 2],
@@ -1401,7 +1401,7 @@ emit(struct defn *d)
 			d->descsz -= 2;
 			i--;
 			continue;
-		} else if (')' == d->desc[i] && 
+		} else if (')' == d->desc[i] &&
 			   '^' == d->desc[i + 1]) {
 			memmove(&d->desc[i],
 				&d->desc[i + 2],
@@ -1416,13 +1416,13 @@ emit(struct defn *d)
 			d->descsz -= 1;
 			i--;
 			continue;
-		} else if ('[' != d->desc[i] || 
-			   '[' != d->desc[i + 1]) 
+		} else if ('[' != d->desc[i] ||
+			   '[' != d->desc[i + 1])
 			continue;
 
 		for (j = i; j < d->descsz; j++)
-			if (']' == d->desc[j] && 
-			    ']' == d->desc[j + 1]) 
+			if (']' == d->desc[j] &&
+			    ']' == d->desc[j + 1])
 				break;
 
 		if (j == d->descsz)
@@ -1430,7 +1430,7 @@ emit(struct defn *d)
 
 		assert(j > i);
 		j += 2;
-		memmove(&d->desc[i], 
+		memmove(&d->desc[i],
 		        &d->desc[j],
 			d->descsz - i - (j - i));
 		d->descsz -= (j - i);
@@ -1466,7 +1466,7 @@ emit(struct defn *d)
 			continue;
 		}
 
-		/* 
+		/*
 		 * Newlines are paragraph breaks.
 		 * If we have multiple newlines, then keep to a single
 		 * `Pp' to keep it clean.
@@ -1500,7 +1500,7 @@ emit(struct defn *d)
 		 * dumbest possible heuristic.
 		 */
 
-		if (d->desc[i] == ' ' && 
+		if (d->desc[i] == ' ' &&
 		    i > 0 && d->desc[i - 1] == '.') {
 			for (j = i - 1; j > 0; j--)
 				if (isspace((unsigned char)d->desc[j])) {
@@ -1535,8 +1535,8 @@ emit(struct defn *d)
 			for (tag = 0; tag < TAG__MAX; tag++) {
 				sz = strlen(tags[tag].html);
 				assert(sz > 0);
-				if (strncmp(&d->desc[i], 
-				    tags[tag].html, sz)) 
+				if (strncmp(&d->desc[i],
+				    tags[tag].html, sz))
 					continue;
 
 				i += sz;
@@ -1576,7 +1576,7 @@ emit(struct defn *d)
 					break;
 				}
 
-				/* 
+				/*
 				 * A breaking mdoc(7) statement.
 				 * Break the current line, output the
 				 * macro, and conditionally break
@@ -1610,11 +1610,11 @@ emit(struct defn *d)
 				col++;
 				stripspace--;
 			}
-		} else if ('[' == d->desc[i] && 
+		} else if ('[' == d->desc[i] &&
 			   ']' != d->desc[i + 1]) {
 			/* Do we start at the bracket or bar? */
 
-			for (sz = i + 1; sz < d->descsz; sz++) 
+			for (sz = i + 1; sz < d->descsz; sz++)
 				if ('|' == d->desc[sz] ||
 				    ']' == d->desc[sz])
 					break;
@@ -1639,8 +1639,8 @@ emit(struct defn *d)
 			j = 0;
 			if ('|' != d->desc[sz]) {
 				i = i + 1;
-				if (sz > 2 && 
-				    ')' == d->desc[sz - 1] && 
+				if (sz > 2 &&
+				    ')' == d->desc[sz - 1] &&
 				    '(' == d->desc[sz - 2]) {
 					if (col > 0)
 						fputc('\n', f);
@@ -1681,12 +1681,12 @@ emit(struct defn *d)
 							fputs(" ,", f);
 						else if (d->desc[i] == ')')
 							fputs(" )", f);
-						else 
+						else
 							break;
 
 					/* Trim trailing space. */
 
-					while (i < d->descsz && 
+					while (i < d->descsz &&
 					       isspace((unsigned char)d->desc[i]))
 						i++;	
 
@@ -1713,7 +1713,7 @@ emit(struct defn *d)
 			continue;
 		}
 
-		/* 
+		/*
 		 * Strip trailing spaces from output.
 		 * Set "stripspace" to be the number of white-space
 		 * characters that we've skipped, plus one.
@@ -1727,14 +1727,14 @@ emit(struct defn *d)
 			while (j < d->descsz && d->desc[j] == ' ')
 				j++;
 			if (j < d->descsz &&
-			    (d->desc[j] == '\n' || 
-			     d->desc[j] == '<' || 
+			    (d->desc[j] == '\n' ||
+			     d->desc[j] == '<' ||
 			     d->desc[j] == '[')) {
-				stripspace = d->desc[j] != '\n' ? 
+				stripspace = d->desc[j] != '\n' ?
 					(j - i + 1) : 0;
 				i = j;
 				continue;
-			} 
+			}
 		}
 
 		assert(d->desc[i] != '\n');
@@ -1800,13 +1800,13 @@ emit(struct defn *d)
 
 			/* Ignore self-reference. */
 
-			if (res == d->nms[0] && verbose) 
+			if (res == d->nms[0] && verbose)
 				warnx("%s:%zu: self-reference: %s",
 					d->fn, d->ln, d->xrs[i]);
 			if (res == d->nms[0])
 				continue;
-			if (res == NULL && verbose) 
-				warnx("%s:%zu: ref not found: %s",  
+			if (res == NULL && verbose)
+				warnx("%s:%zu: ref not found: %s",
 					d->fn, d->ln, d->xrs[i]);
 			if (res == NULL)
 				continue;
@@ -1865,7 +1865,7 @@ sandbox_apple(void)
 	int	 rc;
 
 	rc = sandbox_init
-		(nofile ? kSBXProfilePureComputation : 
+		(nofile ? kSBXProfilePureComputation :
 		 kSBXProfileNoNetwork, SANDBOX_NAMED, &ep);
 	if (rc == 0)
 		return;
@@ -1889,12 +1889,12 @@ check_dupes(struct parse *p)
 		TAILQ_FOREACH_REVERSE(dd, &p->dqhead, defnq, entries) {
 			if (dd == d)
 				break;
-			if (d->fname == NULL || 
+			if (d->fname == NULL ||
 			    dd->fname == NULL ||
 			    strcmp(d->fname, dd->fname))
 				continue;
 			warnx("%s:%zu: duplicate filename: "
-				"%s (from %s, line %zu)", d->fn, 
+				"%s (from %s, line %zu)", d->fn,
 				d->ln, d->fname, dd->nms[0], dd->ln);
 		}
 }
@@ -1997,7 +1997,7 @@ main(int argc, char *argv[])
 	 */
 
 	if (feof(f)) {
-		/* 
+		/*
 		 * Allow us to be at the declarations or scanning for
 		 * the next clause.
 		 */
@@ -2014,7 +2014,7 @@ main(int argc, char *argv[])
 		} else if (p.phase != PHASE_DECL)
 			warnx("%s:%zu: exit when not in "
 				"initial state", p.fn, p.ln);
-	} 
+	}
 
 	while ((d = TAILQ_FIRST(&p.dqhead)) != NULL) {
 		TAILQ_REMOVE(&p.dqhead, d, entries);
