@@ -523,17 +523,25 @@ decl(struct parse *p, const char *cp, size_t len)
 	decl_function(p, cp, len);
 }
 
+/*
+ * Whether to end an interface description phase with an asterisk-slash.
+ * This is run within a phase already opened with slash-asterisk.  It
+ * adjusts the parse state on ending a phase or syntax errors.  It has
+ * various hacks around lacks syntax (e.g., starting single-asterisk
+ * instead of double-asterisk) found in the wild.
+ *
+ * Returns zero if not ending the phase, non-zero if ending.
+ */
 static int
 endphase(struct parse *p, const char *cp)
 {
 
-	if ('\0' == *cp) {
+	if (*cp == '\0') {
 		warnx("%s:%zu: warn: unexpected end of "
 			"interface description", p->fn, p->ln);
 		p->phase = PHASE_INIT;
 		return 1;
 	} else if (strcmp(cp, "*/") == 0) {
-		/* End of comment area, start of declarations. */
 		p->phase = PHASE_DECL;
 		return 1;
 	} else if (!('*' == cp[0] && '*' == cp[1])) {
@@ -550,16 +558,17 @@ endphase(struct parse *p, const char *cp)
 					p->fn, p->ln);
 			return 0;
 		}
-		warnx("%s:%zu: warn: ambiguous end of "
+		warnx("%s:%zu: warn: ambiguous leading characters in "
 			"interface description", p->fn, p->ln);
 		p->phase = PHASE_INIT;
 		return 1;
 	}
+
 	return 0;
 }
 
 /*
- * Parse "SEE ALSO" phrases, which can come at any point in the
+ * Parse a "SEE ALSO" phase, which can come at any point in the
  * interface description (unlike what they claim).
  */
 static void
