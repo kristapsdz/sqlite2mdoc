@@ -1,6 +1,5 @@
-/*	$Id$ */
 /*
- * Copyright (c) 2016, 2018 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2016, 2018, 2023 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -254,7 +253,7 @@ decl_function_add(struct parse *p, char **etext,
 	size_t *etextsz, const char *cp, size_t len)
 {
 
-	if (' ' != (*etext)[*etextsz - 1]) {
+	if ((*etext)[*etextsz - 1] != ' ') {
 		*etext = realloc(*etext, *etextsz + 2);
 		if (*etext == NULL)
 			err(1, NULL);
@@ -347,7 +346,7 @@ again:
 			d->instruct++;
 		decl_function_add(p, &e->text, &e->textsz, cp, len);
 		return(1);
-	} else if (ep == NULL && ! d->multiline) {
+	} else if (ep == NULL && !d->multiline) {
 		d->multiline = 1;
 		/* Is a structure starting in this line? */
 		if (NULL != lcp &&
@@ -429,7 +428,7 @@ decl_define(struct parse *p, const char *cp, size_t len)
 	}
 
 	sz = 0;
-	while ('\0' != cp[sz] && ! isspace((unsigned char)cp[sz]))
+	while (cp[sz] != '\0' && !isspace((unsigned char)cp[sz]))
 		sz++;
 
 	e = calloc(1, sizeof(struct decl));
@@ -666,8 +665,8 @@ desc(struct parse *p, const char *cp, size_t len)
 
 	/* White-space padding between lines. */
 	if (NULL != d->desc &&
-	    ' ' != d->desc[d->descsz - 1] &&
-	    '\n' != d->desc[d->descsz - 1]) {
+	    d->desc[d->descsz - 1] != ' ' &&
+	    d->desc[d->descsz - 1] != '\n') {
 		d->desc = realloc(d->desc, d->descsz + 2);
 		if (d->desc == NULL)
 			err(1, NULL);
@@ -737,7 +736,7 @@ init(struct parse *p, const char *cp)
 	struct defn	*d;
 
 	/* Look for comment hook. */
-	if ('*' != cp[0] || '*' != cp[1])
+	if (cp[0] != '*' || cp[1] != '*')
 		return;
 	cp += 2;
 	while (isspace((unsigned char)*cp))
@@ -793,7 +792,7 @@ grok_name(const struct decl *e,
 	*sz = 0;
 
 	if (DECLTYPE_CPP != e->type) {
-		if (';' != e->text[e->textsz - 1])
+		if (e->text[e->textsz - 1] != ';')
 			return;
 		cp = e->text;
 		do {
@@ -809,13 +808,13 @@ grok_name(const struct decl *e,
 				cp++;
 			*start = cp;
 			*sz = 0;
-			while ( ! isspace((unsigned char)*cp)) {
+			while (!isspace((unsigned char)*cp)) {
 				if (BPOINT(cp))
 					break;
 				cp++;
 				(*sz)++;
 			}
-		} while ( ! BPOINT(cp));
+		} while (!BPOINT(cp));
 	} else {
 		*sz = e->textsz;
 		*start = e->text;
@@ -976,7 +975,7 @@ postprocess(const char *prefix, struct defn *d)
 		 * free text leading up to these) that we're ok
 		 * to ignore.
 		 */
-		while (i < d->seealsosz && '[' != d->seealso[i])
+		while (i < d->seealsosz && d->seealso[i] != '[')
 			i++;
 		if (i == d->seealsosz)
 			break;
@@ -989,8 +988,8 @@ postprocess(const char *prefix, struct defn *d)
 		start = &d->seealso[++i];
 		sz = 0;
 		while (i < d->seealsosz &&
-		      ']' != d->seealso[i] &&
-		      '|' != d->seealso[i]) {
+		      d->seealso[i] != ']' &&
+		      d->seealso[i] != '|') {
 			i++;
 			sz++;
 		}
@@ -1003,9 +1002,9 @@ postprocess(const char *prefix, struct defn *d)
 		 * Continue on to the end-of-reference, if we weren't
 		 * there to begin with.
 		 */
-		if (']' != d->seealso[i])
+		if (d->seealso[i] != ']')
 			while (i < d->seealsosz &&
-			      ']' != d->seealso[i])
+			      d->seealso[i] != ']')
 				i++;
 
 		/* Strip trailing whitespace. */
@@ -1037,7 +1036,7 @@ postprocess(const char *prefix, struct defn *d)
 	 * basically the same thing.
 	 */
 	for (i = 0; i < d->descsz; i++) {
-		if ('[' != d->desc[i])
+		if (d->desc[i] != '[')
 			continue;
 		i++;
 		if (d->desc[i] == '[')
@@ -1054,9 +1053,8 @@ postprocess(const char *prefix, struct defn *d)
 		else if (sz == 0)
 			continue;
 
-		if (']' != d->desc[i])
-			while (i < d->descsz &&
-			      ']' != d->desc[i])
+		if (d->desc[i] != ']')
+			while (i < d->descsz && d->desc[i] != ']')
 				i++;
 
 		while (sz > 1 && start[sz - 1] == ' ')
@@ -1343,7 +1341,7 @@ emit(struct defn *d)
 				 */
 				if (str[0] == '/' && str[1] == '*') {
 					str += 2;
-					for ( ; '\0' != str[0]; str++)
+					for ( ; str[0] != '\0'; str++)
 						if (str[0] == '*' && str[1] == '/')
 							break;
 					if (*str == '\0')
@@ -1430,8 +1428,8 @@ emit(struct defn *d)
 			d->descsz -= 1;
 			i--;
 			continue;
-		} else if ('[' != d->desc[i] ||
-			   '[' != d->desc[i + 1])
+		} else if (d->desc[i] != '[' ||
+			   d->desc[i + 1] != '[')
 			continue;
 
 		for (j = i; j < d->descsz; j++)
@@ -1624,8 +1622,7 @@ emit(struct defn *d)
 				col++;
 				stripspace--;
 			}
-		} else if (d->desc[i] == '[' &&
-			   ']' != d->desc[i + 1]) {
+		} else if (d->desc[i] == '[' && d->desc[i + 1] != ']') {
 			/* Do we start at the bracket or bar? */
 
 			for (sz = i + 1; sz < d->descsz; sz++)
@@ -1651,7 +1648,7 @@ emit(struct defn *d)
 			 */
 
 			j = 0;
-			if ('|' != d->desc[sz]) {
+			if (d->desc[sz] != '|') {
 				i = i + 1;
 				if (sz > 2 &&
 				    d->desc[sz - 1] == ')' &&
