@@ -736,8 +736,10 @@ static void
 init(struct parse *p, const char *cp)
 {
 	struct defn	*d;
+	size_t		 sz;
 
 	/* Look for comment hook. */
+
 	if (cp[0] != '*' || cp[1] != '*')
 		return;
 	cp += 2;
@@ -745,6 +747,7 @@ init(struct parse *p, const char *cp)
 		cp++;
 
 	/* Look for beginning of definition. */
+
 	if (strncmp(cp, "CAPI3REF:", 9))
 		return;
 	cp += 9;
@@ -757,12 +760,17 @@ init(struct parse *p, const char *cp)
 	}
 
 	/* Add definition to list of existing ones. */
-	d = calloc(1, sizeof(struct defn));
-	if (d == NULL)
+
+	if ((d = calloc(1, sizeof(struct defn))) == NULL)
 		err(1, NULL);
-	d->name = strdup(cp);
-	if (d->name == NULL)
+	if ((d->name = strdup(cp)) == NULL)
 		err(1, NULL);
+
+	/* Strip trailing full-stop, if found. */
+
+	if ((sz = strlen(d->name)) > 0 && d->name[sz - 1] == '.')
+		d->name[sz - 1] = '\0';
+
 	d->fn = p->fn;
 	d->ln = p->ln;
 	p->phase = PHASE_KEYS;
