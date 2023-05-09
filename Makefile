@@ -61,37 +61,47 @@ distclean: clean
 	rm -f config.h config.log Makefile.configure
 
 regen_regress: all
-	mkdir -p regress/expect/tmp
-	./sqlite2mdoc -p regress/expect/tmp regress/sqlite3.h
-	@for f in regress/expect/tmp/*.3 ; do \
-		bn=`basename $$f` ; \
-		echo $$bn ; \
-		sed 1d $$f > regress/expect/$$bn.tmp ; \
-		set +e ; \
-		cmp regress/expect/$$bn.tmp regress/expect/$$bn >/dev/null 2>&1 ; \
-		if [ $$? -ne 0 ] ; then \
-			diff -u regress/expect/$$bn regress/expect/$$bn.tmp ; \
-			mv -f regress/expect/$$bn.tmp regress/expect/$$bn ; \
-		fi ; \
-		set -e ; \
+	@for f in regress/*.h ; do \
+		ver=`basename $$f .h | sed -e 's!sqlite3-!!'` ; \
+		mkdir -p regress/expect-$$ver/tmp ; \
+		./sqlite2mdoc -p regress/expect-$$ver/tmp regress/sqlite3-$$ver.h ; \
+		for f in regress/expect-$$ver/tmp/*.3 ; do \
+			bn=`basename $$f` ; \
+			echo $$bn ; \
+			sed 1d $$f > regress/expect-$$ver/$$bn.tmp ; \
+			set +e ; \
+			if [ -f regress/expect-$$ver/$$bn ]; then \
+				cmp regress/expect-$$ver/$$bn.tmp regress/expect-$$ver/$$bn >/dev/null 2>&1 ; \
+				if [ $$? -ne 0 ] ; then \
+					diff -u regress/expect-$$ver/$$bn regress/expect-$$ver/$$bn.tmp ; \
+					mv -f regress/expect-$$ver/$$bn.tmp regress/expect-$$ver/$$bn ; \
+				fi ; \
+			else \
+				mv -f regress/expect-$$ver/$$bn.tmp regress/expect-$$ver/$$bn ; \
+			fi ; \
+			set -e ; \
+		done ; \
+		rm -rf regress/expect-$$ver/tmp ; \
 	done
-	rm -rf regress/expect/tmp
 
 regress: all
-	rm -rf regress/out
-	mkdir regress/out
-	./sqlite2mdoc -p regress/out regress/sqlite3.h
-	@for f in regress/out/*.3 ; do \
-		sed 1d $$f > $$f.tmp ; \
-		mv -f $$f.tmp $$f ; \
-	done
-	@for f in regress/out/*.3 ; do \
-		echo diff $$f regress/expect/`basename $$f` ; \
-		diff -u $$f regress/expect/`basename $$f` ; \
-	done
-	@for f in regress/expect/*.3 ; do \
-		echo diff $$f regress/out/`basename $$f` ; \
-		diff -u $$f regress/out/`basename $$f` ; \
+	@for f in regress/*.h ; do \
+		ver=`basename $$f .h | sed -e 's!sqlite3-!!'` ; \
+		rm -rf regress/out ; \
+		mkdir -p regress/out ; \
+		./sqlite2mdoc -p regress/out $$f ; \
+		for f in regress/out/*.3 ; do \
+			sed 1d $$f > $$f.tmp ; \
+			mv -f $$f.tmp $$f ; \
+		done ; \
+		for f in regress/out/*.3 ; do \
+			echo diff $$f regress/expect-$$ver/`basename $$f` ; \
+			diff -u $$f regress/expect-$$ver/`basename $$f` ; \
+		done ; \
+		for f in regress/expect-$$ver/*.3 ; do \
+			echo diff $$f regress/out/`basename $$f` ; \
+			diff -u $$f regress/out/`basename $$f` ; \
+		done ; \
 	done
 	rm -rf regress/out
 
