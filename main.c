@@ -92,6 +92,7 @@ enum	tag {
 	TAG_I_OPEN,
 	TAG_LI_CLOSE,
 	TAG_LI_OPEN,
+	TAG_LI_OPEN_ATTRS,
 	TAG_OL_CLOSE,
 	TAG_OL_OPEN,
 	TAG_P_OPEN,
@@ -207,6 +208,7 @@ static	const struct taginfo tags[TAG__MAX] = {
 	{ "<i>", "\\fI", TAGINFO_INLINE }, /* TAG_I_OPEN */
 	{ "</li>", "", TAGINFO_NOOP }, /* TAG_LI_CLOSE */
 	{ "<li>", ".It", 0 }, /* TAG_LI_OPEN */
+	{ "<li ", ".It", TAGINFO_ATTRS }, /* TAG_LI_OPEN_ATTRS */
 	{ "</ol>", ".El\n.Pp", 0 }, /* TAG_OL_CLOSE */
 	{ "<ol>", ".Bl -enum", 0 }, /* TAG_OL_OPEN */
 	{ "<p>", ".Pp", 0 }, /* TAG_P_OPEN */
