@@ -94,11 +94,11 @@ regress: all
 		done ; \
 		for f in regress/out/*.3 ; do \
 			echo diff $$f regress/expect-$$ver/`basename $$f` ; \
-			diff -u $$f regress/expect-$$ver/`basename $$f` 1>&2 ; \
+			diff -u $$f regress/expect-$$ver/`basename $$f` ; \
 		done ; \
 		for f in regress/expect-$$ver/*.3 ; do \
 			echo diff $$f regress/out/`basename $$f` ; \
-			diff -u $$f regress/out/`basename $$f` 1>&2 ; \
+			diff -u $$f regress/out/`basename $$f` ; \
 		done ; \
 	done
 	rm -rf regress/out

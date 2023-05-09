@@ -736,7 +736,7 @@ static void
 init(struct parse *p, const char *cp)
 {
 	struct defn	*d;
-	size_t		 sz;
+	size_t		 i, sz;
 
 	/* Look for comment hook. */
 
@@ -766,10 +766,27 @@ init(struct parse *p, const char *cp)
 	if ((d->name = strdup(cp)) == NULL)
 		err(1, NULL);
 
-	/* Strip trailing full-stop, if found. */
+	/* Strip trailing spaces and periods. */
 
-	if ((sz = strlen(d->name)) > 0 && d->name[sz - 1] == '.')
-		d->name[sz - 1] = '\0';
+	for (sz = strlen(d->name); sz > 0; sz--)
+		if (d->name[sz - 1] == '.' ||
+		    d->name[sz - 1] == ' ')
+			d->name[sz - 1] = '\0';
+		else
+			break;
+
+	/*
+	 * Un-title case.  Use a simple heuristic where all words
+	 * starting with an upper case letter followed by a not
+	 * uppercase letter are lowercased.
+	 */
+
+	for (i = 0; i < sz - 1; i++)
+		if ((i == 0 || d->name[i - 1] == ' ') &&
+		    isupper((unsigned char)d->name[i]) &&
+		    !isupper((unsigned char)d->name[i + 1]) &&
+		    !ispunct((unsigned char)d->name[i + 1]))
+			d->name[i] = tolower((unsigned char)d->name[i]);
 
 	d->fn = p->fn;
 	d->ln = p->ln;
