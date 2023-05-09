@@ -74,11 +74,9 @@ regen_regress: all
 				cmp regress/expect-$$ver/$$bn.tmp regress/expect-$$ver/$$bn >/dev/null 2>&1 ; \
 				if [ $$? -ne 0 ] ; then \
 					diff -u regress/expect-$$ver/$$bn regress/expect-$$ver/$$bn.tmp ; \
-					mv -f regress/expect-$$ver/$$bn.tmp regress/expect-$$ver/$$bn ; \
 				fi ; \
-			else \
-				mv -f regress/expect-$$ver/$$bn.tmp regress/expect-$$ver/$$bn ; \
 			fi ; \
+			mv -f regress/expect-$$ver/$$bn.tmp regress/expect-$$ver/$$bn ; \
 			set -e ; \
 		done ; \
 		rm -rf regress/expect-$$ver/tmp ; \
@@ -96,11 +94,11 @@ regress: all
 		done ; \
 		for f in regress/out/*.3 ; do \
 			echo diff $$f regress/expect-$$ver/`basename $$f` ; \
-			diff -u $$f regress/expect-$$ver/`basename $$f` ; \
+			diff -u $$f regress/expect-$$ver/`basename $$f` 1>&2 ; \
 		done ; \
 		for f in regress/expect-$$ver/*.3 ; do \
 			echo diff $$f regress/out/`basename $$f` ; \
-			diff -u $$f regress/out/`basename $$f` ; \
+			diff -u $$f regress/out/`basename $$f` 1>&2 ; \
 		done ; \
 	done
 	rm -rf regress/out
