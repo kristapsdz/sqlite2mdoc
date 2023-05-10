@@ -590,7 +590,7 @@ seealso(struct parse *p, const char *cp, size_t len)
 {
 	struct defn	*d;
 
-	if (endphase(p, cp))
+	if (endphase(p, cp) || len < 2)
 		return;
 
 	cp += 2;
@@ -629,7 +629,7 @@ desc(struct parse *p, const char *cp, size_t len)
 	struct defn	*d;
 	size_t		 nsz;
 
-	if (endphase(p, cp))
+	if (endphase(p, cp) || len < 2)
 		return;
 
 	cp += 2;
@@ -666,7 +666,9 @@ desc(struct parse *p, const char *cp, size_t len)
 	}
 
 	/* White-space padding between lines. */
+
 	if (NULL != d->desc &&
+	    d->descsz > 0 &&
 	    d->desc[d->descsz - 1] != ' ' &&
 	    d->desc[d->descsz - 1] != '\n') {
 		d->desc = realloc(d->desc, d->descsz + 2);
@@ -699,7 +701,7 @@ keys(struct parse *p, const char *cp, size_t len)
 {
 	struct defn	*d;
 
-	if (endphase(p, cp))
+	if (endphase(p, cp) || len < 2)
 		return;
 
 	cp += 2;
