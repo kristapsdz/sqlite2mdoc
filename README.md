@@ -29,15 +29,13 @@ This software has been tested and run on
 [FreeBSD](https://www.freebsd.org),
 [NetBSD](https://www.netbsd.org),
 IllumOS, Solaris, Mac OS X, and Linux (glibc and musl).
-The portability measures are continuously tested by the BSD.lv
-[build system](https://kristaps.bsd.lv/cgi-bin/minci.cgi/index.html?project-name=sqlite2mdoc).
 
 ## Examples
 
 I've used [mandoc](https://mandoc.bsd.lv) to generate some Markdown from
 the [mdoc(7)](https://man.openbsd.org/mdoc.7) output.
 
-- [sqlite3\_open(3)](samples/sample3_open.3.md)
+- [sqlite3\_open(3)](samples/sqlite3_open.3.md)
 - [SQLITE\_FCNTL\_LOCKSTATE(3)](samples/SQLITE_FCNTL_LOCKSTATE.3.md)
 
 ## License

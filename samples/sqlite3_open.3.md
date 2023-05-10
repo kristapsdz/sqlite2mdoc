@@ -4,11 +4,11 @@ SQLITE3\_OPEN(3) - Library Functions Manual
 
 **sqlite3\_open**,
 **sqlite3\_open16**,
-**sqlite3\_open\_v2** - Opening A New Database Connection
+**sqlite3\_open\_v2** - opening a new database connection
 
 # SYNOPSIS
 
-**#include &lt;sqlite.h>**
+**#include &lt;sqlite3.h>**
 
 *int*  
 **sqlite3\_open**(*const char \*filename*,
@@ -38,7 +38,10 @@ of a pointer to the sqlite3 object.
 If the database is opened (and/or created) successfully, then SQLITE\_OK
 is returned.
 Otherwise an error code is returned.
-The sqlite3\_errmsg() or sqlite3\_errmsg16()
+The
+**sqlite3\_errmsg**()
+or
+**sqlite3\_errmsg16**()
 routines can be used to obtain an English language description of the
 error following a failure of any of the sqlite3\_open() routines.
 
@@ -49,17 +52,15 @@ be UTF-16 in the native byte order.
 
 Whether or not an error occurs when it is opened, resources associated
 with the database connection handle should be released
-by passing it to sqlite3\_close() when it is no longer
-required.
+by passing it to
+**sqlite3\_close**()
+when it is no longer required.
 
 The sqlite3\_open\_v2() interface works like sqlite3\_open() except that
 it accepts two additional parameters for additional control over the
 new database connection.
-The flags parameter to sqlite3\_open\_v2() can take one of the following
-three values, optionally combined with the SQLITE\_OPEN\_NOMUTEX,
-SQLITE\_OPEN\_FULLMUTEX, SQLITE\_OPEN\_SHAREDCACHE,
-SQLITE\_OPEN\_PRIVATECACHE, and/or SQLITE\_OPEN\_URI
-flags:
+The flags parameter to sqlite3\_open\_v2() must include, at a minimum,
+one of the following three flag combinations:
 
 SQLITE\_OPEN\_READONLY
 
@@ -72,6 +73,10 @@ SQLITE\_OPEN\_READWRITE
 > only if the file is write protected by the operating system.
 > In either case the database must already exist, otherwise an error
 > is returned.
+> For historical reasons, if opening in read-write mode fails due to
+> OS-level permissions, an attempt is made to open it in read-only mode.
+> **sqlite3\_db\_readonly**()
+> can be used to determine whether the database is actually read-write.
 
 SQLITE\_OPEN\_READWRITE | SQLITE\_OPEN\_CREATE
 
@@ -79,23 +84,78 @@ SQLITE\_OPEN\_READWRITE | SQLITE\_OPEN\_CREATE
 > does not already exist.
 > This is the behavior that is always used for sqlite3\_open() and sqlite3\_open16().
 
-If the 3rd parameter to sqlite3\_open\_v2() is not one of the combinations
-shown above optionally combined with other SQLITE\_OPEN\_\* bits
-then the behavior is undefined.
+In addition to the required flags, the following optional flags are
+also supported:
 
-If the SQLITE\_OPEN\_NOMUTEX flag is set, then the
-database connection opens in the multi-thread threading mode
-as long as the single-thread mode has not been set at compile-time
-or start-time.
-If the SQLITE\_OPEN\_FULLMUTEX flag is set then
-the database connection opens in the serialized threading mode
-unless single-thread was previously selected at compile-time or start-time.
-The SQLITE\_OPEN\_SHAREDCACHE flag causes the
-database connection to be eligible to use shared cache mode,
-regardless of whether or not shared cache is enabled using sqlite3\_enable\_shared\_cache().
-The SQLITE\_OPEN\_PRIVATECACHE flag causes the
-database connection to not participate in shared cache mode
-even if it is enabled.
+SQLITE\_OPEN\_URI
+
+> The filename can be interpreted as a URI if this flag is set.
+
+SQLITE\_OPEN\_MEMORY
+
+> The database will be opened as an in-memory database.
+> The database is named by the "filename" argument for the purposes of
+> cache-sharing, if shared cache mode is enabled, but the "filename"
+> is otherwise ignored.
+
+SQLITE\_OPEN\_NOMUTEX
+
+> The new database connection will use the "multi-thread" threading mode.
+> This means that separate threads are allowed to use SQLite at the same
+> time, as long as each thread is using a different database connection.
+
+SQLITE\_OPEN\_FULLMUTEX
+
+> The new database connection will use the "serialized" threading mode.
+> This means the multiple threads can safely attempt to use the same
+> database connection at the same time.
+> (Mutexes will block any actual concurrency, but in this mode there
+> is no harm in trying.)
+
+SQLITE\_OPEN\_SHAREDCACHE
+
+> The database is opened shared cache enabled, overriding
+> the default shared cache setting provided by
+> **sqlite3\_enable\_shared\_cache**().
+> The use of shared cache mode is discouraged
+> and hence shared cache capabilities may be omitted from many builds
+> of SQLite.
+> In such cases, this option is a no-op.
+
+SQLITE\_OPEN\_PRIVATECACHE
+
+> The database is opened shared cache disabled, overriding
+> the default shared cache setting provided by
+> **sqlite3\_enable\_shared\_cache**().
+
+SQLITE\_OPEN\_EXRESCODE
+
+> The database connection comes up in "extended result code mode".
+> In other words, the database behaves has if sqlite3\_extended\_result\_codes(db,1)
+> where called on the database connection as soon as the connection is
+> created.
+> In addition to setting the extended result code mode, this flag also
+> causes
+> **sqlite3\_open\_v2**()
+> to return an extended result code.
+
+SQLITE\_OPEN\_NOFOLLOW
+
+> The database filename is not allowed to contain a symbolic link
+
+If the 3rd parameter to sqlite3\_open\_v2() is not one of the required
+combinations shown above optionally combined with other SQLITE\_OPEN\_\* bits
+then the behavior is undefined.
+Historic versions of SQLite have silently ignored surplus bits in the
+flags parameter to sqlite3\_open\_v2(), however that behavior might not
+be carried through into future versions of SQLite and so applications
+should not rely upon it.
+Note in particular that the SQLITE\_OPEN\_EXCLUSIVE flag is a no-op for
+sqlite3\_open\_v2().
+The SQLITE\_OPEN\_EXCLUSIVE does \*not\* cause the open to fail if the
+database already exists.
+The SQLITE\_OPEN\_EXCLUSIVE flag is intended for use by the VFS interface
+only, and not by sqlite3\_open\_v2().
 
 The fourth parameter to sqlite3\_open\_v2() is the name of the sqlite3\_vfs
 object that defines the operating system interface that the new database
@@ -124,13 +184,13 @@ If URI filename interpretation is enabled, and the filename
 argument begins with "file:", then the filename is interpreted as a
 URI.
 URI filename interpretation is enabled if the SQLITE\_OPEN\_URI
-flag is set in the fourth argument to sqlite3\_open\_v2(), or if it has
+flag is set in the third argument to sqlite3\_open\_v2(), or if it has
 been enabled globally using the SQLITE\_CONFIG\_URI
-option with the sqlite3\_config() method or by the SQLITE\_USE\_URI
-compile-time option.
-As of SQLite version 3.7.7, URI filename interpretation is turned off
-by default, but future releases of SQLite might enable URI filename
-interpretation by default.
+option with the
+**sqlite3\_config**()
+method or by the SQLITE\_USE\_URI compile-time option.
+URI filename interpretation is turned off by default, but future releases
+of SQLite might enable URI filename interpretation by default.
 See "URI filenames" for additional information.
 
 URI filenames are parsed according to RFC 3986.
@@ -148,8 +208,7 @@ If the path does not begin with a '/' (meaning that the authority section
 is omitted from the URI) then the path is interpreted as a relative
 path.
 On windows, the first component of an absolute path is a drive specification
-(e.g.
-"C:").
+(e.g. "C:").
 
 The query component of a URI may contain parameters that are interpreted
 either by SQLite itself, or by a custom VFS implementation.
@@ -238,6 +297,7 @@ Use the special VFS "unix-dotfile" that uses dot-files in place of
 posix advisory locking.
    file:data.db?mode=readonly   An error.
 "readonly" is not a valid option for the "mode" parameter.
+Use "ro" instead:  "file:data.db?mode=ro".
 
 URI hexadecimal escape sequences (%HH) are supported within the path
 and query components of a URI.
@@ -263,7 +323,7 @@ may fail.
 # IMPLEMENTATION NOTES
 
 These declarations were extracted from the
-interface documentation at line 3015.
+interface documentation at line 3458.
 
 	SQLITE_API int sqlite3_open(
 	  const char *filename,   /* Database filename (UTF-8) */
@@ -285,14 +345,14 @@ interface documentation at line 3015.
 sqlite3(3),
 sqlite3\_close(3),
 sqlite3\_config(3),
+sqlite3\_db\_readonly(3),
 sqlite3\_enable\_shared\_cache(3),
 sqlite3\_errcode(3),
 sqlite3\_temp\_directory(3),
 sqlite3\_vfs(3),
 SQLITE\_CONFIG\_SINGLETHREAD(3),
-SQLITE\_OK(3),
 SQLITE\_IOCAP\_ATOMIC(3),
 SQLITE\_OK(3),
 SQLITE\_OPEN\_READONLY(3)
 
-OpenBSD 6.2 - April 26, 2018
+OpenBSD 7.2 - May 9, 2023

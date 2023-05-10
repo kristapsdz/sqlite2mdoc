@@ -30,11 +30,23 @@ SQLITE\_FCNTL\_LOCKSTATE(3) - Library Functions Manual
 **SQLITE\_FCNTL\_VFS\_POINTER**,
 **SQLITE\_FCNTL\_JOURNAL\_POINTER**,
 **SQLITE\_FCNTL\_WIN32\_GET\_HANDLE**,
-**SQLITE\_FCNTL\_PDB** - Standard File Control Opcodes
+**SQLITE\_FCNTL\_PDB**,
+**SQLITE\_FCNTL\_BEGIN\_ATOMIC\_WRITE**,
+**SQLITE\_FCNTL\_COMMIT\_ATOMIC\_WRITE**,
+**SQLITE\_FCNTL\_ROLLBACK\_ATOMIC\_WRITE**,
+**SQLITE\_FCNTL\_LOCK\_TIMEOUT**,
+**SQLITE\_FCNTL\_DATA\_VERSION**,
+**SQLITE\_FCNTL\_SIZE\_LIMIT**,
+**SQLITE\_FCNTL\_CKPT\_DONE**,
+**SQLITE\_FCNTL\_RESERVE\_BYTES**,
+**SQLITE\_FCNTL\_CKPT\_START**,
+**SQLITE\_FCNTL\_EXTERNAL\_READER**,
+**SQLITE\_FCNTL\_CKSM\_FILE**,
+**SQLITE\_FCNTL\_RESET\_CACHE** - standard file control opcodes
 
 # SYNOPSIS
 
-**#include &lt;sqlite.h>**
+**#include &lt;sqlite3.h>**
 
 **#define SQLITE\_FCNTL\_LOCKSTATE**  
 **#define SQLITE\_FCNTL\_GET\_LOCKPROXYFILE**  
@@ -64,12 +76,25 @@ SQLITE\_FCNTL\_LOCKSTATE(3) - Library Functions Manual
 **#define SQLITE\_FCNTL\_VFS\_POINTER**  
 **#define SQLITE\_FCNTL\_JOURNAL\_POINTER**  
 **#define SQLITE\_FCNTL\_WIN32\_GET\_HANDLE**  
-**#define SQLITE\_FCNTL\_PDB**
+**#define SQLITE\_FCNTL\_PDB**  
+**#define SQLITE\_FCNTL\_BEGIN\_ATOMIC\_WRITE**  
+**#define SQLITE\_FCNTL\_COMMIT\_ATOMIC\_WRITE**  
+**#define SQLITE\_FCNTL\_ROLLBACK\_ATOMIC\_WRITE**  
+**#define SQLITE\_FCNTL\_LOCK\_TIMEOUT**  
+**#define SQLITE\_FCNTL\_DATA\_VERSION**  
+**#define SQLITE\_FCNTL\_SIZE\_LIMIT**  
+**#define SQLITE\_FCNTL\_CKPT\_DONE**  
+**#define SQLITE\_FCNTL\_RESERVE\_BYTES**  
+**#define SQLITE\_FCNTL\_CKPT\_START**  
+**#define SQLITE\_FCNTL\_EXTERNAL\_READER**  
+**#define SQLITE\_FCNTL\_CKSM\_FILE**  
+**#define SQLITE\_FCNTL\_RESET\_CACHE**
 
 # DESCRIPTION
 
 These integer constants are opcodes for the xFileControl method of
-the sqlite3\_io\_methods object and for the sqlite3\_file\_control()
+the sqlite3\_io\_methods object and for the
+**sqlite3\_file\_control**()
 interface.
 
 *	The SQLITE\_FCNTL\_LOCKSTATE opcode is used for
@@ -79,8 +104,7 @@ interface.
 	SQLITE\_LOCK\_RESERVED, SQLITE\_LOCK\_PENDING,
 	or SQLITE\_LOCK\_EXCLUSIVE) into an integer that
 	the pArg argument points to.
-	This capability is used during testing and is only available when the
-	SQLITE\_TEST compile-time option is used.
+	This capability is only available if SQLite is compiled with SQLITE\_DEBUG.
 
 *	The SQLITE\_FCNTL\_SIZE\_HINT opcode is used by
 	SQLite to give the VFS layer a hint of how large the database file
@@ -90,10 +114,22 @@ interface.
 	based on this hint in order to help writes to the database file run
 	faster.
 
+*	The SQLITE\_FCNTL\_SIZE\_LIMIT opcode is used by
+	in-memory VFS that implements
+	**sqlite3\_deserialize**()
+	to set an upper bound on the size of the in-memory database.
+	The argument is a pointer to a sqlite3\_int64.
+	If the integer pointed to is negative, then it is filled in with the
+	current limit.
+	Otherwise the limit is set to the larger of the value of the integer
+	pointed to and the current database size.
+	The integer pointed to is set to the new limit.
+
 *	The SQLITE\_FCNTL\_CHUNK\_SIZE opcode is used to
 	request that the VFS extends and truncates the database file in chunks
 	of a size specified by the user.
-	The fourth argument to sqlite3\_file\_control()
+	The fourth argument to
+	**sqlite3\_file\_control**()
 	should point to an integer (type int) containing the new chunk-size
 	to use for the nominated database.
 	Allocating database file space in large chunks (say 1MB at a time),
@@ -123,9 +159,10 @@ interface.
 	NULL.
 	However, if the database file is being synced as part of a multi-database
 	commit, the argument points to a nul-terminated string containing the
-	transactions master-journal file name.
+	transactions super-journal file name.
 	VFSes that do not need this signal should silently ignore this opcode.
-	Applications should not call sqlite3\_file\_control()
+	Applications should not call
+	**sqlite3\_file\_control**()
 	with this opcode as doing so may disrupt the operation of the specialized
 	VFSes that do require it.
 
@@ -133,7 +170,8 @@ interface.
 	is generated internally by SQLite and sent to the VFS after a transaction
 	has been committed immediately but before the database is unlocked.
 	VFSes that do not need this signal should silently ignore this opcode.
-	Applications should not call sqlite3\_file\_control()
+	Applications should not call
+	**sqlite3\_file\_control**()
 	with this opcode as doing so may disrupt the operation of the specialized
 	VFSes that do require it.
 
@@ -158,15 +196,16 @@ interface.
 
 *	The SQLITE\_FCNTL\_PERSIST\_WAL opcode is used
 	to set or query the persistent Write Ahead Log setting.
-	By default, the auxiliary write ahead log and shared memory files used
-	for transaction control are automatically deleted when the latest connection
-	to the database closes.
+	By default, the auxiliary write ahead log (WAL file) and shared
+	memory files used for transaction control are automatically deleted
+	when the latest connection to the database closes.
 	Setting persistent WAL mode causes those files to persist after close.
 	Persisting the files is useful when other processes that do not have
 	write permission on the directory containing the database file want
 	to read the database file, as the WAL and shared memory files must
 	exist in order for the database to be readable.
-	The fourth parameter to sqlite3\_file\_control()
+	The fourth parameter to
+	**sqlite3\_file\_control**()
 	for this opcode should be a pointer to an integer.
 	That integer is 0 to disable persistent WAL mode or 1 to enable persistent
 	WAL mode.
@@ -178,7 +217,8 @@ interface.
 	or "PSOW" setting.
 	The PSOW setting determines the SQLITE\_IOCAP\_POWERSAFE\_OVERWRITE
 	bit of the xDeviceCharacteristics methods.
-	The fourth parameter to sqlite3\_file\_control()
+	The fourth parameter to
+	**sqlite3\_file\_control**()
 	for this opcode should be a pointer to an integer.
 	That integer is 0 to disable zero-damage mode or 1 to enable zero-damage
 	mode.
@@ -194,9 +234,12 @@ interface.
 *	The SQLITE\_FCNTL\_VFSNAME opcode can be used to
 	obtain the names of all VFSes in the VFS stack.
 	The names are of all VFS shims and the final bottom-level VFS are written
-	into memory obtained from sqlite3\_malloc() and the
-	result is stored in the char\* variable that the fourth parameter of
-	sqlite3\_file\_control() points to.
+	into memory obtained from
+	**sqlite3\_malloc**()
+	and the result is stored in the char\* variable that the fourth parameter
+	of
+	**sqlite3\_file\_control**()
+	points to.
 	The caller is responsible for freeing the memory when done.
 	As with all file-control actions, there is no guarantee that this will
 	actually do anything.
@@ -221,9 +264,10 @@ interface.
 	argument to the pragma or NULL if the pragma has no argument.
 	The handler for an SQLITE\_FCNTL\_PRAGMA file control
 	can optionally make the first element of the char\*\* argument point
-	to a string obtained from sqlite3\_mprintf() or the
-	equivalent and that string will become the result of the pragma or
-	the error message if the pragma fails.
+	to a string obtained from
+	**sqlite3\_mprintf**()
+	or the equivalent and that string will become the result of the pragma
+	or the error message if the pragma fails.
 	If the SQLITE\_FCNTL\_PRAGMA file control returns
 	SQLITE\_NOTFOUND, then normal PRAGMA processing
 	continues.
@@ -242,24 +286,26 @@ interface.
 
 *	The SQLITE\_FCNTL\_BUSYHANDLER file-control may
 	be invoked by SQLite on the database file handle shortly after it is
-	opened in order to provide a custom VFS with access to the connections
+	opened in order to provide a custom VFS with access to the connection's
 	busy-handler callback.
-	The argument is of type (void \*\*) - an array of two (void \*) values.
+	The argument is of type (void\*\*) - an array of two (void \*) values.
 	The first (void \*) actually points to a function of type (int (\*)(void
 	\*)).
-	In order to invoke the connections busy-handler, this function should
+	In order to invoke the connection's busy-handler, this function should
 	be invoked with the second (void \*) in the array as the only argument.
 	If it returns non-zero, then the operation should be retried.
 	If it returns zero, the custom VFS should abandon the current operation.
 
-*	Application can invoke the SQLITE\_FCNTL\_TEMPFILENAME
+*	Applications can invoke the SQLITE\_FCNTL\_TEMPFILENAME
 	file-control to have SQLite generate a temporary filename using the
 	same algorithm that is followed to generate temporary filenames for
 	TEMP tables and other internal uses.
 	The argument should be a char\*\* which will be filled with the filename
-	written into memory obtained from sqlite3\_malloc().
-	The caller should invoke sqlite3\_free() on the result
-	to avoid a memory leak.
+	written into memory obtained from
+	**sqlite3\_malloc**().
+	The caller should invoke
+	**sqlite3\_free**()
+	on the result to avoid a memory leak.
 
 *	The SQLITE\_FCNTL\_MMAP\_SIZE file control is used
 	to query or set the maximum number of bytes that will be used for memory-mapped
@@ -314,10 +360,110 @@ interface.
 	VFS used by the RBU extension only.
 	All other VFS should return SQLITE\_NOTFOUND for this opcode.
 
+*	If the SQLITE\_FCNTL\_BEGIN\_ATOMIC\_WRITE
+	opcode returns SQLITE\_OK, then the file descriptor is placed in "batch
+	write mode", which means all subsequent write operations will be deferred
+	and done atomically at the next SQLITE\_FCNTL\_COMMIT\_ATOMIC\_WRITE.
+	Systems that do not support batch atomic writes will return SQLITE\_NOTFOUND.
+	Following a successful SQLITE\_FCNTL\_BEGIN\_ATOMIC\_WRITE and prior to
+	the closing SQLITE\_FCNTL\_COMMIT\_ATOMIC\_WRITE
+	or SQLITE\_FCNTL\_ROLLBACK\_ATOMIC\_WRITE,
+	SQLite will make no VFS interface calls on the same sqlite3\_file
+	file descriptor except for calls to the xWrite method and the xFileControl
+	method with SQLITE\_FCNTL\_SIZE\_HINT.
+
+*	The SQLITE\_FCNTL\_COMMIT\_ATOMIC\_WRITE
+	opcode causes all write operations since the previous successful call
+	to SQLITE\_FCNTL\_BEGIN\_ATOMIC\_WRITE to
+	be performed atomically.
+	This file control returns SQLITE\_OK if and only if the writes
+	were all performed successfully and have been committed to persistent
+	storage.
+	Regardless of whether or not it is successful, this file control takes
+	the file descriptor out of batch write mode so that all subsequent
+	write operations are independent.
+	SQLite will never invoke SQLITE\_FCNTL\_COMMIT\_ATOMIC\_WRITE without a
+	prior successful call to SQLITE\_FCNTL\_BEGIN\_ATOMIC\_WRITE.
+
+*	The SQLITE\_FCNTL\_ROLLBACK\_ATOMIC\_WRITE
+	opcode causes all write operations since the previous successful call
+	to SQLITE\_FCNTL\_BEGIN\_ATOMIC\_WRITE to
+	be rolled back.
+	This file control takes the file descriptor out of batch write mode
+	so that all subsequent write operations are independent.
+	SQLite will never invoke SQLITE\_FCNTL\_ROLLBACK\_ATOMIC\_WRITE without
+	a prior successful call to SQLITE\_FCNTL\_BEGIN\_ATOMIC\_WRITE.
+
+*	The SQLITE\_FCNTL\_LOCK\_TIMEOUT opcode is used
+	to configure a VFS to block for up to M milliseconds before failing
+	when attempting to obtain a file lock using the xLock or xShmLock methods
+	of the VFS.
+	The parameter is a pointer to a 32-bit signed integer that contains
+	the value that M is to be set to.
+	Before returning, the 32-bit signed integer is overwritten with the
+	previous value of M.
+
+*	The SQLITE\_FCNTL\_DATA\_VERSION opcode is used
+	to detect changes to a database file.
+	The argument is a pointer to a 32-bit unsigned integer.
+	The "data version" for the pager is written into the pointer.
+	The "data version" changes whenever any change occurs to the corresponding
+	database file, either through SQL statements on the same database connection
+	or through transactions committed by separate database connections
+	possibly in other processes.
+	The
+	**sqlite3\_total\_changes**()
+	interface can be used to find if any database on the connection has
+	changed, but that interface responds to changes on TEMP as well as
+	MAIN and does not provide a mechanism to detect changes to MAIN only.
+	Also, the
+	**sqlite3\_total\_changes**()
+	interface responds to internal changes only and omits changes made
+	by other database connections.
+	The PRAGMA data\_version command provides a mechanism
+	to detect changes to a single attached database that occur due to other
+	database connections, but omits changes implemented by the database
+	connection on which it is called.
+	This file control is the only mechanism to detect changes that happen
+	either internally or externally and that are associated with a particular
+	attached database.
+
+*	The SQLITE\_FCNTL\_CKPT\_START opcode is invoked
+	from within a checkpoint in wal mode before the client starts to copy
+	pages from the wal file to the database file.
+
+*	The SQLITE\_FCNTL\_CKPT\_DONE opcode is invoked
+	from within a checkpoint in wal mode after the client has finished
+	copying pages from the wal file to the database file, but before the
+	\*-shm file is updated to record the fact that the pages have been checkpointed.
+
+*	The EXPERIMENTAL SQLITE\_FCNTL\_EXTERNAL\_READER
+	opcode is used to detect whether or not there is a database client
+	in another process with a wal-mode transaction open on the database
+	or not.
+	It is only available on unix.The (void\*) argument passed with this
+	file-control should be a pointer to a value of type (int).
+	The integer value is set to 1 if the database is a wal mode database
+	and there exists at least one client in another process that currently
+	has an SQL transaction open on the database.
+	It is set to 0 if the database is not a wal-mode db, or if there is
+	no such connection in any other process.
+	This opcode cannot be used to detect transactions opened by clients
+	within the current process, only within other processes.
+
+*	The SQLITE\_FCNTL\_CKSM\_FILE opcode is for use
+	interally by the checksum VFS shim only.
+
+*	If there is currently no transaction open on the database, and the
+	database is not a temp db, then the SQLITE\_FCNTL\_RESET\_CACHE
+	file-control purges the contents of the in-memory page cache.
+	If there is an open transaction, or if the db is a temp-db, this opcode
+	is a no-op, not an error.
+
 # IMPLEMENTATION NOTES
 
 These declarations were extracted from the
-interface documentation at line 779.
+interface documentation at line 861.
 
 	#define SQLITE_FCNTL_LOCKSTATE               1
 	#define SQLITE_FCNTL_GET_LOCKPROXYFILE       2
@@ -348,19 +494,32 @@ interface documentation at line 779.
 	#define SQLITE_FCNTL_JOURNAL_POINTER        28
 	#define SQLITE_FCNTL_WIN32_GET_HANDLE       29
 	#define SQLITE_FCNTL_PDB                    30
+	#define SQLITE_FCNTL_BEGIN_ATOMIC_WRITE     31
+	#define SQLITE_FCNTL_COMMIT_ATOMIC_WRITE    32
+	#define SQLITE_FCNTL_ROLLBACK_ATOMIC_WRITE  33
+	#define SQLITE_FCNTL_LOCK_TIMEOUT           34
+	#define SQLITE_FCNTL_DATA_VERSION           35
+	#define SQLITE_FCNTL_SIZE_LIMIT             36
+	#define SQLITE_FCNTL_CKPT_DONE              37
+	#define SQLITE_FCNTL_RESERVE_BYTES          38
+	#define SQLITE_FCNTL_CKPT_START             39
+	#define SQLITE_FCNTL_EXTERNAL_READER        40
+	#define SQLITE_FCNTL_CKSM_FILE              41
+	#define SQLITE_FCNTL_RESET_CACHE            42
 
 # SEE ALSO
 
+sqlite3\_deserialize(3),
 sqlite3\_file(3),
 sqlite3\_file\_control(3),
-sqlite3\_malloc(3),
 sqlite3\_io\_methods(3),
 sqlite3\_malloc(3),
 sqlite3\_mprintf(3),
+sqlite3\_total\_changes(3),
 sqlite3\_vfs(3),
-SQLITE\_FCNTL\_LOCKSTATE(3),
+sqlite\_int64(3),
 SQLITE\_IOCAP\_ATOMIC(3),
 SQLITE\_LOCK\_NONE(3),
 SQLITE\_OK(3)
 
-OpenBSD 6.2 - April 26, 2018
+OpenBSD 7.2 - May 9, 2023
