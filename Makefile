@@ -9,6 +9,7 @@ DOTAR 		 = Makefile \
 		   main.c \
 		   tests.c \
 		   sqlite2mdoc.1
+VALGRIND_ARGS	 = -q --leak-check=full --leak-resolution=high --show-reachable=yes
 
 all: sqlite2mdoc
 
@@ -59,6 +60,12 @@ distcheck: sqlite2mdoc.tar.gz sqlite2mdoc.tar.gz.sha512
 
 distclean: clean
 	rm -f config.h config.log Makefile.configure
+
+valgrind: all
+	@for f in regress/*.h ; do \
+		echo "valgrind $(VALGRIND_ARGS) ./sqlite2mdoc -n $$f" ; \
+		valgrind $(VALGRIND_ARGS) ./sqlite2mdoc -n $$f >/dev/null ; \
+	done
 
 regen_regress: all
 	@for f in regress/*.h ; do \
