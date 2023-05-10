@@ -14,6 +14,9 @@ See the [sqlite2mdoc.1](sqlite2mdoc.1) manpage for syntax details.
 **Note**: this only works with sqlite3, *not* the original `sqlite.h`
 format.
 
+Release snapshots are archived in
+https://kristaps.bsd.lv/sqlite2mdoc/snapshots.
+
 ## Installation
 
 Run `./configure` then `make`.
