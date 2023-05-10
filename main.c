@@ -783,7 +783,7 @@ init(struct parse *p, const char *cp)
 	 * uppercase letter are lowercased.
 	 */
 
-	for (i = 0; i < sz - 1; i++)
+	for (i = 0; sz > 0 && i < sz - 1; i++)
 		if ((i == 0 || d->name[i - 1] == ' ') &&
 		    isupper((unsigned char)d->name[i]) &&
 		    !isupper((unsigned char)d->name[i + 1]) &&
