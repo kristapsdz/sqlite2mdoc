@@ -339,7 +339,7 @@ again:
 
 	/* We're only a partial statement (i.e., no closure). */
 	if (ep == NULL && d->multiline) {
-		assert(NULL != e->text);
+		assert(e->text != NULL);
 		assert(e->textsz > 0);
 		/* Is a struct starting or ending here? */
 		if (d->instruct && NULL != rcp)
@@ -595,6 +595,7 @@ seealso(struct parse *p, const char *cp, size_t len)
 
 	cp += 2;
 	len -= 2;
+
 	while (isspace((unsigned char)*cp)) {
 		cp++;
 		len--;
@@ -641,14 +642,17 @@ desc(struct parse *p, const char *cp, size_t len)
 	}
 
 	/* Fetch current interface definition. */
+
 	d = TAILQ_LAST(&p->dqhead, defnq);
 	assert(NULL != d);
 
 	/* Ignore leading blank lines. */
+
 	if (len == 0 && d->desc == NULL)
 		return;
 
 	/* Collect SEE ALSO clauses. */
+
 	if (strncasecmp(cp, "see also:", 9) == 0) {
 		cp += 9;
 		len -= 9;
@@ -667,7 +671,7 @@ desc(struct parse *p, const char *cp, size_t len)
 
 	/* White-space padding between lines. */
 
-	if (NULL != d->desc &&
+	if (d->desc != NULL &&
 	    d->descsz > 0 &&
 	    d->desc[d->descsz - 1] != ' ' &&
 	    d->desc[d->descsz - 1] != '\n') {
@@ -679,8 +683,10 @@ desc(struct parse *p, const char *cp, size_t len)
 	}
 
 	/* Either append the line of a newline, if blank. */
+
 	nsz = len == 0 ? 1 : len;
 	if (d->desc == NULL) {
+		assert(d->descsz == 0);
 		d->desc = calloc(1, nsz + 1);
 		if (d->desc == NULL)
 			err(1, NULL);
@@ -689,6 +695,7 @@ desc(struct parse *p, const char *cp, size_t len)
 		if (d->desc == NULL)
 			err(1, NULL);
 	}
+
 	d->descsz += nsz;
 	strlcat(d->desc, len == 0 ? "\n" : cp, d->descsz + 1);
 }
@@ -866,6 +873,7 @@ postprocess(const char *prefix, struct defn *d)
 		return;
 
 	/* Find the first #define or declaration. */
+
 	TAILQ_FOREACH(first, &d->dcqhead, entries)
 		if (DECLTYPE_CPP == first->type ||
 		    DECLTYPE_C == first->type)
@@ -880,6 +888,7 @@ postprocess(const char *prefix, struct defn *d)
 	 * Now compute the document name (`Dt').
 	 * We'll also use this for the filename.
 	 */
+
 	grok_name(first, &start, &sz);
 	if (start == NULL) {
 		warnx("%s:%zu: couldn't deduce "
@@ -888,15 +897,15 @@ postprocess(const char *prefix, struct defn *d)
 	}
 
 	/* Document name needs all-caps. */
-	d->dt = malloc(sz + 1);
-	if (d->dt == NULL)
+
+	if ((d->dt = strndup(start, sz)) == NULL)
 		err(1, NULL);
-	memcpy(d->dt, start, sz);
-	d->dt[sz] = '\0';
+	sz = strlen(d->dt);
 	for (i = 0; i < sz; i++)
 		d->dt[i] = toupper((unsigned char)d->dt[i]);
 
 	/* Filename needs no special chars. */
+
 	if (filename) {
 		asprintf(&d->fname, "%.*s.3", (int)sz, start);
 		offs = 0;
@@ -1433,49 +1442,49 @@ emit(struct defn *d)
 	 * don't need to check d->descsz - 1.
 	 */
 
-	for (i = 0; i < d->descsz; i++) {
+	for (i = 0; i < d->descsz; ) {
 		if (d->desc[i] == '^' &&
 		    d->desc[i + 1] == '(') {
 			memmove(&d->desc[i],
 				&d->desc[i + 2],
-				d->descsz - i - 2);
+				d->descsz - i - 1);
 			d->descsz -= 2;
-			i--;
 			continue;
 		} else if (d->desc[i] == ')' &&
 			   d->desc[i + 1] == '^') {
 			memmove(&d->desc[i],
 				&d->desc[i + 2],
-				d->descsz - i - 2);
+				d->descsz - i - 1);
 			d->descsz -= 2;
-			i--;
 			continue;
 		} else if (d->desc[i] == '^') {
 			memmove(&d->desc[i],
 				&d->desc[i + 1],
-				d->descsz - i - 1);
+				d->descsz - i);
 			d->descsz -= 1;
-			i--;
 			continue;
 		} else if (d->desc[i] != '[' ||
-			   d->desc[i + 1] != '[')
+			   d->desc[i + 1] != '[') {
+			i++;
 			continue;
+		}
 
 		for (j = i; j < d->descsz; j++)
 			if (d->desc[j] == ']' &&
 			    d->desc[j + 1] == ']')
 				break;
 
-		if (j == d->descsz)
-			continue;
+		/* Ignore if we don't have a terminator. */
 
 		assert(j > i);
 		j += 2;
-		memmove(&d->desc[i],
-		        &d->desc[j],
-			d->descsz - i - (j - i));
+		if (j > d->descsz) {
+			i++;
+			continue;
+		}
+
+		memmove(&d->desc[i], &d->desc[j], d->descsz - j + 1);
 		d->descsz -= (j - i);
-		i--;
 	}
 
 	/*
@@ -2008,9 +2017,14 @@ main(int argc, char *argv[])
 			warnx("%s:%zu: unterminated line", p.fn, p.ln);
 			break;
 		}
-		cp[--len] = '\0';
 
-		/* Lines are now always nil-terminated. */
+		/*
+		 * Lines are now always NUL-terminated, and don't allow
+		 * NUL characters in the line.
+		 */
+
+		cp[--len] = '\0';
+		len = strlen(cp);
 
 		switch (p.phase) {
 		case PHASE_INIT:
