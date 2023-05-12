@@ -28,10 +28,13 @@ installwww: www
 sqlite2mdoc.tar.gz:
 	mkdir -p .dist/sqlite2mdoc-$(VERSION)/
 	mkdir -p .dist/sqlite2mdoc-$(VERSION)/regress
-	mkdir -p .dist/sqlite2mdoc-$(VERSION)/regress/expect
+	mkdir -p .dist/sqlite2mdoc-$(VERSION)/regress/expect-3.29.0
+	mkdir -p .dist/sqlite2mdoc-$(VERSION)/regress/expect-3.42.0
 	$(INSTALL) -m 0644 $(DOTAR) .dist/sqlite2mdoc-$(VERSION)
-	$(INSTALL) -m 0644 regress/sqlite3.h .dist/sqlite2mdoc-$(VERSION)/regress
-	$(INSTALL) -m 0644 regress/expect/*.3 .dist/sqlite2mdoc-$(VERSION)/regress/expect
+	$(INSTALL) -m 0644 regress/sqlite3-3.29.0.h .dist/sqlite2mdoc-$(VERSION)/regress
+	$(INSTALL) -m 0644 regress/sqlite3-3.42.0.h .dist/sqlite2mdoc-$(VERSION)/regress
+	$(INSTALL) -m 0644 regress/expect-3.29.0/*.3 .dist/sqlite2mdoc-$(VERSION)/regress/expect-3.29.0
+	$(INSTALL) -m 0644 regress/expect-3.42.0/*.3 .dist/sqlite2mdoc-$(VERSION)/regress/expect-3.42.0
 	$(INSTALL) -m 0755 configure .dist/sqlite2mdoc-$(VERSION)
 	( cd .dist/ && tar zcf ../$@ sqlite2mdoc-$(VERSION) )
 	rm -rf .dist/
