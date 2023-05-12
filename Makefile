@@ -3,7 +3,7 @@
 include Makefile.configure
 
 WWWDIR		 = /var/www/vhosts/kristaps.bsd.lv/htdocs/sqlite2mdoc
-VERSION		 = 0.1.10
+VERSION		 = 1.0.0
 DOTAR 		 = Makefile \
 		   compats.c \
 		   main.c \
@@ -21,7 +21,9 @@ www: sqlite2mdoc.tar.gz sqlite2mdoc.tar.gz.sha512
 installwww: www
 	mkdir -p $(WWWDIR)/snapshots
 	$(INSTALL_DATA) sqlite2mdoc.tar.gz $(WWWDIR)/snapshots
+	$(INSTALL_DATA) sqlite2mdoc.tar.gz.sha512 $(WWWDIR)/snapshots
 	$(INSTALL_DATA) sqlite2mdoc.tar.gz $(WWWDIR)/snapshots/sqlite2mdoc-$(VERSION).tar.gz
+	$(INSTALL_DATA) sqlite2mdoc.tar.gz.sha512 $(WWWDIR)/snapshots/sqlite2mdoc-$(VERSION).sha512
 
 sqlite2mdoc.tar.gz:
 	mkdir -p .dist/sqlite2mdoc-$(VERSION)/
