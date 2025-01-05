@@ -233,7 +233,7 @@ static	const struct taginfo tags[TAG__MAX] = {
 	{ "<ul>", ".Bl -bullet", 0 }, /* TAG_UL_OPEN */
 };
 
-static	const char *const preprocs[TAG__MAX] = {
+static	const char *const preprocs[PREPROC__MAX] = {
 	"SQLITE_API", /* PREPROC_SQLITE_API */
 	"SQLITE_DEPRECATED", /* PREPROC_SQLITE_DEPRECATED */
 	"SQLITE_EXPERIMENTAL", /* PREPROC_SQLITE_EXPERIMENTAL */
