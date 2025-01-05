@@ -1,8 +1,8 @@
 .PHONY: distclean clean regress distcheck
 
 include Makefile.configure
-
 WWWDIR		 = /var/www/vhosts/kristaps.bsd.lv/htdocs/sqlite2mdoc
+sinclude Makefile.local
 VERSION		 = 1.0.0
 DOTAR 		 = Makefile \
 		   compats.c \

@@ -1,4 +1,5 @@
 Makefile.configure
+Makefile.local
 config.h
 config.h.old
 config.log
