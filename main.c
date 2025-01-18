@@ -191,9 +191,9 @@ static	const struct taginfo tags[TAG__MAX] = {
 	{ "<a ", "", TAGINFO_INLINE | TAGINFO_ATTRS }, /* TAG_A_OPEN_ATTRS */
 	{ "</b>", "\\fP", TAGINFO_INLINE }, /* TAG_B_CLOSE */
 	{ "<b>", "\\fB", TAGINFO_INLINE }, /* TAG_B_OPEN */
-	{ "<br>", " ", TAGINFO_INLINE }, /* TAG_BR_OPEN */
 	{ "</blockquote>", ".Ed\n.Pp", 0 }, /* TAG_BLOCK_CLOSE */
 	{ "<blockquote>", ".Bd -ragged", 0 }, /* TAG_BLOCK_OPEN */
+	{ "<br>", " ", TAGINFO_INLINE }, /* TAG_BR_OPEN */
 	{ "</dd>", "", TAGINFO_NOOP }, /* TAG_DD_CLOSE */
 	{ "<dd>", "", TAGINFO_NOBR | TAGINFO_NOSP }, /* TAG_DD_OPEN */
 	{ "</dl>", ".El\n.Pp", 0 }, /* TAG_DL_CLOSE */
@@ -216,17 +216,17 @@ static	const struct taginfo tags[TAG__MAX] = {
 	{ "<pre>", ".Bd -literal", 0 }, /* TAG_PRE_OPEN */
 	{ "</span>", "", TAGINFO_INLINE }, /* TAG_SPAN_CLOSE */
 	{ "<span ", "", TAGINFO_INLINE | TAGINFO_ATTRS }, /* TAG_SPAN_OPEN_ATTRS */
-	{ "</table>", ".Pp", 0 }, /* TAG_TABLE_CLOSE */
-	{ "<table>", ".Pp", 0 }, /* TAG_TABLE_OPEN */
-	{ "<table ", ".Pp", TAGINFO_ATTRS }, /* TAG_TABLE_OPEN_ATTRS */
+	{ "</table>", ".TE", 0 }, /* TAG_TABLE_CLOSE */
+	{ "<table>", ".TS", 0 }, /* TAG_TABLE_OPEN */
+	{ "<table ", ".TS", TAGINFO_ATTRS }, /* TAG_TABLE_OPEN_ATTRS */
 	{ "</td>", "", TAGINFO_NOOP }, /* TAG_TD_CLOSE */
-	{ "<td>", " ", TAGINFO_INLINE }, /* TAG_TD_OPEN */
-	{ "<td ", " ", TAGINFO_INLINE | TAGINFO_ATTRS}, /* TAG_TD_OPEN_ATTRS */
+	{ "<td>", "", TAGINFO_NOOP }, /* TAG_TD_OPEN */
+	{ "<td ", "", TAGINFO_NOOP | TAGINFO_ATTRS}, /* TAG_TD_OPEN_ATTRS */
 	{ "</th>", "", TAGINFO_NOOP }, /* TAG_TH_CLOSE */
-	{ "<th>", " ", TAGINFO_INLINE }, /* TAG_TH_OPEN */
-	{ "<th ", " ", TAGINFO_INLINE | TAGINFO_ATTRS}, /* TAG_TH_OPEN_ATTRS */
+	{ "<th>", "", TAGINFO_NOOP }, /* TAG_TH_OPEN */
+	{ "<th ", "", TAGINFO_NOOP | TAGINFO_ATTRS}, /* TAG_TH_OPEN_ATTRS */
 	{ "</tr>", "", TAGINFO_NOOP}, /* TAG_TR_CLOSE */
-	{ "<tr>", "", TAGINFO_NOBR }, /* TAG_TR_OPEN */
+	{ "<tr>", "", TAGINFO_NOOP }, /* TAG_TR_OPEN */
 	{ "</u>", "\\fP", TAGINFO_INLINE }, /* TAG_U_CLOSE */
 	{ "<u>", "\\fI", TAGINFO_INLINE }, /* TAG_U_OPEN */
 	{ "</ul>", ".El\n.Pp", 0 }, /* TAG_UL_CLOSE */
@@ -1186,6 +1186,57 @@ newsentence(size_t start, size_t finish, const char *buf)
 }
 
 /*
+ * For the HTML table starting at "buf" and of maximum length "len", try
+ * to extract the number of columns.  Returns the number of columns or
+ * zero if the columns couldn't be determined.
+ */
+static size_t
+table_columns(const char *buf, size_t len)
+{
+	size_t		 cols = 0;
+	const char	*end, *nbuf, *delim = NULL;
+
+	/* Get the first row.  If found, position within the row. */
+
+	if ((nbuf = memmem(buf, len, "<tr", 3)) == NULL)
+		return cols;
+	assert(nbuf >= buf);
+	len = nbuf - buf - 3;
+	buf = nbuf + 3;
+
+	/* Find the next row, which is the end marker. */
+
+	if ((end = memmem(buf, len, "<tr", 3)) == NULL)
+		return cols;
+	assert(end >= buf);
+	if ((len = end - buf) == 0)
+		return cols;
+
+	/* See if this row contains <th> or <td> elements. */
+
+	if (memmem(buf, len, "<th", 3) != NULL)
+		delim = "<th";
+	else if (memmem(buf, len, "<td", 3) != NULL)
+		delim = "<td";
+	else
+		return cols;
+
+	/* Count the row's <th> or <td> elements. */
+
+	assert(delim != NULL);
+	for (;;) {
+		if ((nbuf = memmem(buf, len, delim, 3)) == NULL)
+			break;
+		assert(nbuf >= buf);
+		len -= (nbuf - buf) + 3;
+		buf = nbuf + 3;
+		cols++;
+	}
+
+	return cols;
+}
+
+/*
  * Emit a valid mdoc(7) document within the given prefix.
  */
 static void
@@ -1198,6 +1249,7 @@ emit(struct defn *d)
 	const char	*res, *lastres, *args, *str, *end, *fn;
 	enum tag	 tag;
 	enum preproc	 pre;
+	int		 incolumn = 0, inblockquote = 0;
 
 	if (!d->postprocessed) {
 		warnx("%s:%zu: interface has errors, not "
@@ -1588,6 +1640,66 @@ emit(struct defn *d)
 				if (strncmp(&d->desc[i],
 				    tags[tag].html, sz))
 					continue;
+				
+				/*
+				 * Special-casing of tables, which care
+				 * about previous state that's otherwise
+				 * ignored.  Track "incolumn" with
+				 * whether the parser is currently in a
+				 * column.
+				 */
+
+				switch (tag) {
+				case TAG_BLOCK_OPEN:
+					inblockquote = 1;
+					break;
+				case TAG_BLOCK_CLOSE:
+					inblockquote = 0;
+					break;
+				case TAG_TD_OPEN:
+				case TAG_TD_OPEN_ATTRS:
+				case TAG_TH_OPEN:
+				case TAG_TH_OPEN_ATTRS:
+					if (incolumn) {
+						if (col > 0)
+							fputs("\n", f);
+						fputs("T}\t", f);
+					}
+					fputs("T{\n", f);
+					col = 0;
+					incolumn = 1;
+					break;
+				case TAG_TR_OPEN:
+					if (incolumn) {
+						if (col > 0)
+							fputs("\n", f);
+						fputs("T}\n", f);
+						col = 0;
+					}
+					incolumn = 0;
+					break;
+				case TAG_TABLE_CLOSE:
+					if (incolumn) {
+						if (col > 0)
+							fputs("\n", f);
+						fputs("T}\n", f);
+						col = 0;
+					}
+					incolumn = 0;
+					break;
+				case TAG_TABLE_OPEN:
+					/* FALLTHROUGH */
+				case TAG_TABLE_OPEN_ATTRS:
+					if (!inblockquote) {
+						if (col > 0)
+							fputs("\n", f);
+						fputs(".sp\n", f);
+						col = 0;
+					}
+					break;
+				default:
+					break;
+				}
 
 				i += sz;
 
@@ -1649,8 +1761,33 @@ emit(struct defn *d)
 				}
 				while (isspace((unsigned char)d->desc[i]))
 					i++;
+
+				if (tag == TAG_TABLE_CLOSE) {
+					if (!inblockquote)
+						fputs(".sp\n", f);
+					col = 0;
+				}
 				break;
 			}
+
+			/*
+			 * Special-casing of tables, which need to know
+			 * the number of subsequent columns to produce
+			 * the tbl(7) header.  If the number of columns
+			 * can't be determined, don't produce a header,
+			 * which will probably result in an ugly table.
+			 */
+
+			if (tag == TAG_TABLE_OPEN ||
+			    tag == TAG_TABLE_OPEN_ATTRS) {
+				sz = table_columns(&d->desc[i],
+					d->descsz - i);
+				for (j = 0; j < sz; j++)
+					fprintf(f, "%sl", j > 0 ?
+						" " : "");
+				fputs(".\n", f);
+			}
+
 			if (tag < TAG__MAX) {
 				stripspace = 0;
 				continue;
