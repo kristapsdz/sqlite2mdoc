@@ -50,14 +50,51 @@ Metadata is returned by writing to the memory locations passed as the
 Any of these arguments may be NULL, in which case the corresponding
 element of metadata is omitted.
 .Bd -ragged
-.Pp
-   Parameter   Output Type    Description
-   5th   const char*   Data type
-   6th   const char*   Name of default collation sequence
-   7th   int           True if column has a NOT NULL constraint
-   8th   int           True if column is part of the PRIMARY KEY
-   9th   int           True if column is AUTOINCREMENT
-.Pp
+.TS
+l l l.
+T{
+Parameter
+T}	T{
+Output Type
+T}	T{
+Description
+T}
+T{
+5th
+T}	T{
+const char*
+T}	T{
+Data type
+T}
+T{
+6th
+T}	T{
+const char*
+T}	T{
+Name of default collation sequence
+T}
+T{
+7th
+T}	T{
+int
+T}	T{
+True if column has a NOT NULL constraint
+T}
+T{
+8th
+T}	T{
+int
+T}	T{
+True if column is part of the PRIMARY KEY
+T}
+T{
+9th
+T}	T{
+int
+T}	T{
+True if column is AUTOINCREMENT
+T}
+.TE
 .Ed
 .Pp
 The memory pointed to by the character pointers returned for the declaration

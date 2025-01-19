@@ -67,20 +67,87 @@
 .Sh DESCRIPTION
 \fBSummary:\fP
 .Bd -ragged
-.Pp
-  \fBsqlite3_column_blob\fP \(-> BLOB result
-  \fBsqlite3_column_double\fP \(-> REAL result
-  \fBsqlite3_column_int\fP \(-> 32-bit INTEGER result
-  \fBsqlite3_column_int64\fP \(-> 64-bit INTEGER result
-  \fBsqlite3_column_text\fP \(-> UTF-8 TEXT result
-  \fBsqlite3_column_text16\fP \(-> UTF-16 TEXT result
-  \fBsqlite3_column_value\fP \(-> The result as an unprotected sqlite3_value
+.TS
+l l l.
+T{
+\fBsqlite3_column_blob\fP
+T}	T{
+\(->
+T}	T{
+BLOB result
+T}
+T{
+\fBsqlite3_column_double\fP
+T}	T{
+\(->
+T}	T{
+REAL result
+T}
+T{
+\fBsqlite3_column_int\fP
+T}	T{
+\(->
+T}	T{
+32-bit INTEGER result
+T}
+T{
+\fBsqlite3_column_int64\fP
+T}	T{
+\(->
+T}	T{
+64-bit INTEGER result
+T}
+T{
+\fBsqlite3_column_text\fP
+T}	T{
+\(->
+T}	T{
+UTF-8 TEXT result
+T}
+T{
+\fBsqlite3_column_text16\fP
+T}	T{
+\(->
+T}	T{
+UTF-16 TEXT result
+T}
+T{
+\fBsqlite3_column_value\fP
+T}	T{
+\(->
+T}	T{
+The result as an unprotected sqlite3_value
 object.
-       
-  \fBsqlite3_column_bytes\fP \(-> Size of a BLOB or a UTF-8 TEXT result in bytes
-  \fBsqlite3_column_bytes16  \fP  \(->   Size of UTF-16 TEXT in bytes
-  \fBsqlite3_column_type\fP \(-> Default datatype of the result
-.Pp
+T}
+T{
+ 
+T}	T{
+ 
+T}	T{
+ 
+T}
+T{
+\fBsqlite3_column_bytes\fP
+T}	T{
+\(->
+T}	T{
+Size of a BLOB or a UTF-8 TEXT result in bytes
+T}
+T{
+\fBsqlite3_column_bytes16  \fP
+T}	T{
+\(->  
+T}	T{
+Size of UTF-16 TEXT in bytes
+T}
+T{
+\fBsqlite3_column_type\fP
+T}	T{
+\(->
+T}	T{
+Default datatype of the result
+T}
+.TE
 .Ed
 .Pp
 \fBDetails:\fP
@@ -211,25 +278,128 @@ is requested,
 is used internally to perform the conversion automatically.
 The following table details the conversions that are applied:
 .Bd -ragged
-.Pp
-   Internal Type   Requested Type    Conversion
-    NULL      INTEGER     Result is 0
-    NULL       FLOAT      Result is 0.0
-    NULL        TEXT      Result is a NULL pointer
-    NULL        BLOB      Result is a NULL pointer
-   INTEGER     FLOAT      Convert from integer to float
-   INTEGER      TEXT      ASCII rendering of the integer
-   INTEGER      BLOB      Same as INTEGER->TEXT
-    FLOAT     INTEGER     CAST to INTEGER
-    FLOAT       TEXT      ASCII rendering of the float
-    FLOAT       BLOB      CAST to BLOB
-    TEXT      INTEGER     CAST to INTEGER
-    TEXT       FLOAT      CAST to REAL
-    TEXT        BLOB      No change
-    BLOB      INTEGER     CAST to INTEGER
-    BLOB       FLOAT      CAST to REAL
-    BLOB        TEXT      Add a zero terminator if needed
-.Pp
+.TS
+l l l.
+T{
+Internal Type
+T}	T{
+Requested Type
+T}	T{
+Conversion
+T}
+T{
+NULL
+T}	T{
+INTEGER
+T}	T{
+Result is 0
+T}
+T{
+NULL
+T}	T{
+FLOAT
+T}	T{
+Result is 0.0
+T}
+T{
+NULL
+T}	T{
+TEXT
+T}	T{
+Result is a NULL pointer
+T}
+T{
+NULL
+T}	T{
+BLOB
+T}	T{
+Result is a NULL pointer
+T}
+T{
+INTEGER
+T}	T{
+FLOAT
+T}	T{
+Convert from integer to float
+T}
+T{
+INTEGER
+T}	T{
+TEXT
+T}	T{
+ASCII rendering of the integer
+T}
+T{
+INTEGER
+T}	T{
+BLOB
+T}	T{
+Same as INTEGER->TEXT
+T}
+T{
+FLOAT
+T}	T{
+INTEGER
+T}	T{
+CAST to INTEGER
+T}
+T{
+FLOAT
+T}	T{
+TEXT
+T}	T{
+ASCII rendering of the float
+T}
+T{
+FLOAT
+T}	T{
+BLOB
+T}	T{
+CAST to BLOB
+T}
+T{
+TEXT
+T}	T{
+INTEGER
+T}	T{
+CAST to INTEGER
+T}
+T{
+TEXT
+T}	T{
+FLOAT
+T}	T{
+CAST to REAL
+T}
+T{
+TEXT
+T}	T{
+BLOB
+T}	T{
+No change
+T}
+T{
+BLOB
+T}	T{
+INTEGER
+T}	T{
+CAST to INTEGER
+T}
+T{
+BLOB
+T}	T{
+FLOAT
+T}	T{
+CAST to REAL
+T}
+T{
+BLOB
+T}	T{
+TEXT
+T}	T{
+Add a zero terminator if needed
+T}
+.TE
 .Ed
 .Pp
 Note that when type conversions occur, pointers returned by prior calls

@@ -257,28 +257,60 @@ Future versions of SQLite might understand additional query parameters.
 See "query parameters with special meaning to SQLite"
 for additional information.
 .Ss URI filename examples
-.Pp
-   URI filenames   Results
-   file:data.db   Open the file "data.db" in the current directory.
-   file:/home/fred/data.db  file:///home/fred/data.db   file://localhost/home/fred/data.db
-  Open the database file "/home/fred/data.db".
-   file://darkstar/home/fred/data.db   An error.
+.sp
+.TS
+l l.
+T{
+URI filenames
+T}	T{
+Results
+T}
+T{
+file:data.db
+T}	T{
+Open the file "data.db" in the current directory.
+T}
+T{
+file:/home/fred/data.db  file:///home/fred/data.db   file://localhost/home/fred/data.db
+ T}	T{
+Open the database file "/home/fred/data.db".
+T}
+T{
+file://darkstar/home/fred/data.db
+T}	T{
+An error.
 "darkstar" is not a recognized authority.
-   file:///C:/Documents%20and%20Settings/fred/Desktop/data.db   Windows
-only: Open the file "data.db" on fred's desktop on drive C:.
+T}
+T{
+file:///C:/Documents%20and%20Settings/fred/Desktop/data.db
+T}	T{
+Windows only: Open the file "data.db" on fred's desktop on drive C:.
 Note that the %20 escaping in this example is not strictly necessary
 - space characters can be used literally in URI filenames.
-   file:data.db?mode=ro&cache=private   Open file "data.db" in the current
-directory for read-only access.
+T}
+T{
+file:data.db?mode=ro&cache=private
+T}	T{
+Open file "data.db" in the current directory for read-only access.
 Regardless of whether or not shared-cache mode is enabled by default,
 use a private cache.
-   file:/home/fred/data.db?vfs=unix-dotfile   Open file "/home/fred/data.db".
+T}
+T{
+file:/home/fred/data.db?vfs=unix-dotfile
+T}	T{
+Open file "/home/fred/data.db".
 Use the special VFS "unix-dotfile" that uses dot-files in place of
 posix advisory locking.
-   file:data.db?mode=readonly   An error.
+T}
+T{
+file:data.db?mode=readonly
+T}	T{
+An error.
 "readonly" is not a valid option for the "mode" parameter.
 Use "ro" instead:  "file:data.db?mode=ro".
-.Pp
+T}
+.TE
+.sp
 URI hexadecimal escape sequences (%HH) are supported within the path
 and query components of a URI.
 A hexadecimal escape sequence consists of a percent sign - "%" - followed

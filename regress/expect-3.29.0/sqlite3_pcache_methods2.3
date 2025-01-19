@@ -113,15 +113,34 @@ intact.
 If the requested page is not already in the cache, then the cache implementation
 should use the value of the createFlag parameter to help it determined
 what action to take:
-.Pp
-   createFlag   Behavior when page is not already in cache
-   0   Do not allocate a new page.
+.sp
+.TS
+l l.
+T{
+createFlag
+T}	T{
+Behavior when page is not already in cache
+T}
+T{
+0
+T}	T{
+Do not allocate a new page.
 Return NULL.
-   1   Allocate a new page if it easy and convenient to do so.
+T}
+T{
+1
+T}	T{
+Allocate a new page if it easy and convenient to do so.
 Otherwise return NULL.
-   2   Make every effort to allocate a new page.
+T}
+T{
+2
+T}	T{
+Make every effort to allocate a new page.
 Only return NULL if allocating a new page is effectively impossible.
-.Pp
+T}
+.TE
+.sp
 SQLite will normally invoke xFetch() with a createFlag of 0 or 1.
 SQLite will only use a createFlag of 2 after a prior call with a createFlag
 of 1 failed.

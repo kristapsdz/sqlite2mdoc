@@ -100,16 +100,51 @@
 .Sh DESCRIPTION
 The six streaming API xxx_strm() functions serve similar purposes to
 the corresponding non-streaming API functions:
-.Pp
-  Streaming function Non-streaming equivalent
-  sqlite3changeset_apply_strm sqlite3changeset_apply
-  sqlite3changeset_apply_strm_v2 sqlite3changeset_apply_v2
-  sqlite3changeset_concat_strm sqlite3changeset_concat
-  sqlite3changeset_invert_strm sqlite3changeset_invert
-  sqlite3changeset_start_strm sqlite3changeset_start
-  sqlite3session_changeset_strm sqlite3session_changeset
-  sqlite3session_patchset_strm sqlite3session_patchset
-.Pp
+.sp
+.TS
+l l.
+T{
+Streaming function
+T}	T{
+Non-streaming equivalent
+T}
+T{
+sqlite3changeset_apply_strm
+T}	T{
+sqlite3changeset_apply
+T}
+T{
+sqlite3changeset_apply_strm_v2
+T}	T{
+sqlite3changeset_apply_v2
+T}
+T{
+sqlite3changeset_concat_strm
+T}	T{
+sqlite3changeset_concat
+T}
+T{
+sqlite3changeset_invert_strm
+T}	T{
+sqlite3changeset_invert
+T}
+T{
+sqlite3changeset_start_strm
+T}	T{
+sqlite3changeset_start
+T}
+T{
+sqlite3session_changeset_strm
+T}	T{
+sqlite3session_changeset
+T}
+T{
+sqlite3session_patchset_strm
+T}	T{
+sqlite3session_patchset
+T}
+.TE
+.sp
 Non-streaming functions that accept changesets (or patchsets) as input
 require that the entire changeset be stored in a single buffer in memory.
 Similarly, those that return a changeset or patchset do so by returning

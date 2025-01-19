@@ -83,25 +83,121 @@
 .Sh DESCRIPTION
 \fBSummary:\fP
 .Bd -ragged
-.Pp
-  \fBsqlite3_value_blob\fP \(-> BLOB value
-  \fBsqlite3_value_double\fP \(-> REAL value
-  \fBsqlite3_value_int\fP \(-> 32-bit INTEGER value
-  \fBsqlite3_value_int64\fP \(-> 64-bit INTEGER value
-  \fBsqlite3_value_pointer\fP \(-> Pointer value
-  \fBsqlite3_value_text\fP \(-> UTF-8 TEXT value
-  \fBsqlite3_value_text16\fP \(-> UTF-16 TEXT value in the native byteorder
-  \fBsqlite3_value_text16be\fP \(-> UTF-16be TEXT value
-  \fBsqlite3_value_text16le\fP \(-> UTF-16le TEXT value
-       
-  \fBsqlite3_value_bytes\fP \(-> Size of a BLOB or a UTF-8 TEXT in bytes
-  \fBsqlite3_value_bytes16  \fP  \(->   Size of UTF-16 TEXT in bytes
-  \fBsqlite3_value_type\fP \(-> Default datatype of the value
-  \fBsqlite3_value_numeric_type  \fP  \(->   Best numeric datatype of the value
-  \fBsqlite3_value_nochange  \fP  \(->   True if the column is unchanged in an
-UPDATE against a virtual table.
-  \fBsqlite3_value_frombind  \fP  \(->   True if value originated from a bound parameter
-.Pp
+.TS
+l l l.
+T{
+\fBsqlite3_value_blob\fP
+T}	T{
+\(->
+T}	T{
+BLOB value
+T}
+T{
+\fBsqlite3_value_double\fP
+T}	T{
+\(->
+T}	T{
+REAL value
+T}
+T{
+\fBsqlite3_value_int\fP
+T}	T{
+\(->
+T}	T{
+32-bit INTEGER value
+T}
+T{
+\fBsqlite3_value_int64\fP
+T}	T{
+\(->
+T}	T{
+64-bit INTEGER value
+T}
+T{
+\fBsqlite3_value_pointer\fP
+T}	T{
+\(->
+T}	T{
+Pointer value
+T}
+T{
+\fBsqlite3_value_text\fP
+T}	T{
+\(->
+T}	T{
+UTF-8 TEXT value
+T}
+T{
+\fBsqlite3_value_text16\fP
+T}	T{
+\(->
+T}	T{
+UTF-16 TEXT value in the native byteorder
+T}
+T{
+\fBsqlite3_value_text16be\fP
+T}	T{
+\(->
+T}	T{
+UTF-16be TEXT value
+T}
+T{
+\fBsqlite3_value_text16le\fP
+T}	T{
+\(->
+T}	T{
+UTF-16le TEXT value
+T}
+T{
+ 
+T}	T{
+ 
+T}	T{
+ 
+T}
+T{
+\fBsqlite3_value_bytes\fP
+T}	T{
+\(->
+T}	T{
+Size of a BLOB or a UTF-8 TEXT in bytes
+T}
+T{
+\fBsqlite3_value_bytes16  \fP
+T}	T{
+\(->  
+T}	T{
+Size of UTF-16 TEXT in bytes
+T}
+T{
+\fBsqlite3_value_type\fP
+T}	T{
+\(->
+T}	T{
+Default datatype of the value
+T}
+T{
+\fBsqlite3_value_numeric_type  \fP
+T}	T{
+\(->  
+T}	T{
+Best numeric datatype of the value
+T}
+T{
+\fBsqlite3_value_nochange  \fP
+T}	T{
+\(->  
+T}	T{
+True if the column is unchanged in an UPDATE against a virtual table.
+T}
+T{
+\fBsqlite3_value_frombind  \fP
+T}	T{
+\(->  
+T}	T{
+True if value originated from a bound parameter
+T}
+.TE
 .Ed
 .Pp
 \fBDetails:\fP
