@@ -16,39 +16,96 @@
 #ifndef EXTERN_H
 #define EXTERN_H
 
-enum tag
-{
-	TAG_A,
-	TAG_B,
-	TAG_BLOCK,
-	TAG_BR,
-	TAG_DD,
-	TAG_DL,
-	TAG_DT,
-	TAG_EM,
-	TAG_H3,
-	TAG_I,
-	TAG_LI,
-	TAG_OL,
-	TAG_P,
-	TAG_PRE,
-	TAG_SPAN,
-	TAG_TABLE,
-	TAG_TD,
-	TAG_TH,
-	TAG_TR,
-	TAG_U,
-	TAG_UL,
-	TAG__MAX,
+/*
+ * Phase of parsing input file.
+ */
+enum	phase {
+	PHASE_INIT = 0, /* waiting to encounter definition */
+	PHASE_KEYS, /* have definition, now keywords */
+	PHASE_DESC, /* have keywords, now description */
+	PHASE_SEEALSO,
+	PHASE_DECL /* have description, now declarations */
 };
 
-enum attr
-{
-	ATTR_HREF,
-	ATTR__MAX,
+/*
+ * What kind of declaration (preliminary analysis).
+ */
+enum	decltype {
+	DECLTYPE_CPP, /* pre-processor */
+	DECLTYPE_C, /* semicolon-closed non-preprocessor */
+	DECLTYPE_NEITHER /* non-preprocessor, no semicolon */
 };
 
-enum tag
-parse_tags(const char *, size_t *, const char **, size_t *, int *);
+/*
+ * In variables and function declarations, we toss these.
+ */
+enum	preproc {
+	PREPROC_SQLITE_API,
+	PREPROC_SQLITE_DEPRECATED,
+	PREPROC_SQLITE_EXPERIMENTAL,
+	PREPROC_SQLITE_EXTERN,
+	PREPROC_SQLITE_STDCALL,
+	PREPROC__MAX
+};
+
+TAILQ_HEAD(defnq, defn);
+TAILQ_HEAD(declq, decl);
+
+/*
+ * A declaration of type DECLTYPE_CPP or DECLTYPE_C.
+ * These need not be unique (if ifdef'd).
+ */
+struct	decl {
+	enum decltype	 type; /* type of declaration */
+	char		*text; /* text */
+	size_t		 textsz; /* strlen(text) */
+	TAILQ_ENTRY(decl) entries;
+};
+
+/*
+ * A definition is basically the manpage contents.
+ */
+struct	defn {
+	char		 *name; /* really Nd */
+	TAILQ_ENTRY(defn) entries;
+	char		 *desc; /* long description */
+	size_t		  descsz; /* strlen(desc) */
+	char		 *fulldesc; /* description w/newlns */
+	size_t		  fulldescsz; /* strlen(fulldesc) */
+	struct declq	  dcqhead; /* declarations */
+	int		  multiline; /* used when parsing */
+	int		  instruct; /* used when parsing */
+	const char	 *fn; /* parsed from file */
+	size_t		  ln; /* parsed at line */
+	int		  postprocessed; /* good for emission? */
+	char		 *dt; /* manpage title */
+	char		**nms; /* manpage names */
+	size_t		  nmsz; /* number of names */
+	char		 *fname; /* manpage filename */
+	char		 *keybuf; /* raw keywords */
+	size_t		  keybufsz; /* length of "keysbuf" */
+	char		 *seealso; /* see also tags */
+	size_t		  seealsosz; /* length of seealso */
+	char		**xrs; /* parsed "see also" references */
+	size_t		  xrsz; /* number of references */
+	char		**keys; /* parsed keywords */
+	size_t		  keysz; /* number of keywords */
+};
+
+/*
+ * Entire parse routine.
+ */
+struct	parse {
+	enum phase	 phase; /* phase of parse */
+	size_t		 ln; /* line number */
+	const char	*fn; /* open file */
+	struct defnq	 dqhead; /* definitions */
+};
+
+void
+print_synopsis(FILE *, const struct decl *, const struct defn *);
+
+void
+print_description(FILE *, const struct defn *);
 
 #endif /*!EXTERN_H*/
