@@ -41,6 +41,16 @@ the [mdoc(7)](https://man.openbsd.org/mdoc.7) output.
 - [sqlite3\_open(3)](samples/sqlite3_open.3.md)
 - [SQLITE\_FCNTL\_LOCKSTATE(3)](samples/SQLITE_FCNTL_LOCKSTATE.3.md)
 
+## Testing
+
+The system is tested using [Valgrind](https://valgrind.org/), AFL and
+now [AFLplusplus](https://aflplus.plus/), and the ASAN and UBSAN
+compiler flags.  These are run over the `make regress` regression
+analysis.  They may be run manually or as part of the CI.
+
+For AFL and AFL++, the `afl` directory contains a simple seed input
+file.
+
 ## License
 
 All sources use the ISC (like OpenBSD) license.
