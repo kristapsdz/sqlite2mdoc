@@ -4,8 +4,6 @@ config.h
 config.h.old
 config.log
 config.log.old
-compats.o
-main.o
-htmltags.o
 sqlite2mdoc
+*.o
 *.swp
