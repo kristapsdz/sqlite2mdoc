@@ -118,5 +118,5 @@ regress: all
 	rm -rf regress/out
 
 clean:
-	rm -f sqlite2mdoc main.o compats.o sqlite2mdoc.tar.gz sqlite2mdoc.tar.gz.sha512
+	rm -f sqlite2mdoc main.o htmltags.o compats.o sqlite2mdoc.tar.gz sqlite2mdoc.tar.gz.sha512
 	rm -rf regress/out
