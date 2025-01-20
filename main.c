@@ -1130,7 +1130,7 @@ table_columns(const char *buf, size_t len)
 	if ((nbuf = memmem(buf, len, "<tr", 3)) == NULL)
 		return cols;
 	assert(nbuf >= buf);
-	len = nbuf - buf - 3;
+	len -= (nbuf - buf) + 3;
 	buf = nbuf + 3;
 
 	/* Find the next row, which is the end marker. */
