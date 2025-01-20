@@ -29,7 +29,6 @@
 # include <sandbox.h>
 #endif
 #include <search.h>
-#include <stdint.h> /* uintptr_t */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,7 +37,7 @@
 #include "extern.h"
 
 /* Verbose reporting. */
-static	int verbose;
+static int verbose;
 
 /* Don't output any files: use stdout. */
 static	int nofile;
@@ -915,59 +914,14 @@ postprocess(const char *prefix, struct defn *d)
 }
 
 /*
- * Convenience function to look up which manpage "hosts" a certain
- * keyword.  For example, SQLITE_OK(3) also handles SQLITE_TOOBIG and so
- * on, so a reference to SQLITE_TOOBIG should actually point to
- * SQLITE_OK.
- * Returns the keyword's file if found or NULL.
- */
-static const char *
-lookup(const char *key)
-{
-	ENTRY			 ent;
-	ENTRY			*res;
-	const struct defn	*d;
-
-	ent.key = (char *)(uintptr_t)key;
-	ent.data = NULL;
-
-	if ((res = hsearch(ent, FIND)) == NULL)
-		return NULL;
-
-	d = (const struct defn *)res->data;
-	if (d->nmsz == 0)
-		return NULL;
-
-	assert(d->nms[0] != NULL);
-	return d->nms[0];
-}
-
-static int
-xrcmp(const void *p1, const void *p2)
-{
-	/* Silence bogus warnings about un-consting. */
-
-	const char	*s1 = lookup(*(const char **)(uintptr_t)p1),
-			*s2 = lookup(*(const char **)(uintptr_t)p2);
-
-	if (s1 == NULL)
-		s1 = "";
-	if (s2 == NULL)
-		s2 = "";
-
-	return strcasecmp(s1, s2);
-}
-
-/*
  * Emit a valid mdoc(7) document within the given prefix.
  */
 static void
 print_mdoc(struct defn *d)
 {
 	struct decl	*first;
-	size_t		 i, last;
+	size_t		 i;
 	FILE		*f;
-	const char	*res, *lastres;
 
 	if (!d->postprocessed) {
 		warnx("%s:%zu: interface has errors, not "
@@ -1011,54 +965,7 @@ print_mdoc(struct defn *d)
 	print_description(f, d);
 
 	fputs(".Sh IMPLEMENTATION NOTES\n", f);
-	fprintf(f, "These declarations were extracted from the\n"
-	      "interface documentation at line %zu.\n", d->ln);
-	fputs(".Bd -literal\n", f);
-	fputs(d->fulldesc, f);
-	fputs(".Ed\n", f);
-
-	/*
-	 * Look up all of our keywords (which are in the xrs field) in
-	 * the table of all known keywords.
-	 * Don't print duplicates.
-	 */
-
-	if (d->xrsz > 0) {
-		qsort(d->xrs, d->xrsz, sizeof(char *), xrcmp);
-		lastres = NULL;
-		for (last = 0, i = 0; i < d->xrsz; i++) {
-			res = lookup(d->xrs[i]);
-
-			/* Ignore self-reference. */
-
-			if (res == d->nms[0] && verbose)
-				warnx("%s:%zu: self-reference: %s",
-					d->fn, d->ln, d->xrs[i]);
-			if (res == d->nms[0])
-				continue;
-			if (res == NULL && verbose)
-				warnx("%s:%zu: ref not found: %s",
-					d->fn, d->ln, d->xrs[i]);
-			if (res == NULL)
-				continue;
-
-			/* Ignore duplicates. */
-
-			if (lastres == res)
-				continue;
-
-			if (last)
-				fputs(" ,\n", f);
-			else
-				fputs(".Sh SEE ALSO\n", f);
-
-			fprintf(f, ".Xr %s 3", res);
-			last = 1;
-			lastres = res;
-		}
-		if (last)
-			fputs("\n", f);
-	}
+	print_implementation(f, d, verbose);
 
 	if (nofile == 0)
 		fclose(f);

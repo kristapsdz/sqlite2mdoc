@@ -102,10 +102,8 @@ struct	parse {
 	struct defnq	 dqhead; /* definitions */
 };
 
-void
-print_synopsis(FILE *, const struct decl *, const struct defn *);
-
-void
-print_description(FILE *, const struct defn *);
+void	print_description(FILE *, const struct defn *);
+void	print_implementation(FILE *, const struct defn *, int);
+void	print_synopsis(FILE *, const struct decl *, const struct defn *);
 
 #endif /*!EXTERN_H*/

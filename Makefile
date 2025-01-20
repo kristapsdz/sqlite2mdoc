@@ -8,18 +8,23 @@ DOTAR 		 = Makefile \
 		   compats.c \
 		   extern.h \
 		   print_description.c \
+		   print_implementation.c \
 		   print_synopsis.c \
 		   main.c \
 		   tests.c \
 		   sqlite2mdoc.1
+OBJS		 = main.o \
+		   print_description.o \
+		   print_implementation.o \
+		   print_synopsis.o
 VALGRIND_ARGS	 = -q --leak-check=full --leak-resolution=high --show-reachable=yes
 
 all: sqlite2mdoc
 
-main.o print_description.o print_synopsis.o: extern.h config.h
+$(OBJS): extern.h config.h
 
-sqlite2mdoc: main.o print_description.o print_synopsis.o compats.o
-	$(CC) -o $@ main.o print_description.o print_synopsis.o compats.o $(LDFLAGS) $(LDADD)
+sqlite2mdoc: $(OBJS) compats.o
+	$(CC) -o $@ $(OBJS) compats.o $(LDFLAGS) $(LDADD)
 
 www: sqlite2mdoc.tar.gz sqlite2mdoc.tar.gz.sha512
 
@@ -119,6 +124,6 @@ regress: all
 	rm -rf regress/out
 
 clean:
-	rm -f sqlite2mdoc main.o print_description.o print_synopsis.o compats.o
+	rm -f sqlite2mdoc $(OBJS) compats.o
 	rm -f sqlite2mdoc.tar.gz sqlite2mdoc.tar.gz.sha512
 	rm -rf regress/out
