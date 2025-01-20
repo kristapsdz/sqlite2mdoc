@@ -1,6 +1,5 @@
-.\"	$Id$
 .\"
-.\" Copyright (c) 2016, 2018 Kristaps Dzonsons <kristaps@bsd.lv>
+.\" Copyright (c) Kristaps Dzonsons <kristaps@bsd.lv>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -90,7 +89,8 @@ The syntax for the interface descriptions is as follows:
 ** if found, will be listed in SEE ALSO.
 **
 ** You can embed <b>HTML</b>, but you must limit this to lists
-** (ordered, unordered, description).
+** (ordered, unordered, description).  Tables, anchors, and some
+** other HTML are also supported.
 **
 ** See also: [another_keyword], although since we're the only
 ** reference, none of these will be found.
@@ -147,7 +147,6 @@ There are some missing bits:
 .Bl -bullet
 .It
 Obviously-broken HTML (e.g., unmatched </dt>) isn't worked around.
-Some HTML (like tables and anchors) is just thrown away.
 .It
 Structure definitions are discarded except for the structure name.
 .It
