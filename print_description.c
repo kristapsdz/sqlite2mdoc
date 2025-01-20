@@ -29,8 +29,7 @@
 
 #include "extern.h"
 
-enum tag
-{
+enum tag {
 	TAG_A,
 	TAG_B,
 	TAG_BLOCK,
@@ -55,8 +54,7 @@ enum tag
 	TAG__MAX,
 };
 
-enum attr
-{
+enum attr {
 	ATTR_HREF,
 	ATTR__MAX,
 };
@@ -64,8 +62,7 @@ enum attr
 /*
  * How to handle mdoc(7) replacement content for HTML found in the text.
  */
-struct taginfo
-{
+struct taginfo {
 	const char	*omdoc; /* opening mdoc(7) */
 	const char	*cmdoc; /* closing mdoc(7) */
 	unsigned int	 oflags; /* opening flags */
@@ -101,7 +98,7 @@ static const struct taginfo tags[TAG__MAX] = {
 	{ ".Bl -bullet", ".El\n.Pp", 0, 0 }, /* TAG_UL */
 };
 
-static	const char *tagnames[TAG__MAX] = {
+static const char *tagnames[TAG__MAX] = {
 	"a", /* TAG_A */
 	"b", /* TAG_B */
 	"blockquote", /* TAG_BLOCK */
@@ -125,8 +122,28 @@ static	const char *tagnames[TAG__MAX] = {
 	"ul", /* TAG_UL */
 };
 
-static	const char *attrs[ATTR__MAX] = {
+static const char *attrs[ATTR__MAX] = {
 	"href", /* ATTR_HREF */
+};
+
+struct entityinfo {
+	const char	*html; /* HTML entity w/o amp/semicolon */
+	const char	*mdoc; /* replacement mdoc(7) */
+};
+
+/*
+ * All HTML entities, numeric and named, that appear in the header file.
+ * More should be added as they're encountered.
+ */
+static const struct entityinfo entities[] = {
+	{ "rarr", "\\(->" },
+	{ "larr", "\\(<-" },
+	{ "nbsp", " " },
+	{ "gt", ">" },
+	{ "lt", "<" },
+	{ "#91", "[" },
+	{ "#93", "]" },
+	{ NULL, NULL },
 };
 
 static enum tag
@@ -137,6 +154,8 @@ parse_tags(const char *in, size_t *outpos, const char **outattrs,
 	enum attr	 attr;
 	size_t		 sz;
 	const char	*start = in;
+
+	/* Initialise to zero/NULL. */
 
 	if (outpos != NULL)
 		*outpos = 0;
@@ -151,6 +170,8 @@ parse_tags(const char *in, size_t *outpos, const char **outattrs,
 
 	if (*in++ != '<')
 		return TAG__MAX;
+
+	/* Check for closing delimiter. */
 
 	if (*in == '/') {
 		if (close != NULL)
@@ -332,19 +353,22 @@ print_description(FILE *f, const struct defn *d)
 {
 	size_t		 sz, descsz, i, j, col, stripspace, outpos;
 	enum tag	 tag;
-	int		 incolumn = 0, inblockquote = 0, close;
+	int		 incolumn = 0, inblockquote = 0, close,
+			 found = 0;
 	const char	*attrs[ATTR__MAX];
 	size_t		 attrsz[ATTR__MAX];
 	unsigned int	 flags;
 
 	/*
-	 * Strip the crap out of the description.
-	 * "Crap" consists of things I don't understand that mess up
-	 * parsing of the HTML, for instance,
-	 *   <dl>[[foo bar]]<dt>foo bar</dt>...</dl>
-	 * These are not well-formed HTML.
-	 * Note that d->desc[d->descz] is the NUL terminator, so we
-	 * don't need to check d->descsz - 1.
+	 * Strip unknown tokens out of the description.  "Unknown"
+	 * consists of things that mess up parsing of the HTML,
+	 * for instance:
+	 *
+	 *     <dl>[[foo bar]]<dt>foo bar</dt>...</dl>
+	 *
+	 * These are not well-formed HTML.  Note that d->desc[d->descz]
+	 * is the NUL terminator, so we don't need to check d->descsz -
+	 * 1.
 	 */
 
 	descsz = d->descsz;
@@ -744,12 +768,11 @@ print_description(FILE *f, const struct defn *d)
 		}
 
 		/*
-		 * Strip trailing spaces from output.
-		 * Set "stripspace" to be the number of white-space
-		 * characters that we've skipped, plus one.
-		 * This means that the next loop iteration while get the
-		 * actual amount we've skipped (for '<' or '[') and we
-		 * can act upon it there.
+		 * Strip trailing spaces from output.  Set "stripspace"
+		 * to be the number of white-space characters that we've
+		 * skipped, plus one.  This means that the next loop
+		 * iteration while get the actual amount we've skipped
+		 * (for '<' or '[') and we can act upon it there.
 		 */
 		
 		if (d->desc[i] == ' ') {
@@ -769,40 +792,35 @@ print_description(FILE *f, const struct defn *d)
 
 		assert(d->desc[i] != '\n');
 
-		/*
-		 * Handle some oddities.
-		 * The following HTML escapes exist in the output that I
-		 * could find.
-		 * There might be others...
-		 */
+		/* Handle known HTML escapes. */
 
-		if (strncmp(&d->desc[i], "&rarr;", 6) == 0) {
-			i += 6;
-			fputs("\\(->", f);
-		} else if (strncmp(&d->desc[i], "&larr;", 6) == 0) {
-			i += 6;
-			fputs("\\(<-", f);
-		} else if (strncmp(&d->desc[i], "&nbsp;", 6) == 0) {
-			i += 6;
-			fputc(' ', f);
-		} else if (strncmp(&d->desc[i], "&lt;", 4) == 0) {
-			i += 4;
-			fputc('<', f);
-		} else if (strncmp(&d->desc[i], "&gt;", 4) == 0) {
-			i += 4;
-			fputc('>', f);
-		} else if (strncmp(&d->desc[i], "&#91;", 5) == 0) {
-			i += 5;
-			fputc('[', f);
-		} else {
-			/* Make sure we don't trigger a macro. */
+		found = 0;
+		if (d->desc[i] == '&') {
+			for (j = 0; entities[j].html != NULL; j++) {
+				sz = strlen(entities[j].html);
+				assert(sz > 0);
+				if (strncmp(&d->desc[i + 1],
+				    entities[j].html, sz))
+					continue;
+				if (d->desc[i + sz + 1] != ';')
+					continue;
+				assert(entities[j].mdoc != NULL);
+				fputs(entities[j].mdoc, f);
+				found = 1;
+				i += sz + 2;
+				break;
+			}
+		}
+		if (!found) {
+			/*
+			 * Make sure not to trigger a macro.
+			 */
 			if (col == 0 &&
 			    (d->desc[i] == '.' || d->desc[i] == '\''))
 				fputs("\\&", f);
 			fputc(d->desc[i], f);
 			i++;
 		}
-
 		col++;
 	}
 

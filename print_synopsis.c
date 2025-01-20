@@ -29,59 +29,63 @@
 
 #include "extern.h"
 
-static	const char *const preprocs[PREPROC__MAX] = {
-	"SQLITE_API", /* PREPROC_SQLITE_API */
-	"SQLITE_DEPRECATED", /* PREPROC_SQLITE_DEPRECATED */
-	"SQLITE_EXPERIMENTAL", /* PREPROC_SQLITE_EXPERIMENTAL */
-	"SQLITE_EXTERN", /* PREPROC_SQLITE_EXTERN */
-	"SQLITE_STDCALL", /* PREPROC_SQLITE_STDCALL */
+/*
+ * These are the CPP types that appear before C declarations.  There are
+ * more defined in sqlite3.h, but these are the only ones known to
+ * actually appear before C declarations.
+ */
+static const char *const preprocs[] = {
+	"SQLITE_API",
+	"SQLITE_DEPRECATED",
+	"SQLITE_EXPERIMENTAL",
+	"SQLITE_EXTERN",
+	"SQLITE_STDCALL",
+	NULL,
 };
 
 void
 print_synopsis(FILE *f, const struct decl *first, const struct defn *d)
 {
-	size_t		 sz, i, ns, fnsz;
+	size_t		 sz, i, j, ns, fnsz;
 	char		*cp;
 	const char	*args, *str, *end, *fn;
-	enum preproc	 pre;
 
-	if (first->type != DECLTYPE_CPP &&
-	    first->type != DECLTYPE_C)
+	/* Only handle known types. */
+
+	if (first->type != DECLTYPE_CPP && first->type != DECLTYPE_C)
 		return;
 
-	/* Easy: just print the CPP name. */
+	/* For C preprocessor defines: just print the CPP name. */
 
 	if (first->type == DECLTYPE_CPP) {
-		fprintf(f, ".Fd #define %s\n",
-			first->text);
+		fprintf(f, ".Fd #define %s\n", first->text);
 		return;
 	}
 
-	/* First, strip out the sqlite CPPs. */
+	/* For C declarations, strip out the sqlite CPPs. */
 
 	for (i = 0; i < first->textsz; ) {
-		for (pre = 0; pre < PREPROC__MAX; pre++) {
-			sz = strlen(preprocs[pre]);
-			if (strncmp(preprocs[pre],
-			    &first->text[i], sz))
+		for (j = 0; preprocs[j] != NULL; j++) {
+			sz = strlen(preprocs[j]);
+			if (strncmp(preprocs[j], &first->text[i], sz))
 				continue;
 			i += sz;
 			while (isspace((unsigned char)first->text[i]))
 				i++;
 			break;
 		}
-		if (pre == PREPROC__MAX)
+		if (preprocs[j] == NULL)
 			break;
 	}
 
-	/* If we're a typedef, immediately print Vt. */
+	/* If a typedef, immediately print Vt. */
 
 	if (strncmp(&first->text[i], "typedef", 7) == 0) {
 		fprintf(f, ".Vt %s\n", &first->text[i]);
 		return;
 	}
 
-	/* Are we a struct? */
+	/* If a struct, output as a Vt as well. */
 
 	if (first->textsz > 2 &&
 	    first->text[first->textsz - 2] == '}' &&
@@ -101,9 +105,10 @@ print_synopsis(FILE *f, const struct decl *first, const struct defn *d)
 		return;
 	}
 
+	/* Unknown C declaration type goes into a literal. */
+
 	str = &first->text[i];
 	if ((args = strchr(str, '(')) == NULL || args == str) {
-		/* What is this? */
 		fputs(".Bd -literal\n", f);
 		fputs(&first->text[i], f);
 		fputs("\n.Ed\n", f);
@@ -133,8 +138,7 @@ print_synopsis(FILE *f, const struct decl *first, const struct defn *d)
 			break;
 
 	if (fnsz == 0)
-		warnx("%s:%zu: zero-length "
-			"function name", d->fn, d->ln);
+		warnx("%s:%zu: zero-length name", d->fn, d->ln);
 	fn = end + 1;
 
 	/*
@@ -157,13 +161,12 @@ print_synopsis(FILE *f, const struct decl *first, const struct defn *d)
 	 */
 
 	/*
-	 * If we can't find what came before, then the function
-	 * has no type, which is odd... let's just call it void.
+	 * If we can't find what came before, then the function has no
+	 * type, which is odd... let's just call it void.
 	 */
 
 	if (end > str) {
-		fprintf(f, ".Ft %.*s\n",
-			(int)(end - str + 1), str);
+		fprintf(f, ".Ft %.*s\n", (int)(end - str + 1), str);
 		fprintf(f, ".Fo %.*s\n", (int)fnsz, fn);
 	} else {
 		fputs(".Ft void\n", f);
@@ -171,9 +174,9 @@ print_synopsis(FILE *f, const struct decl *first, const struct defn *d)
 	}
 
 	/*
-	 * Convert function arguments into `Fa' clauses.
-	 * This also handles nested function pointers, which
-	 * would otherwise throw off the delimeters.
+	 * Convert function arguments into `Fa' clauses.  This also
+	 * handles nested function pointers, which would otherwise throw
+	 * off the delimeters.
 	 */
 
 	for (;;) {

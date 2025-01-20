@@ -59,14 +59,14 @@ lookup(const char *key)
 	return d->nms[0];
 }
 
-
 static int
 xrcmp(const void *p1, const void *p2)
 {
+	const char	*s1 = lookup(*(const char **)(uintptr_t)p1),
+	      		*s2 = lookup(*(const char **)(uintptr_t)p2);
+
 	/* Silence bogus warnings about un-consting. */
 
-	const char	*s1 = lookup(*(const char **)(uintptr_t)p1),
-			*s2 = lookup(*(const char **)(uintptr_t)p2);
 
 	if (s1 == NULL)
 		s1 = "";
@@ -75,7 +75,6 @@ xrcmp(const void *p1, const void *p2)
 
 	return strcasecmp(s1, s2);
 }
-
 
 void
 print_implementation(FILE *f, const struct defn *d, int verbose)

@@ -36,18 +36,6 @@ enum	decltype {
 	DECLTYPE_NEITHER /* non-preprocessor, no semicolon */
 };
 
-/*
- * In variables and function declarations, we toss these.
- */
-enum	preproc {
-	PREPROC_SQLITE_API,
-	PREPROC_SQLITE_DEPRECATED,
-	PREPROC_SQLITE_EXPERIMENTAL,
-	PREPROC_SQLITE_EXTERN,
-	PREPROC_SQLITE_STDCALL,
-	PREPROC__MAX
-};
-
 TAILQ_HEAD(defnq, defn);
 TAILQ_HEAD(declq, decl);
 
