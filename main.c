@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018, 2023 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -35,6 +35,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "extern.h"
+
 /*
  * Phase of parsing input file.
  */
@@ -65,57 +67,6 @@ enum	preproc {
 	PREPROC_SQLITE_EXTERN,
 	PREPROC_SQLITE_STDCALL,
 	PREPROC__MAX
-};
-
-/*
- * HTML tags that we recognise.
- */
-enum	tag {
-	TAG_A_CLOSE,
-	TAG_A_OPEN_ATTRS,
-	TAG_B_CLOSE,
-	TAG_B_OPEN,
-	TAG_BLOCK_CLOSE,
-	TAG_BLOCK_OPEN,
-	TAG_BR_OPEN,
-	TAG_DD_CLOSE,
-	TAG_DD_OPEN,
-	TAG_DL_CLOSE,
-	TAG_DL_OPEN,
-	TAG_DT_CLOSE,
-	TAG_DT_OPEN,
-	TAG_EM_CLOSE,
-	TAG_EM_OPEN,
-	TAG_H3_CLOSE,
-	TAG_H3_OPEN,
-	TAG_I_CLOSE,
-	TAG_I_OPEN,
-	TAG_LI_CLOSE,
-	TAG_LI_OPEN,
-	TAG_LI_OPEN_ATTRS,
-	TAG_OL_CLOSE,
-	TAG_OL_OPEN,
-	TAG_P_OPEN,
-	TAG_PRE_CLOSE,
-	TAG_PRE_OPEN,
-	TAG_SPAN_CLOSE,
-	TAG_SPAN_OPEN_ATTRS,
-	TAG_TABLE_CLOSE,
-	TAG_TABLE_OPEN,
-	TAG_TABLE_OPEN_ATTRS,
-	TAG_TD_CLOSE,
-	TAG_TD_OPEN,
-	TAG_TD_OPEN_ATTRS,
-	TAG_TH_CLOSE,
-	TAG_TH_OPEN,
-	TAG_TH_OPEN_ATTRS,
-	TAG_TR_CLOSE,
-	TAG_TR_OPEN,
-	TAG_U_CLOSE,
-	TAG_U_OPEN,
-	TAG_UL_CLOSE,
-	TAG_UL_OPEN,
-	TAG__MAX
 };
 
 TAILQ_HEAD(defnq, defn);
@@ -176,9 +127,10 @@ struct	parse {
  * How to handle HTML tags we find in the text.
  */
 struct	taginfo {
-	const char	*html; /* HTML to key on */
-	const char	*mdoc; /* generate mdoc(7) */
-	unsigned int	 flags;
+	const char	*omdoc; /* opening mdoc(7) */
+	const char	*cmdoc; /* closing mdoc(7) */
+	unsigned int	 oflags; /* opening flags */
+	unsigned int	 cflags; /* closing flags */
 #define	TAGINFO_NOBR	 0x01 /* follow w/space, not newline */
 #define	TAGINFO_NOOP	 0x02 /* just strip out */
 #define	TAGINFO_NOSP	 0x04 /* follow w/o space or newline */
@@ -187,50 +139,27 @@ struct	taginfo {
 };
 
 static	const struct taginfo tags[TAG__MAX] = {
-	{ "</a>", "", TAGINFO_INLINE }, /* TAG_A_CLOSE */
-	{ "<a ", "", TAGINFO_INLINE | TAGINFO_ATTRS }, /* TAG_A_OPEN_ATTRS */
-	{ "</b>", "\\fP", TAGINFO_INLINE }, /* TAG_B_CLOSE */
-	{ "<b>", "\\fB", TAGINFO_INLINE }, /* TAG_B_OPEN */
-	{ "</blockquote>", ".Ed\n.Pp", 0 }, /* TAG_BLOCK_CLOSE */
-	{ "<blockquote>", ".Bd -ragged", 0 }, /* TAG_BLOCK_OPEN */
-	{ "<br>", " ", TAGINFO_INLINE }, /* TAG_BR_OPEN */
-	{ "</dd>", "", TAGINFO_NOOP }, /* TAG_DD_CLOSE */
-	{ "<dd>", "", TAGINFO_NOBR | TAGINFO_NOSP }, /* TAG_DD_OPEN */
-	{ "</dl>", ".El\n.Pp", 0 }, /* TAG_DL_CLOSE */
-	{ "<dl>", ".Bl -tag -width Ds", 0 }, /* TAG_DL_OPEN */
-	{ "</dt>", "", TAGINFO_NOBR | TAGINFO_NOSP}, /* TAG_DT_CLOSE */
-	{ "<dt>", ".It", TAGINFO_NOBR }, /* TAG_DT_OPEN */
-	{ "</em>", "\\fP", TAGINFO_INLINE }, /* TAG_EM_CLOSE */
-	{ "<em>", "\\fB", TAGINFO_INLINE }, /* TAG_EM_OPEN */
-	{ "</h3>", "", TAGINFO_NOBR | TAGINFO_NOSP}, /* TAG_H3_CLOSE */
-	{ "<h3>", ".Ss", TAGINFO_NOBR }, /* TAG_H3_OPEN */
-	{ "</i>", "\\fP", TAGINFO_INLINE }, /* TAG_I_CLOSE */
-	{ "<i>", "\\fI", TAGINFO_INLINE }, /* TAG_I_OPEN */
-	{ "</li>", "", TAGINFO_NOOP }, /* TAG_LI_CLOSE */
-	{ "<li>", ".It", 0 }, /* TAG_LI_OPEN */
-	{ "<li ", ".It", TAGINFO_ATTRS }, /* TAG_LI_OPEN_ATTRS */
-	{ "</ol>", ".El\n.Pp", 0 }, /* TAG_OL_CLOSE */
-	{ "<ol>", ".Bl -enum", 0 }, /* TAG_OL_OPEN */
-	{ "<p>", ".Pp", 0 }, /* TAG_P_OPEN */
-	{ "</pre>", ".Ed\n.Pp", 0 }, /* TAG_PRE_CLOSE */
-	{ "<pre>", ".Bd -literal", 0 }, /* TAG_PRE_OPEN */
-	{ "</span>", "", TAGINFO_INLINE }, /* TAG_SPAN_CLOSE */
-	{ "<span ", "", TAGINFO_INLINE | TAGINFO_ATTRS }, /* TAG_SPAN_OPEN_ATTRS */
-	{ "</table>", ".TE", 0 }, /* TAG_TABLE_CLOSE */
-	{ "<table>", ".TS", 0 }, /* TAG_TABLE_OPEN */
-	{ "<table ", ".TS", TAGINFO_ATTRS }, /* TAG_TABLE_OPEN_ATTRS */
-	{ "</td>", "", TAGINFO_NOOP }, /* TAG_TD_CLOSE */
-	{ "<td>", "", TAGINFO_NOOP }, /* TAG_TD_OPEN */
-	{ "<td ", "", TAGINFO_NOOP | TAGINFO_ATTRS}, /* TAG_TD_OPEN_ATTRS */
-	{ "</th>", "", TAGINFO_NOOP }, /* TAG_TH_CLOSE */
-	{ "<th>", "", TAGINFO_NOOP }, /* TAG_TH_OPEN */
-	{ "<th ", "", TAGINFO_NOOP | TAGINFO_ATTRS}, /* TAG_TH_OPEN_ATTRS */
-	{ "</tr>", "", TAGINFO_NOOP}, /* TAG_TR_CLOSE */
-	{ "<tr>", "", TAGINFO_NOOP }, /* TAG_TR_OPEN */
-	{ "</u>", "\\fP", TAGINFO_INLINE }, /* TAG_U_CLOSE */
-	{ "<u>", "\\fI", TAGINFO_INLINE }, /* TAG_U_OPEN */
-	{ "</ul>", ".El\n.Pp", 0 }, /* TAG_UL_CLOSE */
-	{ "<ul>", ".Bl -bullet", 0 }, /* TAG_UL_OPEN */
+	{ "", "", TAGINFO_INLINE, TAGINFO_INLINE }, /* TAG_A */
+	{ "\\fB", "\\fP", TAGINFO_INLINE, TAGINFO_INLINE }, /* TAG_B */
+	{ ".Bd -ragged", ".Ed\n.Pp", 0, 0 }, /* TAG_BLOCK */
+	{ " ", "", TAGINFO_INLINE, TAGINFO_INLINE }, /* TAG_BR */
+	{ "", "", TAGINFO_NOBR|TAGINFO_NOSP, TAGINFO_NOOP }, /* TAG_DD */
+	{ ".Bl -tag -width Ds", ".El\n.Pp", 0, 0 }, /* TAG_DL */
+	{ ".It", "", TAGINFO_NOBR, TAGINFO_NOBR|TAGINFO_NOSP }, /* TAG_DT */
+	{ "\\fB", "\\fP", TAGINFO_INLINE, TAGINFO_INLINE }, /* TAG_EM */
+	{ ".Ss", "", TAGINFO_NOBR, TAGINFO_NOBR|TAGINFO_NOSP }, /* TAG_H3 */
+	{ "\\fI", "\\fP", TAGINFO_INLINE, TAGINFO_INLINE }, /* TAG_I */
+	{ ".It", "", 0, TAGINFO_NOOP }, /* TAG_LI */
+	{ ".Bl -enum", ".El\n.Pp", 0, 0 }, /* TAG_OL */
+	{ ".Pp", "", 0, 0 }, /* TAG_P */
+	{ ".Bd -literal", ".Ed\n.Pp", 0, 0 }, /* TAG_PRE */
+	{ "", "", TAGINFO_INLINE, TAGINFO_INLINE}, /* TAG_SPAN */
+	{ ".TS", ".TE", 0, 0 }, /* TAG_TABLE */
+	{ "", "", TAGINFO_NOOP, TAGINFO_NOOP }, /* TAG_TD */
+	{ "", "", TAGINFO_NOOP, TAGINFO_NOOP }, /* TAG_TH */
+	{ "", "", TAGINFO_NOOP, TAGINFO_NOOP }, /* TAG_TR */
+	{ "\\fI", "\\fP", TAGINFO_INLINE, TAGINFO_INLINE }, /* TAG_U */
+	{ ".Bl -bullet", ".El\n.Pp", 0, 0 }, /* TAG_UL */
 };
 
 static	const char *const preprocs[PREPROC__MAX] = {
@@ -1243,13 +1172,17 @@ static void
 emit(struct defn *d)
 {
 	struct decl	*first;
-	size_t		 sz, i, j, col, last, ns, fnsz, stripspace;
+	size_t		 sz, i, j, col, last, ns, fnsz, stripspace,
+			 outpos;
 	FILE		*f;
 	char		*cp;
 	const char	*res, *lastres, *args, *str, *end, *fn;
 	enum tag	 tag;
 	enum preproc	 pre;
-	int		 incolumn = 0, inblockquote = 0;
+	int		 incolumn = 0, inblockquote = 0, close;
+	const char	*attrs[ATTR__MAX];
+	size_t		 attrsz[ATTR__MAX];
+	unsigned int	 flags;
 
 	if (!d->postprocessed) {
 		warnx("%s:%zu: interface has errors, not "
@@ -1579,14 +1512,13 @@ emit(struct defn *d)
 		if (d->desc[i] == '\n') {
 			while (isspace((unsigned char)d->desc[i]))
 				i++;
-			for (tag = 0; tag < TAG__MAX; tag++) {
-				sz = strlen(tags[tag].html);
-				if (strncasecmp(&d->desc[i],
-				    tags[tag].html, sz) == 0)
-					break;
-			}
+			tag = parse_tags(&d->desc[i], NULL, NULL, NULL,
+				&close);
 			if (tag == TAG__MAX ||
-			    (tags[tag].flags & TAGINFO_INLINE)) {
+			    (close &&
+			     (tags[tag].cflags & TAGINFO_INLINE)) ||
+			    (!close &&
+			     (tags[tag].oflags & TAGINFO_INLINE))) {
 				if (col > 0)
 					fputs("\n", f);
 				fputs(".Pp\n", f);
@@ -1633,117 +1565,104 @@ emit(struct defn *d)
 
 		/* Parse HTML tags and links. */
 
-		if (d->desc[i] == '<') {
-			for (tag = 0; tag < TAG__MAX; tag++) {
-				sz = strlen(tags[tag].html);
-				assert(sz > 0);
-				if (strncmp(&d->desc[i],
-				    tags[tag].html, sz))
-					continue;
-				
-				/*
-				 * Special-casing of tables, which care
-				 * about previous state that's otherwise
-				 * ignored.  Track "incolumn" with
-				 * whether the parser is currently in a
-				 * column.
-				 */
+		if (d->desc[i] == '<' && d->desc[i + 1] != '<' &&
+		    (tag = parse_tags(&d->desc[i], &outpos, attrs,
+		     attrsz, &close)) != TAG__MAX) {
+			/* Valid HTML tag. */
 
-				switch (tag) {
-				case TAG_BLOCK_OPEN:
-					inblockquote = 1;
-					break;
-				case TAG_BLOCK_CLOSE:
-					inblockquote = 0;
-					break;
-				case TAG_TD_OPEN:
-				case TAG_TD_OPEN_ATTRS:
-				case TAG_TH_OPEN:
-				case TAG_TH_OPEN_ATTRS:
-					if (incolumn) {
-						if (col > 0)
-							fputs("\n", f);
-						fputs("T}\t", f);
-					}
-					fputs("T{\n", f);
+			switch (tag) {
+			case TAG_A:
+				if (close) {
+					fputs("\"\n", f);
 					col = 0;
-					incolumn = 1;
-					break;
-				case TAG_TR_OPEN:
-					if (incolumn) {
-						if (col > 0)
-							fputs("\n", f);
-						fputs("T}\n", f);
-						col = 0;
-					}
-					incolumn = 0;
-					break;
-				case TAG_TABLE_CLOSE:
-					if (incolumn) {
-						if (col > 0)
-							fputs("\n", f);
-						fputs("T}\n", f);
-						col = 0;
-					}
-					incolumn = 0;
-					break;
-				case TAG_TABLE_OPEN:
-					/* FALLTHROUGH */
-				case TAG_TABLE_OPEN_ATTRS:
-					if (!inblockquote) {
-						if (col > 0)
-							fputs("\n", f);
-						fputs(".sp\n", f);
-						col = 0;
-					}
-					break;
-				default:
 					break;
 				}
+				if (col > 0)
+					fputs("\n", f);
+				fputs(".Lk ", f);
+				if (attrsz[ATTR_HREF] > 0)
+					fprintf(f, "%.*s",
+						(int)attrsz[ATTR_HREF],
+						attrs[ATTR_HREF]);
+				fputs(" \"", f);
+				col = 1;
+				stripspace = 0;
+				break;
+			case TAG_BLOCK:
+				inblockquote = close ? 0 : 1;
+				break;
+			case TAG_TD:
+				/* FALLTHROUGH */
+			case TAG_TH:
+				if (close)
+					break;
+				if (incolumn) {
+					if (col > 0)
+						fputs("\n", f);
+					fputs("T}\t", f);
+				}
+				fputs("T{\n", f);
+				col = 0;
+				incolumn = 1;
+				break;
+			case TAG_TR:
+				if (close || !incolumn)
+					break;
+				if (col > 0)
+					fputs("\n", f);
+				fputs("T}\n", f);
+				col = 0;
+				incolumn = 0;
+				break;
+			case TAG_TABLE:
+				if (!close && !inblockquote) {
+					if (col > 0)
+						fputs("\n", f);
+					fputs(".sp\n", f);
+					col = 0;
+				} else if (close && incolumn) {
+					if (col > 0)
+						fputs("\n", f);
+					fputs("T}\n", f);
+					col = 0;
+					incolumn = 0;
+				}
+				break;
+			default:
+				break;
+			}
 
-				i += sz;
+			i += outpos;
+			flags = close ? tags[tag].cflags :
+				tags[tag].oflags;
 
-				/* Blindly ignore attributes. */
+			/*
+			 * NOOP tags don't do anything, such as the case
+			 * of `</dd>', which only serves to end an `It'
+			 * block that will be closed out by a subsequent
+			 * `It' or end of clause `El' anyway.  Skip the
+			 * trailing space.
+			 */
 
-				if (tags[tag].flags & TAGINFO_ATTRS) {
-					while (d->desc[i] != '\0' &&
-					       d->desc[i] != '>')
-						i++;
-					if (d->desc[i] == '\0')
-						break;
+			if (flags == TAGINFO_NOOP) {
+				while (isspace((unsigned char)d->desc[i]))
 					i++;
+			} else if (flags == TAGINFO_INLINE) {
+				while (stripspace > 0) {
+					fputc(' ', f);
+					col++;
+					stripspace--;
 				}
-
+				if (close)
+					fputs(tags[tag].cmdoc, f);
+				else
+					fputs(tags[tag].omdoc, f);
+			} else {
 				/*
-				 * NOOP tags don't do anything, such as
-				 * the case of `</dd>', which only
-				 * serves to end an `It' block that will
-				 * be closed out by a subsequent `It' or
-				 * end of clause `El' anyway.
-				 * Skip the trailing space.
-				 */
-
-				if (tags[tag].flags & TAGINFO_NOOP) {
-					while (isspace((unsigned char)d->desc[i]))
-						i++;
-					break;
-				} else if (tags[tag].flags & TAGINFO_INLINE) {
-					while (stripspace > 0) {
-						fputc(' ', f);
-						col++;
-						stripspace--;
-					}
-					fputs(tags[tag].mdoc, f);
-					/*col += strlen(tags[tag].mdoc);*/
-					break;
-				}
-
-				/*
-				 * A breaking mdoc(7) statement.
-				 * Break the current line, output the
-				 * macro, and conditionally break
-				 * following that (or we might do
-				 * nothing at all).
+				 * A breaking mdoc(7) statement.  Break
+				 * the current line, output the macro,
+				 * and conditionally break following
+				 * that (or we might do nothing at all).
 				 */
 
 				if (col > 0) {
@@ -1751,47 +1670,51 @@ emit(struct defn *d)
 					col = 0;
 				}
 
-				fputs(tags[tag].mdoc, f);
-				if (!(tags[tag].flags & TAGINFO_NOBR)) {
+				if (close)
+					fputs(tags[tag].cmdoc, f);
+				else
+					fputs(tags[tag].omdoc, f);
+				if (!(flags & TAGINFO_NOBR)) {
 					fputs("\n", f);
 					col = 0;
-				} else if (!(tags[tag].flags & TAGINFO_NOSP)) {
+				} else if (!(flags & TAGINFO_NOSP)) {
 					fputs(" ", f);
 					col++;
 				}
 				while (isspace((unsigned char)d->desc[i]))
 					i++;
 
-				if (tag == TAG_TABLE_CLOSE) {
+				if (tag == TAG_TABLE && close) {
 					if (!inblockquote)
 						fputs(".sp\n", f);
 					col = 0;
 				}
-				break;
+
+				/*
+				 * Special-casing of tables, which need
+				 * to know the number of subsequent
+				 * columns to produce the tbl(7) header.
+				 * If the number of columns can't be
+				 * determined, don't produce a header,
+				 * which will probably result in an ugly
+				 * table.
+				 */
+
+				if (tag == TAG_TABLE && !close) {
+					sz = table_columns(&d->desc[i],
+						d->descsz - i);
+					for (j = 0; j < sz; j++)
+						fprintf(f, "%sl", j > 0 ?
+							" " : "");
+					fputs(".\n", f);
+				}
 			}
 
-			/*
-			 * Special-casing of tables, which need to know
-			 * the number of subsequent columns to produce
-			 * the tbl(7) header.  If the number of columns
-			 * can't be determined, don't produce a header,
-			 * which will probably result in an ugly table.
-			 */
+			stripspace = 0;
+			continue;
+		} else if (d->desc[i] == '<' && d->desc[i + 1] == '<') {
+			/* Literal '<<' as in bit-shifting. */
 
-			if (tag == TAG_TABLE_OPEN ||
-			    tag == TAG_TABLE_OPEN_ATTRS) {
-				sz = table_columns(&d->desc[i],
-					d->descsz - i);
-				for (j = 0; j < sz; j++)
-					fprintf(f, "%sl", j > 0 ?
-						" " : "");
-				fputs(".\n", f);
-			}
-
-			if (tag < TAG__MAX) {
-				stripspace = 0;
-				continue;
-			}
 			while (stripspace > 0) {
 				fputc(' ', f);
 				col++;

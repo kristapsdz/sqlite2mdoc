@@ -3,9 +3,11 @@
 include Makefile.configure
 WWWDIR		 = /var/www/vhosts/kristaps.bsd.lv/htdocs/sqlite2mdoc
 sinclude Makefile.local
-VERSION		 = 1.0.0
+VERSION		 = 1.0.1
 DOTAR 		 = Makefile \
 		   compats.c \
+		   extern.h \
+		   htmltags.c \
 		   main.c \
 		   tests.c \
 		   sqlite2mdoc.1
@@ -13,8 +15,10 @@ VALGRIND_ARGS	 = -q --leak-check=full --leak-resolution=high --show-reachable=ye
 
 all: sqlite2mdoc
 
-sqlite2mdoc: main.o compats.o
-	$(CC) -o $@ main.o compats.o $(LDFLAGS) $(LDADD)
+main.o htmltags.o: extern.h config.h
+
+sqlite2mdoc: main.o htmltags.o compats.o
+	$(CC) -o $@ main.o htmltags.o compats.o $(LDFLAGS) $(LDADD)
 
 www: sqlite2mdoc.tar.gz sqlite2mdoc.tar.gz.sha512
 
@@ -41,8 +45,6 @@ sqlite2mdoc.tar.gz:
 
 sqlite2mdoc.tar.gz.sha512: sqlite2mdoc.tar.gz
 	openssl dgst -sha512 -hex sqlite2mdoc.tar.gz >$@
-
-main.o: config.h
 
 install:
 	mkdir -p $(DESTDIR)$(BINDIR)
