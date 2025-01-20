@@ -199,7 +199,7 @@ parse_tags(const char *in, size_t *outpos, const char **outattrs,
 		}
 
 		if (attr == ATTR__MAX) {
-			for ( ; in[sz] != '\0'; sz++)
+			for (sz = 0; in[sz] != '\0'; sz++)
 				if (in[sz] == '=')
 					break;
 			if (in[sz] == '\0')
